@@ -21,7 +21,9 @@ socket = io('http://192.168.100.12:3000');
 config = {};
 
 socket.on("connected", function(data) {
-  return config['id'] = data.id;
+  console.log(data);
+  config["id"] = data.id;
+  return config["ip"] = data.ip;
 });
 
 window.onbeforeunload = function() {
@@ -32,10 +34,34 @@ window.onbeforeunload = function() {
 
 App = React.createClass({
   displayName: 'App',
+  getInitialState: function() {
+    return {
+      id: config.id,
+      ip: config.ip,
+      errAdmin: 0
+    };
+  },
+  componentWillMount: function() {
+    socket.on("connected", (function(_this) {
+      return function(data) {
+        return _this.setState({
+          id: data.id,
+          ip: data.ip
+        });
+      };
+    })(this));
+    return socket.on("errAdminLogin", (function(_this) {
+      return function(data) {
+        return _this.setState({
+          errAdmin: data.type
+        });
+      };
+    })(this));
+  },
   render: function() {
     return React.createElement("div", {
       "className": "container"
-    }, "\t\t\tLearner");
+    }, React.createElement("span", null, "id: ", config.id), React.createElement("br", null), React.createElement("span", null, "ip: ", config.ip));
   }
 });
 
