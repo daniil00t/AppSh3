@@ -43,6 +43,7 @@
     "node": ">=0.10.32"
   },
   "dependencies": {
+    "crypto": "^1.0.1",
     "express-redirect": "^1.2.2",
     "hash-generator": "^0.1.0",
     "material-ui": "^0.7.2",
