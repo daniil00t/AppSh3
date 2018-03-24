@@ -13,4 +13,4 @@ gulp.task 'less', ->
     .pipe autoprefixer({cascade: false, browsers: ['last 2 versions']})
     .pipe sourcemaps.write()
     .pipe rename 'style.css'
-    .pipe gulp.dest('./build/stylesheets')
+    .pipe gulp.dest('./Public/stylesheets')

@@ -43,10 +43,12 @@
     "node": ">=0.10.32"
   },
   "dependencies": {
+    "bootstrap": "^4.0.0",
     "crypto": "^1.0.1",
     "express-redirect": "^1.2.2",
     "hash-generator": "^0.1.0",
     "material-ui": "^0.7.2",
+    "mongoose": "^5.0.11",
     "react": "^0.13.1",
     "react-cookies": "^0.1.0",
     "react-router": "^4.2.0",

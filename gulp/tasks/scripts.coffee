@@ -28,7 +28,7 @@ gulp.task 'scripts', ->
     clientBundler.bundle()
       .on 'error', handleErrors
       .pipe source('client.js')
-      .pipe gulp.dest('./build/scripts')
+      .pipe gulp.dest('./Public/scripts/learner/test')
       .on 'end', ->
         bundleLogger.end 'client.js'
 
