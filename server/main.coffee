@@ -21,6 +21,8 @@ Store = require "./store"
 app.use('/cssFiles', express["static"](path.resolve __dirname, '../Public/stylesheets'))
 app.use('/libsFiles', express["static"](path.resolve __dirname, '../Public/libs'))
 app.use('/jsFiles', express["static"](path.resolve __dirname, '../Public/scripts'))
+app.use('/filesForData', express["static"](path.resolve __dirname, '../docs'))
+app.use('/filesETC', express["static"](path.resolve __dirname, '../Public/etc'))
 
 fs.writeFile "db.log", "", (err)->
 	if err then throw err
@@ -79,28 +81,36 @@ io.on 'connection', (socket)->
 		when "/admin"
 			route_sock.admin(socket, store)
 		when "/learner/test"
+			console.log "test"
 			DB.setUpConnection()
 			Test.getTests(TestSchema).then (data)->
 				_data = filterClientTest data
 				socket.emit "getDataTest", _data
-
-			# Test.updateTest TestSchema, "5ab13bc6b1ebda12dcd3b60e", { anses: [
-			# 	{firstItems: ["Admin", "You", "Like"], secondItems: ["Krasavchik", "Me", "Solnyshko"]}
-			# ] }
+			socket.on "sendDataTest", (data)=>
+				console.log data
+			# Test.updateTest TestSchema, "5ab90fb48bcf221dd8d29310", { trueanses: ["подписание капитуляции Германии 8 мая 1945 года"] }
 			# test.addTest()
-			# DB.addTest({
-			# 	type: "defQ",
-			# 	num: 0,
-			# 	question: "Привет! Как у тебя дела?",
-			# 	anses: [
-			# 		["Норм, ну вообщем как всегда!", 0]
-			# 		["Супер, потому что это работает!", 1]
-			# 		["Как всегда", 0]
-			# 		["Не знаю", 0]
-			# 	]
-			# })
+			# Test.removeTest TestSchema, "5ab90fb0f16ac7197ce70fa5"
+			# setTimeout (->
+			# 	Test.addTest(TestSchema, {
+			# 		type: "inpQ",
+			# 		num: 3,
+			# 		question: "Как тебя зовут?",
+			# 		score: 2,
+			# 		trueanses: ["Daniil"]
+			# 	})
+			# ),2000
+			
 		else
 			console.log "/"
+			route_sock.admin(socket, store)
+			socket.on "exportDBonFile", (data)->
+				DB.setUpConnection()
+				Test.getTests(TestSchema).then (data)->
+					fs.writeFile "./docs/db_test.json", JSON.stringify(data), "utf-8", (err)=>
+						if err then throw err
+						console.log "saved file"
+						socket.emit "sendPathExportFileDB", {path: "/FilesForData/db_test.json"}
 			###Delete###
 
 			###endDelete###

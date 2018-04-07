@@ -10,15 +10,17 @@ React.render(React.createElement(App, null), document.getElementById('app'));
 
 
 },{"./app":2,"react":"react"}],2:[function(require,module,exports){
-var App, DefQ, JoinQ, MultQ, React, ee, io, socket;
+var App, DefQ, Header, InpQ, JoinQ, MultQ, React, ee, io, socket;
 
 React = require('react');
 
 io = require("socket.io-client");
 
-socket = io('http://192.168.100.12:3000');
-
 ee = require("./ee");
+
+socket = io("");
+
+Header = require("./components/Header");
 
 DefQ = require("./components/defQ");
 
@@ -26,12 +28,26 @@ MultQ = require("./components/multQ");
 
 JoinQ = require("./components/joinQ");
 
+InpQ = require("./components/inpQ");
+
 App = React.createClass({
   displayName: 'App',
   getInitialState: function() {
     return {
-      DATA: []
+      DATA: [],
+      _data: [],
+      preloader: true
     };
+  },
+  handleEndTest: function() {
+    ee.emit("endTest", {
+      type: true
+    });
+    socket.emit("sendDataTest", {
+      data: this.state._data
+    });
+    alert("Пожайлуста, подождите. Данные вот-вот доберутся до сервера...");
+    return window.location.replace("http://" + window.location.host + "/learner");
   },
   componentWillMount: function() {
     socket.on("getDataTest", (function(_this) {
@@ -42,25 +58,45 @@ App = React.createClass({
           i = data[j];
           arr.push(i);
         }
-        return _this.setState({
+        _this.setState({
           DATA: arr
+        });
+        return _this.setState({
+          preloader: false
         });
       };
     })(this));
-    return ee.on("updateAnswer", (function(_this) {
+    return ee.on("sendAnswer", (function(_this) {
       return function(data) {
-        return console.log(data);
+        var Data;
+        Data = _this.state._data;
+        Data.push(data);
+        return _this.setState({
+          _data: Data
+        });
       };
     })(this));
   },
   render: function() {
-    return React.createElement("div", {
+    return React.createElement("div", null, React.createElement("div", {
+      "className": "preloader",
+      "style": {
+        display: !this.state.preloader ? "none" : void 0
+      }
+    }, React.createElement("div", {
+      "className": "cssload-thecube"
+    }, React.createElement("div", {
+      "className": "cssload-cube cssload-c1"
+    }), React.createElement("div", {
+      "className": "cssload-cube cssload-c2"
+    }), React.createElement("div", {
+      "className": "cssload-cube cssload-c4"
+    }), React.createElement("div", {
+      "className": "cssload-cube cssload-c3"
+    }))), React.createElement("div", {
       "className": "container"
-    }, React.createElement("header", {
-      "className": "main_header"
-    }, React.createElement("h1", null, "Test")), (this.state.DATA.length !== 0 ? this.state.DATA.map((function(_this) {
+    }, React.createElement(Header, null), (this.state.DATA.length !== 0 ? this.state.DATA.map((function(_this) {
       return function(i) {
-        console.log(i);
         switch (i.type) {
           case "defQ":
             return React.createElement("div", null, React.createElement(DefQ, {
@@ -73,12 +109,21 @@ App = React.createClass({
           case "joinQ":
             return React.createElement("div", null, React.createElement(JoinQ, {
               "data": i
+            }), React.createElement("hr", null));
+          case "inpQ":
+            return React.createElement("div", null, React.createElement(InpQ, {
+              "data": i
             }));
           default:
             return console.log("elses");
         }
       };
-    })(this)) : React.createElement("div", null, "Получаю данные...")));
+    })(this)) : React.createElement("div", null, "Получаю данные...")), React.createElement("button", {
+      "onClick": this.handleEndTest,
+      "className": "endTest"
+    }, "Завершить"), React.createElement("footer", {
+      "className": "main_footer"
+    })));
   }
 });
 
@@ -86,7 +131,73 @@ module.exports = App;
 
 
 
-},{"./components/defQ":3,"./components/joinQ":4,"./components/multQ":5,"./ee":6,"react":"react","socket.io-client":42}],3:[function(require,module,exports){
+},{"./components/Header":3,"./components/defQ":4,"./components/inpQ":5,"./components/joinQ":6,"./components/multQ":7,"./ee":8,"react":"react","socket.io-client":44}],3:[function(require,module,exports){
+var Header, React, ee;
+
+React = require("react");
+
+ee = require("../ee");
+
+Header = React.createClass({
+  displayName: "Header",
+  getInitialState: function() {
+    return {
+      name: "",
+      lastname: ""
+    };
+  },
+  handleClickSaveName: function() {
+    this.setState({
+      name: document.getElementById("name_user").value
+    });
+    return this.setState({
+      lastname: document.getElementById("lastname_user").value
+    });
+  },
+  render: function() {
+    return React.createElement("header", {
+      "className": "main_header"
+    }, React.createElement("h1", {
+      "className": "brand_app"
+    }, "Test"), React.createElement("div", {
+      "className": "inf_user"
+    }, React.createElement("div", {
+      "className": "lbs_header"
+    }, React.createElement("span", null, "Имя:"), React.createElement("br", null), React.createElement("span", null, "Фамилия: ")), React.createElement("div", {
+      "className": "inps_header"
+    }, React.createElement("input", {
+      "type": "text",
+      "id": "name_user"
+    }), React.createElement("br", null), React.createElement("input", {
+      "type": "text",
+      "id": "lastname_user"
+    })), React.createElement("br", null), React.createElement("button", {
+      "className": "save_inf_user",
+      "onClick": this.handleClickSaveName
+    }, "Сохранить")), React.createElement("div", {
+      "className": "changeVariant"
+    }, React.createElement("h4", null, "Вариант: "), React.createElement("select", {
+      "id": "selectVariant"
+    }, React.createElement("option", {
+      "selected": "selected",
+      "value": "1"
+    }, "1"), React.createElement("option", {
+      "value": "2"
+    }, "2"), React.createElement("option", {
+      "value": "3"
+    }, "3"), React.createElement("option", {
+      "value": "4"
+    }, "4"), React.createElement("option", {
+      "value": "5"
+    }, "5"))));
+  }
+});
+
+module.exports = Header;
+
+
+
+},{"../ee":8,"react":"react"}],4:[function(require,module,exports){
 var DefQ, React, ee;
 
 React = require("react");
@@ -98,23 +209,38 @@ DefQ = React.createClass({
   getInitialState: function() {
     return {
       num: this.props.data.num,
-      activeItem: -1
+      activeItem: -1,
+      alphabet: {
+        rus: ["а", "б", "в", "г", "д", "е", "ж", "з", "и", "к"],
+        en: ["a", "b", "c", "d", "e", "f", "g", "h", "i", "j"]
+      },
+      myans: {}
     };
   },
-  handleClickIl: function(i) {
+  handleClickIl: function(i, e) {
     var id, value;
-    id = "Q_" + this.state.num + "_" + i;
-    document.getElementById(id).checked = true;
-    console.log("i");
-    value = +i;
-    ee.emit("updateAnswer", {
-      type: "defQ",
-      num: this.state.num,
-      val: value
-    });
-    return this.setState({
-      activeItem: value
-    });
+    if (e.target.localName === "span" || e.target.localName === "li") {
+      id = "Q_" + this.state.num + "_" + i;
+      document.getElementById(id).checked = true;
+      value = +i;
+      this.setState({
+        myans: {
+          type: "defQ",
+          num: this.state.num,
+          val: value
+        }
+      });
+      return this.setState({
+        activeItem: value
+      });
+    }
+  },
+  componentWillMount: function() {
+    return ee.on("endTest", (function(_this) {
+      return function(data) {
+        return ee.emit("sendAnswer", _this.state.myans);
+      };
+    })(this));
   },
   render: function() {
     return React.createElement("div", {
@@ -126,18 +252,22 @@ DefQ = React.createClass({
     }, this.props.data.anses.map((function(_this) {
       return function(i, j) {
         return React.createElement("li", {
-          "onClick": _this.handleClickIl.bind(_this, j),
+          "onClick": (function(e) {
+            return _this.handleClickIl.bind(_this, j)(e);
+          }),
           "key": j,
           "style": (j === _this.state.activeItem ? {
-            backgroundColor: "#8fcaf9",
-            color: "#fff"
+            backgroundColor: "#3670F7",
+            color: "#fff",
+            boxShadow: "0 0 15px rgba(0,0,0,0.6)"
           } : void 0)
         }, React.createElement("label", null, React.createElement("input", {
           "type": "radio",
           "name": "Q_" + _this.state.num,
           "id": "Q_" + _this.state.num + "_" + j,
+          "disabled": "disabled",
           "value": j
-        }), i));
+        }), (_this.state.alphabet.rus[j].toUpperCase()) + ". " + i));
       };
     })(this))));
   }
@@ -147,7 +277,43 @@ module.exports = DefQ;
 
 
 
-},{"../ee":6,"react":"react"}],4:[function(require,module,exports){
+},{"../ee":8,"react":"react"}],5:[function(require,module,exports){
+var InpQ, React, ee;
+
+React = require("react");
+
+ee = require("../ee");
+
+InpQ = React.createClass({
+  displayName: "InpQ",
+  componentWillMount: function() {
+    return ee.on("endTest", (function(_this) {
+      return function(data) {
+        return ee.emit("sendAnswer", {
+          type: "inpQ",
+          num: _this.props.data.num,
+          val: document.getElementById("ans").value
+        });
+      };
+    })(this));
+  },
+  render: function() {
+    return React.createElement("div", {
+      "className": "inpQ"
+    }, React.createElement("h3", {
+      "className": "question defQuestion"
+    }, this.props.data.num + 1 + ". " + this.props.data.question), React.createElement("p", null, this.props.data.text), React.createElement("input", {
+      "type": "text",
+      "id": "ans"
+    }));
+  }
+});
+
+module.exports = InpQ;
+
+
+
+},{"../ee":8,"react":"react"}],6:[function(require,module,exports){
 var JoinQ, React, ee;
 
 React = require("react");
@@ -158,6 +324,9 @@ JoinQ = React.createClass({
   displayName: "JoinQ",
   getInitialState: function() {
     return {
+      configs: {
+        count_items: this.props.data.anses[0].firstItems.length
+      },
       heightSVG: 0,
       colors: ["#2B9483", "#2866F7", "#FC911A", "#DB381B"],
       coordsItems: {
@@ -166,7 +335,11 @@ JoinQ = React.createClass({
       },
       paths: [],
       tmpPath: [],
-      arrCoordsPaths: []
+      arrCoordsPaths: [],
+      alphabet: {
+        rus: ["а", "б", "в", "г", "д", "е", "ж", "з", "и", "к"],
+        en: ["a", "b", "c", "d", "e", "f", "g", "h", "i", "j"]
+      }
     };
   },
   componentDidMount: function() {
@@ -188,9 +361,8 @@ JoinQ = React.createClass({
   },
   handleJoin: function(j, e, type) {
     var _data, data;
-    if (this.state.paths.length < 3) {
+    if (this.state.paths.length < this.state.configs.count_items) {
       if (type === "f") {
-        console.log(j);
         data = this.state.tmpPath;
         data.push({
           num: j,
@@ -200,41 +372,54 @@ JoinQ = React.createClass({
           tmpPath: data
         });
       } else {
-        console.log(j);
-        data = this.state.tmpPath;
-        data.push({
-          num: j,
-          type: type
-        });
-        this.setState({
-          tmpPath: data
-        });
-        this.drawPath([this.state.tmpPath[0].num, this.state.tmpPath[1].num]);
-        _data = this.state.paths;
-        _data.push(this.state.tmpPath);
-        this.setState({
-          paths: _data
-        });
-        return this.setState({
-          tmpPath: []
-        });
+        if (this.state.tmpPath.length !== 0) {
+          data = this.state.tmpPath;
+          data.push({
+            num: j,
+            type: type
+          });
+          this.setState({
+            tmpPath: data
+          });
+          this.drawPath([this.state.tmpPath[0].num, this.state.tmpPath[1].num]);
+          _data = this.state.paths;
+          _data.push(this.state.tmpPath);
+          this.setState({
+            paths: _data
+          });
+          return this.setState({
+            tmpPath: []
+          });
+        }
       }
     }
   },
   drawPath: function(arrCoords) {
     var data;
-    console.log(arrCoords);
     data = this.state.arrCoordsPaths;
     data.push(arrCoords);
-    this.setState({
+    return this.setState({
       arrCoordsPaths: data
     });
-    return console.log(this.state.arrCoordsPaths);
+  },
+  componentWillMount: function() {
+    return ee.on("endTest", (function(_this) {
+      return function(data) {
+        return ee.emit("sendAnswer", {
+          type: "joinQ",
+          num: _this.props.data.num,
+          ans: _this.state.paths
+        });
+      };
+    })(this));
   },
   render: function() {
+    var arr, i, j, len, max;
     return React.createElement("div", {
       "className": "joinQ"
-    }, React.createElement("div", {
+    }, React.createElement("h3", {
+      "className": "question"
+    }, (this.props.data.num + 1) + ". " + this.props.data.question), React.createElement("div", {
       "className": "wrap"
     }, React.createElement("div", {
       "className": "firstAnses one"
@@ -250,7 +435,7 @@ JoinQ = React.createClass({
           "onMouseOver": _this.hoverOverLiFirstAns.bind(_this, j),
           "onMouseOut": _this.hoverOutLiFirstAns.bind(_this, j),
           "id": "Q_F_" + j
-        }, i, React.createElement("br", null));
+        }, (_this.state.alphabet.rus[j].toUpperCase()) + ". " + i, React.createElement("br", null));
       };
     })(this)))), React.createElement("svg", {
       "className": "lines joinQsvg",
@@ -275,9 +460,39 @@ JoinQ = React.createClass({
             return _this.handleJoin.bind(_this, j)(e, "s");
           }),
           "id": "Q_S_" + j
-        }, i, React.createElement("br", null));
+        }, (j + 1) + ". " + i, React.createElement("br", null));
       };
-    })(this))))));
+    })(this)))), React.createElement("table", {
+      "className": "ansesTable",
+      "border": "2"
+    }, React.createElement("tr", null, this.props.data.anses[0].firstItems.map((function(_this) {
+      return function(i, j) {
+        return React.createElement("td", null, _this.state.alphabet.rus[j].toUpperCase());
+      };
+    })(this))), React.createElement("tr", null, ((function() {
+      arr = this.state.paths;
+      len = arr.length - 1;
+      i = 0;
+      while (i < len) {
+        j = 0;
+        while (j < len - i) {
+          if (arr[j][0].num > arr[j + 1][0].num) {
+            max = arr[j];
+            arr[j] = arr[j + 1];
+            arr[j + 1] = max;
+          }
+          j++;
+        }
+        i++;
+      }
+      return arr.map((function(_this) {
+        return function(i, j) {
+          if (i[0].num === j) {
+            return React.createElement("td", null, i[1].num + 1);
+          }
+        };
+      })(this));
+    }).call(this))))));
   }
 });
 
@@ -285,7 +500,7 @@ module.exports = JoinQ;
 
 
 
-},{"../ee":6,"react":"react"}],5:[function(require,module,exports){
+},{"../ee":8,"react":"react"}],7:[function(require,module,exports){
 var MultQ, React, ee;
 
 React = require("react");
@@ -297,19 +512,24 @@ MultQ = React.createClass({
   getInitialState: function() {
     return {
       num: this.props.data.num,
-      activeItems: []
+      activeItems: [],
+      myans: []
     };
   },
   handleClickIl: function(i, e) {
-    var data, id, k, l, len, q, ref, value;
+    var _data, data, id, k, l, len, q, ref, value;
     if (this.state.activeItems.length < 2) {
       id = "Q_" + this.state.num + "_" + i;
       document.getElementById(id).checked = !document.getElementById(id).checked;
       value = +i;
-      ee.emit("updateAnswer", {
+      _data = this.state.myans;
+      _data.push({
         type: "multQ",
         num: this.state.num,
         val: value
+      });
+      this.setState({
+        myans: _data
       });
       data = this.state.activeItems;
       data.push(i);
@@ -356,6 +576,17 @@ MultQ = React.createClass({
       return item.getDOMNode().ondblclick = this.handleDoubleClick;
     }
   },
+  componentWillMount: function() {
+    return ee.on("endTest", (function(_this) {
+      return function(data) {
+        return ee.emit("sendAnswer", {
+          type: "multQ",
+          num: _this.props.data.num,
+          ans: _this.state.myans
+        });
+      };
+    })(this));
+  },
   render: function() {
     return React.createElement("div", {
       "className": "ItemMultQ"
@@ -372,8 +603,9 @@ MultQ = React.createClass({
           "ref": _this.refCallback,
           "key": j,
           "style": (j === _this.state.activeItems[_this.state.activeItems.length - 1] || j === _this.state.activeItems[_this.state.activeItems.length - 2] ? {
-            backgroundColor: "#8fcaf9",
-            color: "#fff"
+            backgroundColor: "#3670F7",
+            color: "#fff",
+            boxShadow: "0 0 15px rgba(0,0,0,0.6)"
           } : void 0)
         }, React.createElement("label", {
           "onClick": false
@@ -394,7 +626,7 @@ module.exports = MultQ;
 
 
 
-},{"../ee":6,"react":"react"}],6:[function(require,module,exports){
+},{"../ee":8,"react":"react"}],8:[function(require,module,exports){
 var EventEmitter, ee;
 
 EventEmitter = require("events").EventEmitter;
@@ -405,7 +637,7 @@ module.exports = ee;
 
 
 
-},{"events":32}],7:[function(require,module,exports){
+},{"events":34}],9:[function(require,module,exports){
 module.exports = after
 
 function after(count, callback, err_cb) {
@@ -435,7 +667,7 @@ function after(count, callback, err_cb) {
 
 function noop() {}
 
-},{}],8:[function(require,module,exports){
+},{}],10:[function(require,module,exports){
 /**
  * An abstraction for slicing an arraybuffer even when
  * ArrayBuffer.prototype.slice is not supported
@@ -466,7 +698,7 @@ module.exports = function(arraybuffer, start, end) {
   return result.buffer;
 };
 
-},{}],9:[function(require,module,exports){
+},{}],11:[function(require,module,exports){
 
 /**
  * Expose `Backoff`.
@@ -553,7 +785,7 @@ Backoff.prototype.setJitter = function(jitter){
 };
 
 
-},{}],10:[function(require,module,exports){
+},{}],12:[function(require,module,exports){
 /*
  * base64-arraybuffer
  * https://github.com/niklasvh/base64-arraybuffer
@@ -622,7 +854,7 @@ Backoff.prototype.setJitter = function(jitter){
   };
 })();
 
-},{}],11:[function(require,module,exports){
+},{}],13:[function(require,module,exports){
 (function (global){
 /**
  * Create a blob builder even when vendor prefixes exist
@@ -722,9 +954,9 @@ module.exports = (function() {
 })();
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],12:[function(require,module,exports){
+},{}],14:[function(require,module,exports){
 
-},{}],13:[function(require,module,exports){
+},{}],15:[function(require,module,exports){
 /**
  * Slice reference.
  */
@@ -749,7 +981,7 @@ module.exports = function(obj, fn){
   }
 };
 
-},{}],14:[function(require,module,exports){
+},{}],16:[function(require,module,exports){
 
 /**
  * Expose `Emitter`.
@@ -915,7 +1147,7 @@ Emitter.prototype.hasListeners = function(event){
   return !! this.listeners(event).length;
 };
 
-},{}],15:[function(require,module,exports){
+},{}],17:[function(require,module,exports){
 
 module.exports = function(a, b){
   var fn = function(){};
@@ -923,11 +1155,11 @@ module.exports = function(a, b){
   a.prototype = new fn;
   a.prototype.constructor = a;
 };
-},{}],16:[function(require,module,exports){
+},{}],18:[function(require,module,exports){
 
 module.exports = require('./lib/index');
 
-},{"./lib/index":17}],17:[function(require,module,exports){
+},{"./lib/index":19}],19:[function(require,module,exports){
 
 module.exports = require('./socket');
 
@@ -939,7 +1171,7 @@ module.exports = require('./socket');
  */
 module.exports.parser = require('engine.io-parser');
 
-},{"./socket":18,"engine.io-parser":30}],18:[function(require,module,exports){
+},{"./socket":20,"engine.io-parser":32}],20:[function(require,module,exports){
 (function (global){
 /**
  * Module dependencies.
@@ -1681,7 +1913,7 @@ Socket.prototype.filterUpgrades = function (upgrades) {
 };
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./transport":19,"./transports/index":20,"component-emitter":26,"debug":27,"engine.io-parser":30,"indexof":35,"parsejson":38,"parseqs":39,"parseuri":40}],19:[function(require,module,exports){
+},{"./transport":21,"./transports/index":22,"component-emitter":28,"debug":29,"engine.io-parser":32,"indexof":37,"parsejson":40,"parseqs":41,"parseuri":42}],21:[function(require,module,exports){
 /**
  * Module dependencies.
  */
@@ -1840,7 +2072,7 @@ Transport.prototype.onClose = function () {
   this.emit('close');
 };
 
-},{"component-emitter":26,"engine.io-parser":30}],20:[function(require,module,exports){
+},{"component-emitter":28,"engine.io-parser":32}],22:[function(require,module,exports){
 (function (global){
 /**
  * Module dependencies
@@ -1897,7 +2129,7 @@ function polling (opts) {
 }
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./polling-jsonp":21,"./polling-xhr":22,"./websocket":24,"xmlhttprequest-ssl":25}],21:[function(require,module,exports){
+},{"./polling-jsonp":23,"./polling-xhr":24,"./websocket":26,"xmlhttprequest-ssl":27}],23:[function(require,module,exports){
 (function (global){
 
 /**
@@ -2132,7 +2364,7 @@ JSONPPolling.prototype.doWrite = function (data, fn) {
 };
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./polling":23,"component-inherit":15}],22:[function(require,module,exports){
+},{"./polling":25,"component-inherit":17}],24:[function(require,module,exports){
 (function (global){
 /**
  * Module requirements.
@@ -2560,7 +2792,7 @@ function unloadHandler () {
 }
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./polling":23,"component-emitter":26,"component-inherit":15,"debug":27,"xmlhttprequest-ssl":25}],23:[function(require,module,exports){
+},{"./polling":25,"component-emitter":28,"component-inherit":17,"debug":29,"xmlhttprequest-ssl":27}],25:[function(require,module,exports){
 /**
  * Module dependencies.
  */
@@ -2807,7 +3039,7 @@ Polling.prototype.uri = function () {
   return schema + '://' + (ipv6 ? '[' + this.hostname + ']' : this.hostname) + port + this.path + query;
 };
 
-},{"../transport":19,"component-inherit":15,"debug":27,"engine.io-parser":30,"parseqs":39,"xmlhttprequest-ssl":25,"yeast":59}],24:[function(require,module,exports){
+},{"../transport":21,"component-inherit":17,"debug":29,"engine.io-parser":32,"parseqs":41,"xmlhttprequest-ssl":27,"yeast":61}],26:[function(require,module,exports){
 (function (global){
 /**
  * Module dependencies.
@@ -3096,7 +3328,7 @@ WS.prototype.check = function () {
 };
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../transport":19,"component-inherit":15,"debug":27,"engine.io-parser":30,"parseqs":39,"ws":12,"yeast":59}],25:[function(require,module,exports){
+},{"../transport":21,"component-inherit":17,"debug":29,"engine.io-parser":32,"parseqs":41,"ws":14,"yeast":61}],27:[function(require,module,exports){
 (function (global){
 // browser shim for xmlhttprequest module
 
@@ -3137,7 +3369,7 @@ module.exports = function (opts) {
 };
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"has-cors":34}],26:[function(require,module,exports){
+},{"has-cors":36}],28:[function(require,module,exports){
 
 /**
  * Expose `Emitter`.
@@ -3302,7 +3534,7 @@ Emitter.prototype.hasListeners = function(event){
   return !! this.listeners(event).length;
 };
 
-},{}],27:[function(require,module,exports){
+},{}],29:[function(require,module,exports){
 (function (process){
 
 /**
@@ -3483,7 +3715,7 @@ function localstorage(){
 }
 
 }).call(this,require('_process'))
-},{"./debug":28,"_process":41}],28:[function(require,module,exports){
+},{"./debug":30,"_process":43}],30:[function(require,module,exports){
 
 /**
  * This is the common logic for both the Node.js and web browser
@@ -3685,7 +3917,7 @@ function coerce(val) {
   return val;
 }
 
-},{"ms":29}],29:[function(require,module,exports){
+},{"ms":31}],31:[function(require,module,exports){
 /**
  * Helpers.
  */
@@ -3836,7 +4068,7 @@ function plural(ms, n, name) {
   return Math.ceil(ms / n) + ' ' + name + 's'
 }
 
-},{}],30:[function(require,module,exports){
+},{}],32:[function(require,module,exports){
 (function (global){
 /**
  * Module dependencies.
@@ -4449,7 +4681,7 @@ exports.decodePayloadAsBinary = function (data, binaryType, callback) {
 };
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./keys":31,"after":7,"arraybuffer.slice":8,"base64-arraybuffer":10,"blob":11,"has-binary":33,"wtf-8":58}],31:[function(require,module,exports){
+},{"./keys":33,"after":9,"arraybuffer.slice":10,"base64-arraybuffer":12,"blob":13,"has-binary":35,"wtf-8":60}],33:[function(require,module,exports){
 
 /**
  * Gets the keys for an object.
@@ -4470,7 +4702,7 @@ module.exports = Object.keys || function keys (obj){
   return arr;
 };
 
-},{}],32:[function(require,module,exports){
+},{}],34:[function(require,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -4773,7 +5005,7 @@ function isUndefined(arg) {
   return arg === void 0;
 }
 
-},{}],33:[function(require,module,exports){
+},{}],35:[function(require,module,exports){
 (function (global){
 
 /*
@@ -4836,7 +5068,7 @@ function hasBinary(data) {
 }
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"isarray":36}],34:[function(require,module,exports){
+},{"isarray":38}],36:[function(require,module,exports){
 
 /**
  * Module exports.
@@ -4855,7 +5087,7 @@ try {
   module.exports = false;
 }
 
-},{}],35:[function(require,module,exports){
+},{}],37:[function(require,module,exports){
 
 var indexOf = [].indexOf;
 
@@ -4866,12 +5098,12 @@ module.exports = function(arr, obj){
   }
   return -1;
 };
-},{}],36:[function(require,module,exports){
+},{}],38:[function(require,module,exports){
 module.exports = Array.isArray || function (arr) {
   return Object.prototype.toString.call(arr) == '[object Array]';
 };
 
-},{}],37:[function(require,module,exports){
+},{}],39:[function(require,module,exports){
 (function (global){
 /*! JSON v3.3.2 | http://bestiejs.github.io/json3 | Copyright 2012-2014, Kit Cambridge | http://kit.mit-license.org */
 ;(function () {
@@ -5777,7 +6009,7 @@ module.exports = Array.isArray || function (arr) {
 }).call(this);
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],38:[function(require,module,exports){
+},{}],40:[function(require,module,exports){
 (function (global){
 /**
  * JSON parse.
@@ -5812,7 +6044,7 @@ module.exports = function parsejson(data) {
   }
 };
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],39:[function(require,module,exports){
+},{}],41:[function(require,module,exports){
 /**
  * Compiles a querystring
  * Returns string representation of the object
@@ -5851,7 +6083,7 @@ exports.decode = function(qs){
   return qry;
 };
 
-},{}],40:[function(require,module,exports){
+},{}],42:[function(require,module,exports){
 /**
  * Parses an URI
  *
@@ -5892,7 +6124,7 @@ module.exports = function parseuri(str) {
     return uri;
 };
 
-},{}],41:[function(require,module,exports){
+},{}],43:[function(require,module,exports){
 // shim for using process in browser
 
 var process = module.exports = {};
@@ -5980,7 +6212,7 @@ process.chdir = function (dir) {
     throw new Error('process.chdir is not supported');
 };
 
-},{}],42:[function(require,module,exports){
+},{}],44:[function(require,module,exports){
 
 /**
  * Module dependencies.
@@ -6091,7 +6323,7 @@ exports.connect = lookup;
 exports.Manager = require('./manager');
 exports.Socket = require('./socket');
 
-},{"./manager":43,"./socket":45,"./url":46,"debug":48,"socket.io-parser":52}],43:[function(require,module,exports){
+},{"./manager":45,"./socket":47,"./url":48,"debug":50,"socket.io-parser":54}],45:[function(require,module,exports){
 
 /**
  * Module dependencies.
@@ -6653,7 +6885,7 @@ Manager.prototype.onreconnect = function () {
   this.emitAll('reconnect', attempt);
 };
 
-},{"./on":44,"./socket":45,"backo2":9,"component-bind":13,"component-emitter":47,"debug":48,"engine.io-client":16,"indexof":35,"socket.io-parser":52}],44:[function(require,module,exports){
+},{"./on":46,"./socket":47,"backo2":11,"component-bind":15,"component-emitter":49,"debug":50,"engine.io-client":18,"indexof":37,"socket.io-parser":54}],46:[function(require,module,exports){
 
 /**
  * Module exports.
@@ -6679,7 +6911,7 @@ function on (obj, ev, fn) {
   };
 }
 
-},{}],45:[function(require,module,exports){
+},{}],47:[function(require,module,exports){
 
 /**
  * Module dependencies.
@@ -7100,7 +7332,7 @@ Socket.prototype.compress = function (compress) {
   return this;
 };
 
-},{"./on":44,"component-bind":13,"component-emitter":47,"debug":48,"has-binary":33,"socket.io-parser":52,"to-array":57}],46:[function(require,module,exports){
+},{"./on":46,"component-bind":15,"component-emitter":49,"debug":50,"has-binary":35,"socket.io-parser":54,"to-array":59}],48:[function(require,module,exports){
 (function (global){
 
 /**
@@ -7179,15 +7411,15 @@ function url (uri, loc) {
 }
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"debug":48,"parseuri":40}],47:[function(require,module,exports){
-module.exports=require(26)
-},{"E:\\_web\\nodeJsProjects\\Socket_io\\node_modules\\engine.io-client\\node_modules\\component-emitter\\index.js":26}],48:[function(require,module,exports){
-module.exports=require(27)
-},{"./debug":49,"E:\\_web\\nodeJsProjects\\Socket_io\\node_modules\\engine.io-client\\node_modules\\debug\\browser.js":27,"_process":41}],49:[function(require,module,exports){
+},{"debug":50,"parseuri":42}],49:[function(require,module,exports){
 module.exports=require(28)
-},{"E:\\_web\\nodeJsProjects\\Socket_io\\node_modules\\engine.io-client\\node_modules\\debug\\debug.js":28,"ms":50}],50:[function(require,module,exports){
+},{"E:\\_web\\nodeJsProjects\\Socket_io\\node_modules\\engine.io-client\\node_modules\\component-emitter\\index.js":28}],50:[function(require,module,exports){
 module.exports=require(29)
-},{"E:\\_web\\nodeJsProjects\\Socket_io\\node_modules\\engine.io-client\\node_modules\\ms\\index.js":29}],51:[function(require,module,exports){
+},{"./debug":51,"E:\\_web\\nodeJsProjects\\Socket_io\\node_modules\\engine.io-client\\node_modules\\debug\\browser.js":29,"_process":43}],51:[function(require,module,exports){
+module.exports=require(30)
+},{"E:\\_web\\nodeJsProjects\\Socket_io\\node_modules\\engine.io-client\\node_modules\\debug\\debug.js":30,"ms":52}],52:[function(require,module,exports){
+module.exports=require(31)
+},{"E:\\_web\\nodeJsProjects\\Socket_io\\node_modules\\engine.io-client\\node_modules\\ms\\index.js":31}],53:[function(require,module,exports){
 (function (global){
 /*global Blob,File*/
 
@@ -7332,7 +7564,7 @@ exports.removeBlobs = function(data, callback) {
 };
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./is-buffer":53,"isarray":36}],52:[function(require,module,exports){
+},{"./is-buffer":55,"isarray":38}],54:[function(require,module,exports){
 
 /**
  * Module dependencies.
@@ -7738,7 +7970,7 @@ function error(data){
   };
 }
 
-},{"./binary":51,"./is-buffer":53,"component-emitter":14,"debug":54,"json3":37}],53:[function(require,module,exports){
+},{"./binary":53,"./is-buffer":55,"component-emitter":16,"debug":56,"json3":39}],55:[function(require,module,exports){
 (function (global){
 
 module.exports = isBuf;
@@ -7755,7 +7987,7 @@ function isBuf(obj) {
 }
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],54:[function(require,module,exports){
+},{}],56:[function(require,module,exports){
 
 /**
  * This is the web browser implementation of `debug()`.
@@ -7925,7 +8157,7 @@ function localstorage(){
   } catch (e) {}
 }
 
-},{"./debug":55}],55:[function(require,module,exports){
+},{"./debug":57}],57:[function(require,module,exports){
 
 /**
  * This is the common logic for both the Node.js and web browser
@@ -8124,7 +8356,7 @@ function coerce(val) {
   return val;
 }
 
-},{"ms":56}],56:[function(require,module,exports){
+},{"ms":58}],58:[function(require,module,exports){
 /**
  * Helpers.
  */
@@ -8251,7 +8483,7 @@ function plural(ms, n, name) {
   return Math.ceil(ms / n) + ' ' + name + 's';
 }
 
-},{}],57:[function(require,module,exports){
+},{}],59:[function(require,module,exports){
 module.exports = toArray
 
 function toArray(list, index) {
@@ -8266,7 +8498,7 @@ function toArray(list, index) {
     return array
 }
 
-},{}],58:[function(require,module,exports){
+},{}],60:[function(require,module,exports){
 (function (global){
 /*! https://mths.be/wtf8 v1.0.0 by @mathias */
 ;(function(root) {
@@ -8504,7 +8736,7 @@ function toArray(list, index) {
 }(this));
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],59:[function(require,module,exports){
+},{}],61:[function(require,module,exports){
 'use strict';
 
 var alphabet = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz-_'.split('')

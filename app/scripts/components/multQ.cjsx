@@ -7,12 +7,15 @@ MultQ = React.createClass
 	getInitialState: ->
 		num: @props.data.num
 		activeItems: []
+		myans: []
 	handleClickIl: (i, e)->
 		if @state.activeItems.length < 2
 			id = "Q_#{@state.num}_#{i}"
 			document.getElementById(id).checked = !document.getElementById(id).checked
 			value = +i
-			ee.emit "updateAnswer", {type: "multQ", num: @state.num, val: value}
+			_data = @state.myans
+			_data.push {type: "multQ", num: @state.num, val: value}
+			@setState myans: _data
 			
 			data = @state.activeItems
 			data.push i
@@ -44,6 +47,9 @@ MultQ = React.createClass
 		if item
 			item.getDOMNode().ondblclick = this.handleDoubleClick
 
+	componentWillMount: ->
+		ee.on "endTest", (data)=>
+			ee.emit "sendAnswer", {type: "multQ", num: @props.data.num, ans: @state.myans}
 		
 	render: ->
 		<div className="ItemMultQ">
@@ -51,7 +57,7 @@ MultQ = React.createClass
 			<ul className="ulanses multulanses">
 				{
 					@props.data.anses.map (i, j)=>
-						<li onClick={(e) => @handleClickIl.bind(@, j)(e)} ref={@refCallback} key={j} style={if j == @state.activeItems[@state.activeItems.length-1] or j == @state.activeItems[@state.activeItems.length-2] then {backgroundColor: "#8fcaf9", color: "#fff"}}><label onClick={false}><input onClick={false} type="checkbox" disabled="disabled" name={"Q_#{@state.num}"} id={"Q_#{@state.num}_#{j}"} value={j}/>{i}</label></li>
+						<li onClick={(e) => @handleClickIl.bind(@, j)(e)} ref={@refCallback} key={j} style={if j == @state.activeItems[@state.activeItems.length-1] or j == @state.activeItems[@state.activeItems.length-2] then {backgroundColor: "#3670F7", color: "#fff", boxShadow: "0 0 15px rgba(0,0,0,0.6)"}}><label onClick={false}><input onClick={false} type="checkbox" disabled="disabled" name={"Q_#{@state.num}"} id={"Q_#{@state.num}_#{j}"} value={j}/>{i}</label></li>
 				}
 			</ul>
 		</div>

@@ -8,7 +8,8 @@ TestSchema = new Schema({
 	num       : { type: Number },
 	question  : { type: String },
 	anses     : { type: Array },
+	text      : { type: String }
 	score     : { type: Number }
-	trueanses : { type: Number }
+	trueanses : { type: Array }
 })
 module.exports = mongoose.model('Test', TestSchema)

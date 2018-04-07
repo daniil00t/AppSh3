@@ -16,7 +16,7 @@ React = require('react');
 
 io = require("socket.io-client");
 
-socket = io('http://192.168.100.12:3000');
+socket = io('http://192.168.100.8:3000');
 
 App = React.createClass({
   displayName: 'App',
