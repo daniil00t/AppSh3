@@ -10,7 +10,7 @@ React.render(React.createElement(App, null), document.getElementById('app'));
 
 
 },{"./app":2,"react":"react"}],2:[function(require,module,exports){
-var App, DefQ, Header, InpQ, JoinQ, MultQ, React, ee, io, socket;
+var App, DefQ, Header, InpQ, JoinQ, MultQ, React, config, ee, io, socket;
 
 React = require('react');
 
@@ -30,32 +30,55 @@ JoinQ = require("./components/joinQ");
 
 InpQ = require("./components/inpQ");
 
+config = {};
+
+socket.on("connected", function(data) {
+  console.log(data);
+  config["id"] = data.id;
+  return config["ip"] = data.ip;
+});
+
+window.onbeforeunload = function() {
+  return socket.emit("closed", {
+    id: config.id
+  });
+};
+
+console.log(config);
+
 App = React.createClass({
   displayName: 'App',
   getInitialState: function() {
     return {
       DATA: [],
       _data: [],
-      preloader: true
+      preloader: true,
+      variant: 1,
+      data_user: {},
+      start: false
     };
   },
-  handleEndTest: function() {
+  endTest: function(massage) {
     ee.emit("endTest", {
       type: true
     });
     socket.emit("sendDataTest", {
-      data: this.state._data
+      data: this.state._data,
+      data_user: this.state.data_user
     });
-    alert("Пожайлуста, подождите. Данные вот-вот доберутся до сервера...");
+    alert(massage);
     return window.location.replace("http://" + window.location.host + "/learner");
+  },
+  handleEndTest: function() {
+    return this.endTest("Пожайлуста, подождите. Данные вот-вот доберутся до сервера...");
   },
   componentWillMount: function() {
     socket.on("getDataTest", (function(_this) {
       return function(data) {
-        var arr, i, j, len;
+        var arr, i, k, len;
         arr = [];
-        for (j = 0, len = data.length; j < len; j++) {
-          i = data[j];
+        for (k = 0, len = data.length; k < len; k++) {
+          i = data[k];
           arr.push(i);
         }
         _this.setState({
@@ -66,7 +89,7 @@ App = React.createClass({
         });
       };
     })(this));
-    return ee.on("sendAnswer", (function(_this) {
+    ee.on("sendAnswer", (function(_this) {
       return function(data) {
         var Data;
         Data = _this.state._data;
@@ -74,6 +97,45 @@ App = React.createClass({
         return _this.setState({
           _data: Data
         });
+      };
+    })(this));
+    ee.on("changeVariant", (function(_this) {
+      return function(data) {
+        return _this.setState({
+          variant: +data.value
+        });
+      };
+    })(this));
+    ee.on("changeUserData", (function(_this) {
+      return function(data) {
+        var obj;
+        obj = {};
+        obj.firstname_user = data.firstname;
+        obj.lastname_user = data.lastname;
+        return _this.setState({
+          data_user: obj
+        });
+      };
+    })(this));
+    ee.on("stopTimer", (function(_this) {
+      return function(data) {
+        return _this.endTest("К сожалению, время закончилось. Сохраняю ваши данные...");
+      };
+    })(this));
+    return ee.on("startTestapp", (function(_this) {
+      return function(data) {
+        if ((_this.state.data_user.firstname_user != null) && (_this.state.data_user.lastname_user != null)) {
+          ee.emit("startTesth", {
+            type: true
+          });
+          return _this.setState({
+            start: data.type
+          });
+        } else {
+          return ee.emit("startTesth", {
+            type: false
+          });
+        }
       };
     })(this));
   },
@@ -95,30 +157,38 @@ App = React.createClass({
       "className": "cssload-cube cssload-c3"
     }))), React.createElement("div", {
       "className": "container"
-    }, React.createElement(Header, null), (this.state.DATA.length !== 0 ? this.state.DATA.map((function(_this) {
-      return function(i) {
-        switch (i.type) {
-          case "defQ":
-            return React.createElement("div", null, React.createElement(DefQ, {
-              "data": i
-            }), React.createElement("hr", null));
-          case "multQ":
-            return React.createElement("div", null, React.createElement(MultQ, {
-              "data": i
-            }), React.createElement("hr", null));
-          case "joinQ":
-            return React.createElement("div", null, React.createElement(JoinQ, {
-              "data": i
-            }), React.createElement("hr", null));
-          case "inpQ":
-            return React.createElement("div", null, React.createElement(InpQ, {
-              "data": i
-            }));
-          default:
-            return console.log("elses");
+    }, React.createElement(Header, {
+      "data": this.state.DATA
+    }), (this.state.DATA.length !== 0 && this.state.start ? this.state.DATA.map((function(_this) {
+      return function(i, j) {
+        if (_this.state.variant === j + 1 && i.data.length !== 0) {
+          return i.data.map(function(q, w) {
+            switch (q.type) {
+              case "defQ":
+                return React.createElement("div", null, React.createElement(DefQ, {
+                  "data": q
+                }), React.createElement("hr", null));
+              case "multQ":
+                return React.createElement("div", null, React.createElement(MultQ, {
+                  "data": q
+                }), React.createElement("hr", null));
+              case "joinQ":
+                return React.createElement("div", null, React.createElement(JoinQ, {
+                  "data": q
+                }), React.createElement("hr", null));
+              case "inpQ":
+                return React.createElement("div", null, React.createElement(InpQ, {
+                  "data": q
+                }));
+              default:
+                return console.log("elses");
+            }
+          });
         }
       };
-    })(this)) : React.createElement("div", null, "Получаю данные...")), React.createElement("button", {
+    })(this)) : this.state.DATA.length === 0 ? React.createElement("div", null, "К сожалению, данных нет.") : !this.state.start ? React.createElement("div", {
+      "className": "text-center nostart"
+    }, "Нажмите на кнопку старта таймера и давайте начинать!") : void 0), React.createElement("button", {
       "onClick": this.handleEndTest,
       "className": "endTest"
     }, "Завершить"), React.createElement("footer", {
@@ -142,24 +212,84 @@ Header = React.createClass({
   displayName: "Header",
   getInitialState: function() {
     return {
-      name: "",
-      lastname: ""
+      time: {}
     };
   },
   handleClickSaveName: function() {
-    this.setState({
-      name: document.getElementById("name_user").value
-    });
-    return this.setState({
+    return ee.emit("changeUserData", {
+      firstname: document.getElementById("name_user").value,
       lastname: document.getElementById("lastname_user").value
     });
+  },
+  handleChangeSelect: function(e) {
+    return ee.emit("changeVariant", {
+      value: e.target.value
+    });
+  },
+  handleStartTest: function() {
+    return ee.emit("startTestapp", {
+      time: this.state.time,
+      type: true
+    });
+  },
+  componentWillReceiveProps: function() {
+    var minutes, obj, seconds, time_seconds;
+    time_seconds = 0;
+    this.props.data.map((function(_this) {
+      return function(i, j) {
+        if (j === 0) {
+          return time_seconds = i.time;
+        }
+      };
+    })(this));
+    console.log(time_seconds);
+    seconds = time_seconds % 60;
+    minutes = Math.floor(time_seconds / 60);
+    obj = {};
+    obj.seconds = seconds;
+    obj.minutes = minutes;
+    return this.setState({
+      time: obj
+    });
+  },
+  componentWillMount: function() {
+    return ee.on("startTesth", (function(_this) {
+      return function(data) {
+        var SI, timeall;
+        if (data.type) {
+          timeall = _this.state.time.minutes * 60 + _this.state.time.seconds;
+          console.log(timeall);
+          return SI = setInterval((function() {
+            var obj;
+            if (timeall === 1) {
+              clearInterval(SI);
+              return ee.emit("stopTimer", {
+                type: true
+              });
+            } else {
+              timeall--;
+              obj = {};
+              obj.seconds = timeall % 60;
+              obj.minutes = Math.floor(timeall / 60);
+              return _this.setState({
+                time: obj
+              });
+            }
+          }), 1000);
+        } else {
+          return alert("Введите свое имя и фамилие!");
+        }
+      };
+    })(this));
   },
   render: function() {
     return React.createElement("header", {
       "className": "main_header"
     }, React.createElement("h1", {
       "className": "brand_app"
-    }, "Test"), React.createElement("div", {
+    }, React.createElement("span", {
+      "className": "t_brand"
+    }, "T"), "est"), React.createElement("div", {
       "className": "inf_user"
     }, React.createElement("div", {
       "className": "lbs_header"
@@ -177,19 +307,31 @@ Header = React.createClass({
     }, "Сохранить")), React.createElement("div", {
       "className": "changeVariant"
     }, React.createElement("h4", null, "Вариант: "), React.createElement("select", {
-      "id": "selectVariant"
-    }, React.createElement("option", {
-      "selected": "selected",
-      "value": "1"
-    }, "1"), React.createElement("option", {
-      "value": "2"
-    }, "2"), React.createElement("option", {
-      "value": "3"
-    }, "3"), React.createElement("option", {
-      "value": "4"
-    }, "4"), React.createElement("option", {
-      "value": "5"
-    }, "5"))));
+      "id": "selectVariant",
+      "onChange": ((function(_this) {
+        return function(e) {
+          return _this.handleChangeSelect(e);
+        };
+      })(this))
+    }, this.props.data.map((function(_this) {
+      return function(i, j) {
+        if (j === 0) {
+          return React.createElement("option", {
+            "selected": "selected",
+            "value": "1"
+          }, "1");
+        } else {
+          return React.createElement("option", {
+            "value": j + 1
+          }, j + 1);
+        }
+      };
+    })(this)))), React.createElement("div", {
+      "className": "TimerTest"
+    }, React.createElement("h1", null, (this.state.time.minutes < 10 ? "0" + this.state.time.minutes : this.state.time.minutes) + ":" + (this.state.time.seconds < 10 ? "0" + this.state.time.seconds : this.state.time.seconds)), React.createElement("i", {
+      "className": "fa fa-play",
+      "onClick": this.handleStartTest
+    })));
   }
 });
 
@@ -266,8 +408,11 @@ DefQ = React.createClass({
           "name": "Q_" + _this.state.num,
           "id": "Q_" + _this.state.num + "_" + j,
           "disabled": "disabled",
-          "value": j
-        }), (_this.state.alphabet.rus[j].toUpperCase()) + ". " + i));
+          "value": j,
+          "dangerouslySetInnerHTML": {
+            __html: (_this.state.alphabet.rus[j].toUpperCase()) + ". " + i
+          }
+        })));
       };
     })(this))));
   }

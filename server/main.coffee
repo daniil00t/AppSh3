@@ -22,7 +22,7 @@ app.use('/cssFiles', express["static"](path.resolve __dirname, '../Public/styles
 app.use('/libsFiles', express["static"](path.resolve __dirname, '../Public/libs'))
 app.use('/jsFiles', express["static"](path.resolve __dirname, '../Public/scripts'))
 app.use('/filesForData', express["static"](path.resolve __dirname, '../docs'))
-app.use('/filesETC', express["static"](path.resolve __dirname, '../Public/etc'))
+# app.use('/filesETC', express["static"](path.resolve __dirname, '../Public/etc'))
 
 fs.writeFile "db.log", "", (err)->
 	if err then throw err
@@ -83,14 +83,35 @@ io.on 'connection', (socket)->
 		when "/learner/test"
 			console.log "test"
 			DB.setUpConnection()
-			Test.getTests(TestSchema).then (data)->
+			Test.getData(TestSchema).then (data)->
 				_data = filterClientTest data
 				socket.emit "getDataTest", _data
 			socket.on "sendDataTest", (data)=>
 				console.log data
-			# Test.updateTest TestSchema, "5ab90fb48bcf221dd8d29310", { trueanses: ["подписание капитуляции Германии 8 мая 1945 года"] }
+			id = socket.id
+			console.log "connected user, id: #{id}"
+			ip = socket.handshake.address
+			store.addNewClient 
+				id: id
+				ip: socket.handshake.address
+				type: "learner"
+				privileges: 3
+				app: "test"
+			socket.emit 'connected', id: id, ip: ip
+			console.log store.getClients()
+			# Test.updateTest TestSchema, "5ac8eaec68352c16604b478a", { data: [{
+			# 	anses: ["63<sub>10</sub> · 4<sub>10</sub>","F8<sub>16</sub>+1<sub>10</sub>","333<sub>8</sub>","11100111<sub>2</sub>"],
+			# 	trueanses:[1],
+			# 	_id:"5ab13b053ad35c0284233fb2",
+			# 	type:"defQ",
+			# 	num:0,
+			# 	question:"Даны 4 числа, они записаны с использованием различных систем счисления. Укажите среди этих чисел то, в двоичной записи которого содержится ровно 6 единиц. Если таких чисел несколько, укажите наибольшее из них.",
+			# 	__v:0,
+			# 	score:1
+			# }]}
+			# Test.updateTestAll TestSchema, { time: 10 }
 			# test.addTest()
-			# Test.removeTest TestSchema, "5ab90fb0f16ac7197ce70fa5"
+
 			# setTimeout (->
 			# 	Test.addTest(TestSchema, {
 			# 		type: "inpQ",

@@ -1,91 +1,65 @@
 React = require 'react'
 io = require "socket.io-client"
-ee = require "./ee"
-socket = io ""
-Header = require "./components/Header"
+socket = io('')
+crypto = require('crypto')
 
-DefQ = require "./components/defQ"
-MultQ = require "./components/multQ"
-JoinQ = require "./components/joinQ"
-InpQ = require "./components/inpQ"
-
-
-
-# socket.on "connected", (data)->
-# 	console.log data
-# 	config["id"] = data.id
-# 	config["ip"] = data.ip
-# window.onbeforeunload = ->
-# 	socket.emit "closed", {id: config.id}
-
-
+Panel = require "./components/admin_panel"
 
 App = React.createClass
 	displayName: 'App'
 	getInitialState: ->
-		DATA: []
-		_data: []
+		numErr: -1
+		adminOnline: false
+		auth: no
 		preloader: true
-	# handleLogin: ->
-	# 	socket.emit "adminLogin", {login: document.getElementById("login").value, password: document.getElementById("password").value}
-	handleEndTest: ->
-		ee.emit "endTest", {type: on}
-		socket.emit "sendDataTest", data: @state._data
-		alert "Пожайлуста, подождите. Данные вот-вот доберутся до сервера..."
-		window.location.replace("http://#{window.location.host}/learner")
+	handleLogin: ->
+		socket.emit "adminLogin",  {login: document.getElementById("login1").value, password: document.getElementById("password1").value}
+		console.log "click"
 	componentWillMount: ->
-		# socket.on "connected", (data)=>
-		# 	@setState id: data.id, ip: data.ip
-		socket.on "getDataTest", (data)=>
-			arr = []
-			for i in data
-				arr.push i
-			@setState DATA: arr
-			@setState preloader: no
+		socket.on "StartAdmin", (data)=>
+			# @setState adminOnline: data.online
+			@setState preloader: false
+		socket.on "adminLoginSuccess", (data)=>
+			@setState auth: true
+			@setState adminOnline: true
+			console.log "Auth"
 
-		# ee.on "updateAnswer", (data)=>
-		# 	Data = @state._data
-		# 	Data.push data
-		# 	@setState _data: Data
-		# 	console.log data
+		socket.on "YOUADMIN", (data)=>
+			@setState auth: data.type
+			@setState adminOnline: data.type
+			@setState preloader: false
 
-		ee.on "sendAnswer", (data)=>
-			Data = @state._data
-			Data.push data
-			@setState _data: Data
+		socket.on "err", (data)=>
+			@setState numErr: data.num
 	render: ->
-		<div>
+		<div className="wrp_admin">
 			<div className="preloader" style={display: if !@state.preloader then "none"}>
-				<div className="cssload-thecube">
-					<div className="cssload-cube cssload-c1"></div>
-					<div className="cssload-cube cssload-c2"></div>
-					<div className="cssload-cube cssload-c4"></div>
-					<div className="cssload-cube cssload-c3"></div>
+					<div className="cssload-thecube">
+						<div className="cssload-cube cssload-c1"></div>
+						<div className="cssload-cube cssload-c2"></div>
+						<div className="cssload-cube cssload-c4"></div>
+						<div className="cssload-cube cssload-c3"></div>
+					</div>
 				</div>
-			</div>
-			<div className="container">
-				<Header />
+			<div className="container-fluid">
 				{
-					if @state.DATA.length isnt 0
-						@state.DATA.map (i)=>
-							switch i.type
-								when "defQ"
-									<div><DefQ data={i} /><hr /></div>
-								when "multQ"
-									<div><MultQ data={i} /><hr /></div>
-								when "joinQ"
-									<div><JoinQ data={i} /><hr/></div>
-								when "inpQ"
-									<div><InpQ data={i} /></div>
-								else
-									console.log "elses"
+					if !@state.adminOnline
+						<div>
+							<span style={color: "red"}>{if @state.numErr == 1 then "login or password are incorrect!"}</span>
+							<div className="wrp-login">
+								<h1>Admin Login</h1>
+								<div id="login"><input type="text" id="login1" placeholder="login"/></div>
+								<div id="pass"><input type="password" id="password1" placeholder="password"/></div>
+								<button onClick={@handleLogin}>Login</button>
+							</div>
+						</div>
 					else
-						<div>Получаю данные...</div>
+						console.log @state.auth
+						if @state.auth
+							<Panel />
+						else
+							<span>{@state.numErr}</span>
 				}
-				<button onClick={@handleEndTest} className="endTest">Завершить</button>
-			<footer className="main_footer">
-
-			</footer>
 			</div>
 		</div>
 

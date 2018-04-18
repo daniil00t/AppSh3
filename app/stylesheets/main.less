@@ -29,6 +29,7 @@
 	h1.brand_app{
 		width: 300px;
 		float: left;
+		color: #333;
 	}
 	.inf_user{
 		display: inline-block;
@@ -230,3 +231,221 @@
 	}
 }
 
+.TimerTest{
+	float: right;
+	margin-right: 100px;
+	h1{
+		width: 100px;
+		line-height: 130px;
+		float: left;
+		font-weight: 500 !important;
+	}
+	i.fa{
+		display: inline-block;
+		float: right;
+		line-height: 135px;
+		font-size: 25px;
+		cursor: pointer;
+		color: #DB381B;
+	}
+}
+.t_brand{
+	color: #2B9483;
+}
+.nostart{
+	margin-bottom: 25px;
+}
+
+/*********************************/
+/* AdminPanel and admin login */
+/*********************************/
+.wrp-login{
+	display: block;
+	position: fixed;
+	top: 0;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	background-color: #fff;
+	z-index: 999;
+	margin: auto;
+	width: 350px;
+	height: 300px;
+	background-color: #2B9483;
+	text-align: center;
+	border-radius: 5px;
+	h1{
+		display: inline-block;
+		color: #fff;
+		text-transform: uppercase;
+		padding: 20px 0;
+		font-size: 34px;
+		font-weight: 550;
+	}
+	input{
+		width: 250px;
+		margin: auto;
+		display: block;
+		border: #fff 1px solid;
+		box-shadow: 0 0 10px rgba(0,0,0,.3);
+		height: 35px;
+		font-size: 18px;
+		outline: none;
+		padding: 0 25px;
+		border-radius: 3px;
+		&:nth-child(1){
+			margin-bottom: 15px;
+		}
+		&:placeholder{
+			color: #999;
+		}
+	}
+	#login{
+		&::before{
+			font-family: FontAwesome;
+			content: "\f007";
+			position: absolute;
+			font-size: 22px;
+			margin: 7px 0 0 55px;
+			left: 0;
+			color: #2c536c;
+			line-height: 32px;
+		}
+	}
+	#pass{
+		&::before{
+			font-family: FontAwesome;
+			content: "\f023";
+			position: absolute;
+			font-size: 22px;
+			margin: 7px 0 0 55px;
+			left: 0;
+			color: #2c536c;
+			line-height: 32px;
+		}
+	}
+
+	button{
+		margin-top: 30px;
+		background-color: #2866F7;
+		color: #fff;
+		width: 120px;
+		border: none;
+		padding: 5px;
+		font-size: 18px;
+		border-bottom: 4px solid #0d52f5;
+		border-radius: 3px;
+		box-shadow: 0 0 10px rgba(0,0,0,.3);
+		transition: all ease-in-out .1s;
+		outline: none;
+		line-height: 28px;
+		&:hover{
+			background-color: darken(#2866F7, 2%);
+			border-bottom: 4px solid darken(#0d52f5, 2%);
+		}
+		&:active{
+			background-color: lighten(#2866F7, 1%);
+			border-bottom: 4px solid lighten(#0d52f5, 1%);
+		}
+	}
+}
+
+body, html {
+  height: 100%;
+}
+#app{
+	height: 100%;
+	.wrp_admin{
+		height: 100%;
+	}
+}
+.container-fluid {
+  height: 100%;
+}
+.container-fluid .row {
+  height: 100%;
+}
+.container-fluid .row .navbarmain {
+  background-color: #2b9483;
+  height: 100%;
+}
+.container-fluid .row .navbarmain .brand h1 {
+  color: white;
+  text-transform: uppercase;
+  font-size: 25px;
+}
+.container-fluid .row .navbarmain ul.navbar {
+  padding: 0;
+  margin-top: 50px;
+}
+.container-fluid .row .navbarmain ul.navbar li {
+  list-style: none;
+  padding: 0;
+  color: white;
+  padding: 5px 0;
+  border-bottom: 1px solid white;
+  cursor: pointer;
+}
+.container-fluid .row .navbarmain ul.navbar li:last-child {
+  border-bottom: none;
+}
+.container-fluid .row .navbarmain ul.navbar li.active::after {
+  content: "*";
+  float: right;
+}
+
+.container-fluid {
+  width: 100%;
+  height: 100%;
+}
+.container-fluid .row {
+  width: 100%;
+  height: 100%;
+}
+.container-fluid .row .mainArea {
+  height: 100%;
+}
+.container-fluid .row .mainArea .wrp {
+  height: 100%;
+  padding: 5px 20px;
+}
+.container-fluid .row .mainArea .wrp .users-settings h1 {
+  border-bottom: 1px solid #2b9483;
+}
+.container-fluid .row .mainArea .wrp .users-settings select {
+  border: none;
+  background-color: white;
+  width: 120px;
+  height: 35px;
+  border: 2px solid #2866f7;
+  border-radius: 5px;
+  padding: 0 7px;
+  outline: none;
+}
+.container-fluid .row .mainArea .wrp .users-settings ul.onlineusers {
+  padding: 0;
+  margin-top: 50px;
+}
+.container-fluid .row .mainArea .wrp .users-settings ul.onlineusers li {
+  list-style: none;
+  padding: 5px 10px;
+  margin-bottom: 20px;
+  box-shadow: 0 0 15px rgba(0, 0, 0, 0.4);
+  width: 250px;
+  max-width: 350px;
+  border-radius: 18px;
+  position: relative;
+  line-height: 28px;
+}
+.container-fluid .row .mainArea .wrp .users-settings ul.onlineusers li i {
+  font-size: 18px;
+  color: #2866f7;
+  position: absolute;
+  right: 0;
+  padding-right: 15px;
+  line-height: 28px;
+  cursor: pointer;
+}
+.container-fluid .row .mainArea .wrp .users-settings ul.onlineusers li .info {
+  margin-right: 20px;
+}
