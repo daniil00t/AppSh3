@@ -98,7 +98,11 @@ io.on 'connection', (socket)->
 				privileges: 3
 				app: "test"
 			socket.emit 'connected', id: id, ip: ip
-			console.log store.getClients()
+			# console.log store.getClients()
+		
+			socket.on "closed", (data)->
+				console.log "disconnect user, id: #{data.id}"
+				store.deleteClient data.id
 			# Test.updateTest TestSchema, "5ac8eaec68352c16604b478a", { data: [{
 			# 	anses: ["63<sub>10</sub> · 4<sub>10</sub>","F8<sub>16</sub>+1<sub>10</sub>","333<sub>8</sub>","11100111<sub>2</sub>"],
 			# 	trueanses:[1],
@@ -142,3 +146,4 @@ io.on 'connection', (socket)->
 	# 	socket.broadcast.emit "news", {id: data.id, data: data.massage}
 	# 	socket.emit "news", {id: data.id, data: data.massage}
 	# 	# socket.broadcast.send data.massage
+

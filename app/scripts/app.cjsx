@@ -2,7 +2,7 @@ React = require 'react'
 io = require "socket.io-client"
 socket = io('')
 crypto = require('crypto')
-
+ee = require "./ee"
 Panel = require "./components/admin_panel"
 
 App = React.createClass
@@ -27,20 +27,31 @@ App = React.createClass
 		socket.on "YOUADMIN", (data)=>
 			@setState auth: data.type
 			@setState adminOnline: data.type
-			@setState preloader: false
+			setTimeout (=>
+				@setState preloader: false
+			), 300
 
 		socket.on "err", (data)=>
 			@setState numErr: data.num
+		ee.on "logoutAdmin", (data)->
+			socket.emit "logoutAdmin", type: on
+			window.location.replace("http://#{window.location.host}/admin")
+		ee.on "loadUsers", (data)->
+			if data.status == "load"
+				socket.emit "loadUsers", status: "load"
+		socket.on "loadUsers", (data)->
+			if data.status == "sending"
+				ee.emit "loadUsers", data: data.data, status: "sending"
 	render: ->
 		<div className="wrp_admin">
 			<div className="preloader" style={display: if !@state.preloader then "none"}>
-					<div className="cssload-thecube">
-						<div className="cssload-cube cssload-c1"></div>
-						<div className="cssload-cube cssload-c2"></div>
-						<div className="cssload-cube cssload-c4"></div>
-						<div className="cssload-cube cssload-c3"></div>
-					</div>
+				<div className="cssload-thecube">
+					<div className="cssload-cube cssload-c1"></div>
+					<div className="cssload-cube cssload-c2"></div>
+					<div className="cssload-cube cssload-c4"></div>
+					<div className="cssload-cube cssload-c3"></div>
 				</div>
+			</div>
 			<div className="container-fluid">
 				{
 					if !@state.adminOnline

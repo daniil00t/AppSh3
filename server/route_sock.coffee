@@ -1,4 +1,5 @@
 crypto = require('crypto')
+ee = require "./ee"
 
 DB = require "./utils/db"
 UsersSchema = require "./utils/schema_user"
@@ -79,14 +80,19 @@ decryptLogPass = (hash)->
 
 admin = (socket, store)->
 	###Admin funcs and methods...###
+
+	# console.log decryptLogPass "f933e820c03a31975c7ccd788f5c5fda0607"
+	# console.log decryptLogPass "fdae23efce058f58a26f061f52a81a730607"
+
 	adminOnline = store.getAdminOnline()
 	ip = socket.handshake.address
 
-	console.log adminOnline
+	# console.log adminOnline
 	DB.setUpConnection()
+	# Users.addData(UsersSchema, {hash: "fdae23efce058f58a26f061f52a81a730607", privelegs: "admin"})
 	
 	# Users.removeData UsersSchema, "5aca245acc5bd644deb63732"
-	# Users.addData UsersSchema, { hash: "dc7de35bc05384f64e971f7c49f7b0330408", privelegs: "admin" }
+	# Users.update UsersSchema, "5ada149c2b97af1ba80a87aa", { hash: "f933e820c03a31975c7ccd788f5c5fda0607"}
 
 	
 	# socket.emit "StartAdmin", {ip: ip, hash: encryptHash DATA.login, DATA.password}
@@ -95,26 +101,31 @@ admin = (socket, store)->
 	###Если админ не в сети###
 	if !adminOnline
 		socket.emit "StartAdmin", {online: no}
+		# socket.emit "YOUADMIN", {type: true}
 		socket.on "adminLogin", (data)->
 			_data = data
 			# data -> login, password
 			_data.ip = socket.handshake.address
-			Users.getData(UsersSchema).then (__data)->
-				if __data[1].hash == encryptLogPass data.login, data.password
-					store.setAdmin
-						ip: _data.ip
-						type: "admin"
-						login: true
-						privileges: 10
-						hash: __data[1].hash
-
-					socket.emit "adminLoginSuccess", type: on
-					console.log "Login! #{_data.ip} -> admin"
-					console.log store.getAdmin()
+			Users.getData(UsersSchema).then (__data)=>
+				log = false
+				for i, j in __data
+					if i.privelegs == "admin" and i.hash == encryptLogPass(data.login, data.password)
+						store.setAdmin
+							ip: _data.ip
+							type: "admin"
+							login: true
+							privileges: 10
+							hash: i.hash
+						socket.emit "adminLoginSuccess", type: on
+						console.log "Login! #{_data.ip} -> admin"
+						console.log store.getAdmin()
+						log = true
+						break
+			
 
 					# ee.emit "redirectToAdmin", type: true
 					# app.redirect "/admin", "/admin"
-				else
+				if !log
 					console.log "wrong!Login or password incorrected!"
 					socket.emit "err", {num: 1}
 		###Если админ в сети###			
@@ -124,5 +135,13 @@ admin = (socket, store)->
 			socket.emit "YOUADMIN", {type: true}
 		else
 			socket.emit "err", {num: 2}
-
+	socket.on "logoutAdmin", (data)->
+		console.log "delete!"
+		store.deleteAdmin()
+	ee.on "changeUsers", (data)=>
+		socket.emit "loadUsers", status: "sending", data: store.getClients()
+	socket.on "loadUsers", (data)=>
+		if data.status == "load"
+			socket.emit "loadUsers", status: "sending", data: store.getClients()
+			console.log "send"
 module.exports = {learner_chat: learner_chat, admin: admin}

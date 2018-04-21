@@ -31,7 +31,7 @@ socket.on("connected", function(data) {
 });
 
 window.onbeforeunload = function() {
-  return socket.emit("closed", {
+  socket.emit("closed", {
     id: config.id
   });
 };

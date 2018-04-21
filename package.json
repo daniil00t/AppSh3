@@ -8,7 +8,8 @@
     "url": "git@github.com:sergeylaptev/react-fundamentals.git"
   },
   "scripts": {
-    "server": "nodemon ./server/main.coffee"
+    "server": "nodemon ./server/main.coffee",
+    "start": "coffee ./server/main.coffee"
   },
   "browserify": {
     "transform": [

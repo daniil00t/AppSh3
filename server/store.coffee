@@ -1,3 +1,4 @@
+ee = require "./ee"
 class Admin
 	setAdmin: (data)->
 		@_store.admin = data
@@ -16,6 +17,7 @@ class Clients extends Admin
 		@_store.configs = {}
 	addNewClient: (data)->
 		@_store.clients.push data
+		ee.emit "changeUsers", data: @_store.clients
 	addContent: (id, data)->
 		for i, j in @_store.clients
 			if i.id?
@@ -32,20 +34,33 @@ class Clients extends Admin
 				tmp = Object.assign {}, @_store.clients[j]
 				tmp[Object.keys(data)[0]] = data[Object.keys(data)[0]]
 				@_store.clients[j] = tmp
+		ee.emit "changeUsers", data: @_store.clients
+
 	getClients: ->
 		return @_store.clients
 	deleteClient: (id)->
 		try
-			j = 0
-			if @_store.clients != 1
-				for i in @_store.clients
-					if id is i.id
+			if @_store.clients.length > 1 
+				for i, j in @_store.clients
+					if i.id == id
 						@_store.clients.splice j, 1
-					j++
-			else:
+			else
 				@_store.clients = []
 		catch
-			console.log id
+			console.log "Что-то пошло не так"
+		# try
+		# 	j = 0
+		# 	if @_store.clients.length != 1
+		# 		for i in @_store.clients
+		# 			if id is i.id
+		# 				@_store.clients.splice j, 1
+		# 			j++
+		# 	else:
+		# 		@_store.clients = []
+		# catch
+		# 	console.log id
+		ee.emit "changeUsers", data: @_store.clients
+
 
 
 class Store extends Clients

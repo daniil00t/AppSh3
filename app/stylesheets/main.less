@@ -1,5 +1,7 @@
 @import "node_modules/material-ui/src/less/scaffolding.less";
 @import "node_modules/material-ui/src/less/components.less";
+@import "./libs/animate.less";
+
 
 @import "layout";
 @import "overrides";
@@ -260,7 +262,10 @@
 /* AdminPanel and admin login */
 /*********************************/
 .wrp-login{
+	// animation: fadeIn .5s ease-in-out;
+	// animation-delay: .5s;
 	display: block;
+	opacity: 1;
 	position: fixed;
 	top: 0;
 	left: 0;
@@ -361,9 +366,12 @@ body, html {
 }
 .container-fluid {
   height: 100%;
+  padding: 0;
 }
 .container-fluid .row {
   height: 100%;
+  padding: 0;
+  margin: 0;
 }
 .container-fluid .row .navbarmain {
   background-color: #2b9483;
@@ -404,6 +412,7 @@ body, html {
 }
 .container-fluid .row .mainArea {
   height: 100%;
+  padding: 0;
 }
 .container-fluid .row .mainArea .wrp {
   height: 100%;
@@ -431,7 +440,7 @@ body, html {
   padding: 5px 10px;
   margin-bottom: 20px;
   box-shadow: 0 0 15px rgba(0, 0, 0, 0.4);
-  width: 250px;
+  width: 300px;
   max-width: 350px;
   border-radius: 18px;
   position: relative;
@@ -448,4 +457,74 @@ body, html {
 }
 .container-fluid .row .mainArea .wrp .users-settings ul.onlineusers li .info {
   margin-right: 20px;
+}
+/* Panel */
+@keyframes Hide{
+	0%{
+		display: block;
+		opacity: 1;
+	}
+	100%{
+		opacity: 0;
+		display: none;
+	}
+}
+@keyframes Show{
+	0%{
+		opacity: 0;
+		display: none;
+	}
+	100%{
+		display: block;
+		opacity: 1;
+	}
+}
+.Header_panel{
+	height: 40px;
+	// background-color: red;
+	.fr{
+		height: 100%;
+		width: 60%;
+		float: right;
+		padding: 5px 30px 0 0;
+		ul{
+			float: right;
+			li{
+				display: inline-block;
+				line-height: 40px;
+				background-color: #2866f7;
+				color: #fff;
+				padding: 0 15px;
+				cursor: pointer;
+				border-radius: 3px;
+				font-size: 16px;
+				margin-right: 10px;
+				i{
+					margin-right: 4px;
+				}
+			}
+			.logout{
+				background-color: #2866f7;
+				transition: all ease-in-out .1s;
+				&:hover{
+					background-color: #2154cc;
+				}
+			}
+			.settings{
+				background-color: #DB381B;
+				transition: all ease-in-out .1s;
+				&:hover{
+					background-color: #c23218;
+				}
+			}
+		}
+	}
+}
+.users-settings{
+	animation: fadeIn .3s ease-in-out;
+}
+.appUsers{
+	color: #2B9483;
+	margin-right: 60px;
+	float: right;
 }
