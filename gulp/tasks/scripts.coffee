@@ -13,19 +13,45 @@ dependencies =
 
 gulp.task 'scripts', ->
   #==========  Client bundler  ==========#
-
-  clientBundler = browserify
+  ###Learner###
+  clientBundlerLearner = browserify
     cache: {}, packageCache: {}
-    entries: './app/scripts/main.coffee'
+    entries: './app/_learner/scripts/main.coffee'
     extensions: ['.cjsx', '.coffee']
 
   _.forEach dependencies, (path, dep) ->
-    clientBundler.external dep
+    clientBundlerLearner.external dep
 
   rebundle = ->
     bundleLogger.start 'client.js'
 
-    clientBundler.bundle()
+    clientBundlerLearner.bundle()
+      .on 'error', handleErrors
+      .pipe source('client.js')
+      .pipe gulp.dest('./Public/scripts/learner/test')
+      .on 'end', ->
+        bundleLogger.end 'client.js'
+
+  if global.isWatching
+    clientBundlerLearner = watchify clientBundlerLearner
+    clientBundlerLearner.on 'update', rebundle
+  rebundle()
+
+  ###Admin###
+
+
+  clientBundlerAdmin = browserify
+    cache: {}, packageCache: {}
+    entries: './app/_admin/scripts/main.coffee'
+    extensions: ['.cjsx', '.coffee']
+
+  _.forEach dependencies, (path, dep) ->
+    clientBundlerAdmin.external dep
+
+  rebundle1 = ->
+    bundleLogger.start 'client.js'
+
+    clientBundlerAdmin.bundle()
       .on 'error', handleErrors
       .pipe source('client.js')
       .pipe gulp.dest('./Public/scripts/admin')
@@ -33,9 +59,9 @@ gulp.task 'scripts', ->
         bundleLogger.end 'client.js'
 
   if global.isWatching
-    clientBundler = watchify clientBundler
-    clientBundler.on 'update', rebundle
-  rebundle()
+    clientBundlerAdmin = watchify clientBundlerAdmin
+    clientBundlerAdmin.on 'update', rebundle1
+  rebundle1()
 
   #==========  Vendor bundler  ==========#
 

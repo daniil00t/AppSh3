@@ -55,7 +55,8 @@ App = React.createClass({
       preloader: true,
       variant: 1,
       data_user: {},
-      start: false
+      start: false,
+      ban: false
     };
   },
   endTest: function(massage) {
@@ -112,6 +113,11 @@ App = React.createClass({
         obj = {};
         obj.firstname_user = data.firstname;
         obj.lastname_user = data.lastname;
+        socket.emit("setNameForTest", {
+          id: config.id,
+          firstname_user: obj.firstname_user,
+          lastname_user: obj.lastname_user
+        });
         return _this.setState({
           data_user: obj
         });
@@ -122,7 +128,7 @@ App = React.createClass({
         return _this.endTest("К сожалению, время закончилось. Сохраняю ваши данные...");
       };
     })(this));
-    return ee.on("startTestapp", (function(_this) {
+    ee.on("startTestapp", (function(_this) {
       return function(data) {
         if ((_this.state.data_user.firstname_user != null) && (_this.state.data_user.lastname_user != null)) {
           ee.emit("startTesth", {
@@ -138,62 +144,83 @@ App = React.createClass({
         }
       };
     })(this));
-  },
-  render: function() {
-    return React.createElement("div", null, React.createElement("div", {
-      "className": "preloader",
-      "style": {
-        display: !this.state.preloader ? "none" : void 0
-      }
-    }, React.createElement("div", {
-      "className": "cssload-thecube"
-    }, React.createElement("div", {
-      "className": "cssload-cube cssload-c1"
-    }), React.createElement("div", {
-      "className": "cssload-cube cssload-c2"
-    }), React.createElement("div", {
-      "className": "cssload-cube cssload-c4"
-    }), React.createElement("div", {
-      "className": "cssload-cube cssload-c3"
-    }))), React.createElement("div", {
-      "className": "container"
-    }, React.createElement(Header, {
-      "data": this.state.DATA
-    }), (this.state.DATA.length !== 0 && this.state.start ? this.state.DATA.map((function(_this) {
-      return function(i, j) {
-        if (_this.state.variant === j + 1 && i.data.length !== 0) {
-          return i.data.map(function(q, w) {
-            switch (q.type) {
-              case "defQ":
-                return React.createElement("div", null, React.createElement(DefQ, {
-                  "data": q
-                }), React.createElement("hr", null));
-              case "multQ":
-                return React.createElement("div", null, React.createElement(MultQ, {
-                  "data": q
-                }), React.createElement("hr", null));
-              case "joinQ":
-                return React.createElement("div", null, React.createElement(JoinQ, {
-                  "data": q
-                }), React.createElement("hr", null));
-              case "inpQ":
-                return React.createElement("div", null, React.createElement(InpQ, {
-                  "data": q
-                }));
-              default:
-                return console.log("elses");
-            }
+    socket.on("deleteUser_toClient", (function(_this) {
+      return function(data) {
+        if (config.id === data.id) {
+          alert(data.massage);
+          return _this.setState({
+            ban: true
           });
         }
       };
-    })(this)) : this.state.DATA.length === 0 ? React.createElement("div", null, "К сожалению, данных нет.") : !this.state.start ? React.createElement("div", {
-      "className": "text-center nostart"
-    }, "Нажмите на кнопку старта таймера и давайте начинать!") : void 0), React.createElement("button", {
-      "onClick": this.handleEndTest,
-      "className": "endTest"
-    }, "Завершить"), React.createElement("footer", {
-      "className": "main_footer"
-    })));
+    })(this));
+    return socket.on("UserInBan", (function(_this) {
+      return function(data) {
+        return _this.setState({
+          ban: data.type ? false : void 0
+        });
+      };
+    })(this));
+  },
+  render: function() {
+    if (!this.state.ban) {
+      return React.createElement("div", null, React.createElement("div", {
+        "className": "preloader",
+        "style": {
+          display: !this.state.preloader ? "none" : void 0
+        }
+      }, React.createElement("div", {
+        "className": "cssload-thecube"
+      }, React.createElement("div", {
+        "className": "cssload-cube cssload-c1"
+      }), React.createElement("div", {
+        "className": "cssload-cube cssload-c2"
+      }), React.createElement("div", {
+        "className": "cssload-cube cssload-c4"
+      }), React.createElement("div", {
+        "className": "cssload-cube cssload-c3"
+      }))), React.createElement("div", {
+        "className": "container"
+      }, React.createElement(Header, {
+        "data": this.state.DATA
+      }), (this.state.DATA.length !== 0 && this.state.start ? this.state.DATA.map((function(_this) {
+        return function(i, j) {
+          if (_this.state.variant === j + 1 && i.data.length !== 0) {
+            return i.data.map(function(q, w) {
+              switch (q.type) {
+                case "defQ":
+                  return React.createElement("div", null, React.createElement(DefQ, {
+                    "data": q
+                  }), React.createElement("hr", null));
+                case "multQ":
+                  return React.createElement("div", null, React.createElement(MultQ, {
+                    "data": q
+                  }), React.createElement("hr", null));
+                case "joinQ":
+                  return React.createElement("div", null, React.createElement(JoinQ, {
+                    "data": q
+                  }), React.createElement("hr", null));
+                case "inpQ":
+                  return React.createElement("div", null, React.createElement(InpQ, {
+                    "data": q
+                  }));
+                default:
+                  return console.log("elses");
+              }
+            });
+          }
+        };
+      })(this)) : this.state.DATA.length === 0 ? React.createElement("div", null, "К сожалению, данных нет.") : !this.state.start ? React.createElement("div", {
+        "className": "text-center nostart"
+      }, "Нажмите на кнопку старта таймера и давайте начинать!") : void 0), React.createElement("button", {
+        "onClick": this.handleEndTest,
+        "className": "endTest"
+      }, "Завершить"), React.createElement("footer", {
+        "className": "main_footer"
+      })));
+    } else {
+      return React.createElement("span", null, "Поздравляю, вы в бане!");
+    }
   }
 });
 

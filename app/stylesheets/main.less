@@ -426,7 +426,8 @@ body, html {
   background-color: white;
   width: 120px;
   height: 35px;
-  border: 2px solid #2866f7;
+  border: 2px solid #fff;
+  box-shadow: 0 0 10px rgba(0,0,0,.4);
   border-radius: 5px;
   padding: 0 7px;
   outline: none;
@@ -434,6 +435,7 @@ body, html {
 .container-fluid .row .mainArea .wrp .users-settings ul.onlineusers {
   padding: 0;
   margin-top: 50px;
+  animation: fadeInUp ease-in-out .2s;
 }
 .container-fluid .row .mainArea .wrp .users-settings ul.onlineusers li {
   list-style: none;
@@ -527,4 +529,35 @@ body, html {
 	color: #2B9483;
 	margin-right: 60px;
 	float: right;
+}
+.animFadeInUp{
+	animation: fadeInUp ease-in-out .15s;
+}
+.infoUser{
+	opacity: 0;
+	display: none !important;
+	position: absolute;
+	bottom: 45px;
+	left: 155px;
+	display: block;
+	background-color: rgba(0,0,0,.6);
+	color: #fff;
+	width: 250px;
+	height: 60px;
+	padding: 5px 15px;
+	border-radius: 3px;
+	.labels{
+		padding: 0 5px 0 0;
+		float: left;
+	}
+}
+._active{
+	animation: fadeInUp .2s ease-in-out;
+	display: block !important;
+	opacity: 1;
+}
+._noactive{
+	animation: fadeOutDown .2s ease-in-out;
+	display: none !important;
+	opacity: 0;
 }

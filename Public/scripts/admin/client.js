@@ -95,7 +95,7 @@ App = React.createClass({
         });
       }
     });
-    return socket.on("loadUsers", function(data) {
+    socket.on("loadUsers", function(data) {
       if (data.status === "sending") {
         return ee.emit("loadUsers", {
           data: data.data,
@@ -103,6 +103,11 @@ App = React.createClass({
         });
       }
     });
+    return ee.on("deleteUserAndMassage_ee", (function(_this) {
+      return function(data) {
+        return socket.emit("deleteUserAndMassage", data);
+      };
+    })(this));
   },
   render: function() {
     return React.createElement("div", {
@@ -328,13 +333,53 @@ Users_panel = React.createClass({
       filtered: e.target.value
     });
   },
-  renderedLiUser: function(i) {
-    return React.createElement("li", null, (i.name != null ? i.name : i.id), React.createElement("span", {
+  handleHoverOver: function(i) {
+    document.getElementsByClassName("infoUser")[i].classList.remove("_noactive");
+    return document.getElementsByClassName("infoUser")[i].classList.add("_active");
+  },
+  handleHoverOut: function(i) {
+    document.getElementsByClassName("infoUser")[i].classList.remove("_active");
+    return document.getElementsByClassName("infoUser")[i].classList.add("_noactive");
+  },
+  handleClickDeleteUser: function(k) {
+    var arr, i, j, l, len, mas;
+    mas = prompt("Massage: ");
+    if (mas != null) {
+      ee.emit("deleteUserAndMassage_ee", {
+        ip: k.ip,
+        id: k.id,
+        massage: mas.length === 0 ? "sorry, but you are deleting" : mas
+      });
+      arr = this.state.users;
+      for (j = l = 0, len = arr.length; l < len; j = ++l) {
+        i = arr[j];
+        if (i.id === k.id) {
+          arr.splice(j, 1);
+        }
+      }
+      return this.setState({
+        users: arr
+      });
+    }
+  },
+  renderedLiUser: function(i, j) {
+    return React.createElement("li", {
+      "className": "animFadeInUp"
+    }, React.createElement("div", {
+      "className": "infoUser"
+    }, React.createElement("span", {
+      "className": "labels"
+    }, React.createElement("span", null, "id: "), React.createElement("br", null), React.createElement("span", null, "ip: ")), React.createElement("span", {
+      "className": "values"
+    }, React.createElement("span", null, i.id), React.createElement("br", null), React.createElement("span", null, i.ip))), ((i.fname != null) && (i.lname != null) ? (i.fname[0].toUpperCase()) + ". " + i.lname : i.name != null ? i.name : i.id), React.createElement("span", {
       "className": "appUsers"
     }, i.app), React.createElement("i", {
-      "className": "fa fa-info-circle info"
+      "className": "fa fa-info-circle info",
+      "onMouseOver": this.handleHoverOver.bind(this, j),
+      "onMouseOut": this.handleHoverOut.bind(this, j)
     }), React.createElement("i", {
-      "className": "fa fa-times-circle close"
+      "className": "fa fa-times-circle close",
+      "onClick": this.handleClickDeleteUser.bind(this, i)
     }));
   },
   componentWillMount: function() {
@@ -343,12 +388,12 @@ Users_panel = React.createClass({
     });
     return ee.on("loadUsers", (function(_this) {
       return function(data) {
-        var arr, i, k, len, ref;
+        var arr, i, l, len, ref;
         arr = [];
         if (data.status === "sending") {
           ref = data.data;
-          for (k = 0, len = ref.length; k < len; k++) {
-            i = ref[k];
+          for (l = 0, len = ref.length; l < len; l++) {
+            i = ref[l];
             arr.push(i);
           }
           return _this.setState({
@@ -382,14 +427,14 @@ Users_panel = React.createClass({
           case "all":
             return this.state.users.map((function(_this) {
               return function(i, j) {
-                return _this.renderedLiUser(i);
+                return _this.renderedLiUser(i, j);
               };
             })(this));
           case "test":
             return this.state.users.map((function(_this) {
               return function(i, j) {
                 if (i.app === "test") {
-                  return _this.renderedLiUser(i);
+                  return _this.renderedLiUser(i, j);
                 }
               };
             })(this));
@@ -397,7 +442,7 @@ Users_panel = React.createClass({
             return this.state.users.map((function(_this) {
               return function(i, j) {
                 if (i.app === "chat") {
-                  return _this.renderedLiUser(i);
+                  return _this.renderedLiUser(i, j);
                 }
               };
             })(this));

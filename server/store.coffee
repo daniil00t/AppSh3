@@ -15,6 +15,7 @@ class Clients extends Admin
 		@_store.clients = []
 		@_store.admin = {}
 		@_store.configs = {}
+		@_store.ban = []
 	addNewClient: (data)->
 		@_store.clients.push data
 		ee.emit "changeUsers", data: @_store.clients
@@ -35,6 +36,7 @@ class Clients extends Admin
 				tmp[Object.keys(data)[0]] = data[Object.keys(data)[0]]
 				@_store.clients[j] = tmp
 		ee.emit "changeUsers", data: @_store.clients
+		console.log @_store.clients
 
 	getClients: ->
 		return @_store.clients
@@ -48,18 +50,22 @@ class Clients extends Admin
 				@_store.clients = []
 		catch
 			console.log "Что-то пошло не так"
-		# try
-		# 	j = 0
-		# 	if @_store.clients.length != 1
-		# 		for i in @_store.clients
-		# 			if id is i.id
-		# 				@_store.clients.splice j, 1
-		# 			j++
-		# 	else:
-		# 		@_store.clients = []
-		# catch
-		# 	console.log id
-		ee.emit "changeUsers", data: @_store.clients
+	addUserToBan: (ip)->
+		@_store.ban.push ip
+	getUsersBan: ->
+		@_store.ban
+	# try
+	# 	j = 0
+	# 	if @_store.clients.length != 1
+	# 		for i in @_store.clients
+	# 			if id is i.id
+	# 				@_store.clients.splice j, 1
+	# 			j++
+	# 	else:
+	# 		@_store.clients = []
+	# catch
+	# 	console.log id
+	# ee.emit "changeUsers", data: @_store.clients
 
 
 

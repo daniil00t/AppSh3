@@ -81,28 +81,42 @@ io.on 'connection', (socket)->
 		when "/admin"
 			route_sock.admin(socket, store)
 		when "/learner/test"
-			console.log "test"
-			DB.setUpConnection()
-			Test.getData(TestSchema).then (data)->
-				_data = filterClientTest data
-				socket.emit "getDataTest", _data
-			socket.on "sendDataTest", (data)=>
-				console.log data
-			id = socket.id
-			console.log "connected user, id: #{id}"
 			ip = socket.handshake.address
-			store.addNewClient 
-				id: id
-				ip: socket.handshake.address
-				type: "learner"
-				privileges: 3
-				app: "test"
-			socket.emit 'connected', id: id, ip: ip
-			# console.log store.getClients()
-		
-			socket.on "closed", (data)->
-				console.log "disconnect user, id: #{data.id}"
-				store.deleteClient data.id
+			ban = false
+			for i in store.getUsersBan()
+				if i is ip
+					ban = true
+					socket.emit "UserInBan", type: true
+
+			if ban is false
+				DB.setUpConnection()
+				Test.getData(TestSchema).then (data)->
+					_data = filterClientTest data
+					socket.emit "getDataTest", _data
+				socket.on "sendDataTest", (data)=>
+					console.log data
+				id = socket.id
+				console.log "connected user, id: #{id}"
+				store.addNewClient 
+					id: id
+					ip: socket.handshake.address
+					type: "learner"
+					privileges: 3
+					app: "test"
+				socket.emit 'connected', id: id, ip: ip
+				# console.log store.getClients()
+			
+				socket.on "closed", (data)->
+					console.log "disconnect user, id: #{data.id}"
+					store.deleteClient data.id
+
+
+
+				socket.on "setNameForTest", (data)->
+					console.log "up"
+					store.updateClient(data.id, {fname: data.firstname_user})
+					store.updateClient(data.id, {lname: data.lastname_user})
+
 			# Test.updateTest TestSchema, "5ac8eaec68352c16604b478a", { data: [{
 			# 	anses: ["63<sub>10</sub> · 4<sub>10</sub>","F8<sub>16</sub>+1<sub>10</sub>","333<sub>8</sub>","11100111<sub>2</sub>"],
 			# 	trueanses:[1],

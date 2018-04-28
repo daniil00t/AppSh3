@@ -144,4 +144,10 @@ admin = (socket, store)->
 		if data.status == "load"
 			socket.emit "loadUsers", status: "sending", data: store.getClients()
 			console.log "send"
+	socket.on "deleteUserAndMassage", (data)->
+		# ee.emit "deleteUser_toClient_ee", data
+		console.log data
+		store.addUserToBan data.ip
+		console.log store.getUsersBan()
+		socket.broadcast.emit "deleteUser_toClient", data
 module.exports = {learner_chat: learner_chat, admin: admin}
