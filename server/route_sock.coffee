@@ -6,9 +6,11 @@ UsersSchema = require "./utils/schema_user"
 Users = require "./modules/test.learner.module"
 
 learner_chat = (socket, store)->
+
+	# Registr new client
 	id = socket.id
-	console.log "connected user, id: #{id}"
 	ip = socket.handshake.address
+	console.log "connected user, id: #{id}"
 	store.addNewClient 
 		id: id
 		ip: socket.handshake.address
@@ -16,18 +18,22 @@ learner_chat = (socket, store)->
 		privileges: 3
 		app: "chat"
 	socket.emit 'connected', id: id, ip: ip
+
+
 	### Main methods learner ###
 	socket.on "setNameLearner", (data)->
+		# Проверка имени на совподаемость
 		nameOnline = no
 		for i in store.getClients()
 			if i.name == data.name
 				nameOnline = on
 				break
 		if !nameOnline
-			store.updateClient data.id, {name: data.name}
+			# store.updateClient data.id, {name: data.name}
 		else
 			console.log "name is holded"
-		console.log store.getClients()
+			
+		# console.log store.getClients()
 
 	socket.on "newMassageToChat", (data)->
 		console.log "id: #{data.id} | text: #{data.text}"

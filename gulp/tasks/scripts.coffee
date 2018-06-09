@@ -37,6 +37,30 @@ gulp.task 'scripts', ->
     clientBundlerLearner.on 'update', rebundle
   rebundle()
 
+  # Chat
+  clientBundlerLearner = browserify
+    cache: {}, packageCache: {}
+    entries: './app/_learner_chat/scripts/main.coffee'
+    extensions: ['.cjsx', '.coffee']
+
+  _.forEach dependencies, (path, dep) ->
+    clientBundlerLearner.external dep
+
+  rebundle = ->
+    bundleLogger.start 'client.js'
+
+    clientBundlerLearner.bundle()
+      .on 'error', handleErrors
+      .pipe source('client.js')
+      .pipe gulp.dest('./Public/scripts/learner/chat')
+      .on 'end', ->
+        bundleLogger.end 'client.js'
+
+  if global.isWatching
+    clientBundlerLearner = watchify clientBundlerLearner
+    clientBundlerLearner.on 'update', rebundle
+  rebundle()
+
   ###Admin###
 
 
