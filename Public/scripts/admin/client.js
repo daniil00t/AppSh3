@@ -343,6 +343,7 @@ Users_panel = React.createClass({
   },
   handleClickDeleteUser: function(k) {
     var arr, i, j, l, len, mas;
+    console.log(k);
     mas = prompt("Massage: ");
     if (mas != null) {
       ee.emit("deleteUserAndMassage_ee", {

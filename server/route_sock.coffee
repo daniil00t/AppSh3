@@ -83,7 +83,13 @@ admin = (socket, store)->
 
 	# console.log decryptLogPass "f933e820c03a31975c7ccd788f5c5fda0607"
 	# console.log decryptLogPass "fdae23efce058f58a26f061f52a81a730607"
+	# 	{ "_id" : ObjectId("59bac5cd33c3a832db76b1dc"), "name" : "Tom" }
+	# { "_id" : ObjectId("5aca31dac8f61b22e4a8cb4e"), "hash" : "dc7de35bc05384f64e971f
+	# 7c49f7b0330408", "privelegs" : "admin", "__v" : 0 }
+	# { "_id" : ObjectId("5ada149c2b97af1ba80a87aa"), "hash" : "f933e820c03a31975c7ccd
+	# 788f5c5fda0607", "privelegs" : "admin", "__v" : 0 }
 
+	# console.dir decryptLogPass "f933e820c03a31975c7ccd788f5c5fda0607"
 	adminOnline = store.getAdminOnline()
 	ip = socket.handshake.address
 

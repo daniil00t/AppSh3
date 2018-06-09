@@ -48,8 +48,10 @@ class Clients extends Admin
 						@_store.clients.splice j, 1
 			else
 				@_store.clients = []
+			ee.emit "changeUsers", data: @_store.clients
 		catch
 			console.log "Что-то пошло не так"
+
 	addUserToBan: (ip)->
 		@_store.ban.push ip
 	getUsersBan: ->

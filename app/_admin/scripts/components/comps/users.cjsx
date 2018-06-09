@@ -23,6 +23,7 @@ Users_panel = React.createClass
 		document.getElementsByClassName("infoUser")[i].classList.remove "_active"
 		document.getElementsByClassName("infoUser")[i].classList.add "_noactive"
 	handleClickDeleteUser: (k)->
+		console.log k
 		mas = prompt("Massage: ")
 		if mas?
 			ee.emit "deleteUserAndMassage_ee", {ip: k.ip, id: k.id, massage: if mas.length is 0 then "sorry, but you are deleting" else mas}

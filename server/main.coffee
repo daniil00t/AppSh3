@@ -21,14 +21,14 @@ Store = require "./store"
 app.use('/cssFiles', express["static"](path.resolve __dirname, '../Public/stylesheets'))
 app.use('/libsFiles', express["static"](path.resolve __dirname, '../Public/libs'))
 app.use('/jsFiles', express["static"](path.resolve __dirname, '../Public/scripts'))
-app.use('/filesForData', express["static"](path.resolve __dirname, '../docs'))
+# app.use('/filesForData', express["static"](path.resolve __dirname, '../docs'))
 # app.use('/filesETC', express["static"](path.resolve __dirname, '../Public/etc'))
 
-fs.writeFile "db.log", "", (err)->
-	if err then throw err
-appendToFile = (filename, data)->
-	fs.appendFile filename, data, (err)->
-  	if err then throw err
+# fs.writeFile "db.log", "", (err)->
+# 	if err then throw err
+# appendToFile = (filename, data)->
+# 	fs.appendFile filename, data, (err)->
+#   	if err then throw err
 
 server.listen(3000)
 console.log "works in 3000 port"
@@ -43,7 +43,7 @@ app.get '/', (req, res)->
 ######
 
 app.get "/admin", (req, res)->
-	ip = req.headers['x-forwarded-for'] or req.connection.remoteAddress or req.socket.remoteAddress or (if req.connection.socket then req.connection.socket.remoteAddress else null)
+	# ip = req.headers['x-forwarded-for'] or req.connection.remoteAddress or req.socket.remoteAddress or (if req.connection.socket then req.connection.socket.remoteAddress else null)
 	res.sendfile path.resolve __dirname, "../Public/admin/index.html"
 
 ######
