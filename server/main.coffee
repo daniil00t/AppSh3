@@ -21,6 +21,9 @@ Store = require "./store"
 app.use('/cssFiles', express["static"](path.resolve __dirname, '../Public/stylesheets'))
 app.use('/libsFiles', express["static"](path.resolve __dirname, '../Public/libs'))
 app.use('/jsFiles', express["static"](path.resolve __dirname, '../Public/scripts'))
+
+app.use('/imgFiles', express["static"](path.resolve __dirname, '../Public/img'))
+
 # app.use('/filesForData', express["static"](path.resolve __dirname, '../docs'))
 # app.use('/filesETC', express["static"](path.resolve __dirname, '../Public/etc'))
 
