@@ -25,40 +25,48 @@ parseValue = (val)->
 Header = React.createClass
 	displayName: "Header"
 	getInitialState: ->
+		ava: false
 		nameUsr: ""
 		defaultPathImgUsr: "/imgFiles/no-avatar.png"
 		pathImgUsr: ""
 	haveAva: (e)->
 		if e.target.checked
+			@setState ava: true
 			$(".out").removeClass("noactive").addClass("active")
 		else
+			@setState ava: false
 			$(".out").removeClass("active").addClass("noactive")
 	changeNameUsr: ->
 		name = document.getElementById("name").value
-		ee.emit "changeNameUsr", name: name
-		@setState nameUsr: name
-		console.log name
+		if name.length > 3
+			ee.emit "changeNameUsr@ee", name: name
+			@setState nameUsr: name
+		else
+			alert "Введите имя корректно!"
 	changeNameUsrForInput: (e)->
 		val = e.key
 		if val == "Enter"
 			name = e.target.value
-			ee.emit "changeNameUsr", name: name
-			@setState nameUsr: name
-			console.log name
+			if name.length > 3
+				ee.emit "changeNameUsr@ee", name: name
+				@setState nameUsr: name
+			else
+				alert "Введите имя корректно!"
+
 	changePathImgUsr: (e)->
 		val = e.key
 		if val == "Enter"
 			path = e.target.value
 			path = if parseValue(path)? then parseValue(path) else @state.defaultPathImgUsr
-			ee.emit "changePathImgUsr", path: path
+			ee.emit "changePathImgUsr@ee", path: path
 			@setState pathImgUsr: path
 			# console.log 
 	componentWillMount: ->
 		ee.on "addMassage__toHeader", (data)=>
 			ee.emit "addMassage", {massage: data.massage, nameUsr: @state.nameUsr, pathAva: if @state.pathImgUsr != "" then @state.pathImgUsr else @state.defaultPathImgUsr}
 	render: ->
-		<div className="container-fluid">
-			<header className="chat_header">
+		<header className="chat_header">
+			<div className="container-fluid">
 				<div className="row">
 					<div className="col-md-3 col-lg-3">
 						<div className="logo">
@@ -71,7 +79,7 @@ Header = React.createClass
 							<button className="btn btn-default save_name" onClick={@changeNameUsr}>Save</button>
 						</div>
 						<div className="changeAva">
-							<label for="ava">
+							<label for="ava" style={display: if @state.ava then "none" else "block"}>
 								<input name="ava" id="ava" type="checkbox" onChange={(e) => @haveAva e} disabled={if @state.nameUsr != "" then "" else "disabled"}/>
 							У меня есть ава</label><br/>
 							<div className="out noactive">
@@ -87,8 +95,8 @@ Header = React.createClass
 						<a className="btn btn-default logout_button" href="/learner"><i className="fas fa-sign-out-alt"></i>Выйти</a>
 					</div>
 				</div>
-			</header>
-		</div>
+			</div>
+		</header>
 
 
 module.exports = Header

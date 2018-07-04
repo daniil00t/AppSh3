@@ -32,7 +32,7 @@ class Clients extends Admin
 		console.log "update..."
 		for i, j in @_store.clients
 			if i.id == id
-				tmp = Object.assign {}, @_store.clients[j]
+				tmp = Object.assign {}, i
 				tmp[Object.keys(data)[0]] = data[Object.keys(data)[0]]
 				@_store.clients[j] = tmp
 		ee.emit "changeUsers", data: @_store.clients
@@ -68,9 +68,4 @@ class Clients extends Admin
 	# catch
 	# 	console.log id
 	# ee.emit "changeUsers", data: @_store.clients
-
-
-
-class Store extends Clients
-	
-module.exports = Store
+module.exports = Clients

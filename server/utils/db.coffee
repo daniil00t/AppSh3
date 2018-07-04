@@ -1,13 +1,14 @@
 mongoose = require "mongoose"
 fs = require "fs"
 path = require "path"
+ee = require "../ee"
 
 setUpConnection = ->
 	console.log "Connecting..."
 	data = fs.readFileSync path.resolve(__dirname, "../etc/config.json"), "utf-8"
 	config = JSON.parse data
 	mongoose.connect "mongodb://#{config.db.host}:#{config.db.port}/#{config.db.name}", (err)->
-		if err then console.log "connection failed=(" else console.log "Ok"
+		if err then ee.emit "errorSrv@ee", err: err, type: "mongodb" else console.log "Ok"
 	
 	
 

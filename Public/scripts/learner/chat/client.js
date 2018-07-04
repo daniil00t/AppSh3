@@ -30,13 +30,6 @@ socket.on("connected", function(data) {
   return configs = data;
 });
 
-window.onbeforeunload = function() {
-  console.log(configs);
-  return socket.emit("closed", {
-    id: configs.id
-  });
-};
-
 App = React.createClass({
   displayName: "App",
   getInitialState: function() {
@@ -46,10 +39,44 @@ App = React.createClass({
     };
   },
   componentWillMount: function() {
+
+    /* _ Preload _ */
+    var isTouchDevice;
+    isTouchDevice = !!navigator.userAgent.match(/(iPhone|iPod|iPad|Android|playbook|silk|BlackBerry|BB10|Windows Phone|Tizen|Bada|webOS|IEMobile|Opera Mini)/);
+    if (isTouchDevice) {
+      if (!confirm("Мы хотим вас предупредить, что наше приложение работает нестабильно на мобильных устройствах. Продолжить?")) {
+        window.location.replace("http://192.168.100.9:3000/learner");
+      }
+    }
+
+    /* _ Socket events _ */
     socket.on("connected", (function(_this) {
       return function(data) {
         return _this.setState({
           configsUsr: data
+        });
+      };
+    })(this));
+    socket.on("errorUsr@soc", (function(_this) {
+      return function(data) {
+        return alert("Error: " + data.nameError + ". NumError: " + data.noError);
+      };
+    })(this));
+
+    /* _ EventEmitter events _ */
+    ee.on("changeNameUsr@ee", (function(_this) {
+      return function(data) {
+        return socket.emit("changeNameUsr@soc", {
+          id: _this.state.configsUsr.id,
+          name: data.name
+        });
+      };
+    })(this));
+    ee.on("changePathImgUsr@ee", (function(_this) {
+      return function(data) {
+        return socket.emit("changePathImgUsr@soc", {
+          id: _this.state.configsUsr.id,
+          path: data.path
         });
       };
     })(this));
@@ -114,6 +141,7 @@ Header = React.createClass({
   displayName: "Header",
   getInitialState: function() {
     return {
+      ava: false,
       nameUsr: "",
       defaultPathImgUsr: "/imgFiles/no-avatar.png",
       pathImgUsr: ""
@@ -121,34 +149,46 @@ Header = React.createClass({
   },
   haveAva: function(e) {
     if (e.target.checked) {
+      this.setState({
+        ava: true
+      });
       return $(".out").removeClass("noactive").addClass("active");
     } else {
+      this.setState({
+        ava: false
+      });
       return $(".out").removeClass("active").addClass("noactive");
     }
   },
   changeNameUsr: function() {
     var name;
     name = document.getElementById("name").value;
-    ee.emit("changeNameUsr", {
-      name: name
-    });
-    this.setState({
-      nameUsr: name
-    });
-    return console.log(name);
+    if (name.length > 3) {
+      ee.emit("changeNameUsr@ee", {
+        name: name
+      });
+      return this.setState({
+        nameUsr: name
+      });
+    } else {
+      return alert("Введите имя корректно!");
+    }
   },
   changeNameUsrForInput: function(e) {
     var name, val;
     val = e.key;
     if (val === "Enter") {
       name = e.target.value;
-      ee.emit("changeNameUsr", {
-        name: name
-      });
-      this.setState({
-        nameUsr: name
-      });
-      return console.log(name);
+      if (name.length > 3) {
+        ee.emit("changeNameUsr@ee", {
+          name: name
+        });
+        return this.setState({
+          nameUsr: name
+        });
+      } else {
+        return alert("Введите имя корректно!");
+      }
     }
   },
   changePathImgUsr: function(e) {
@@ -157,7 +197,7 @@ Header = React.createClass({
     if (val === "Enter") {
       path = e.target.value;
       path = parseValue(path) != null ? parseValue(path) : this.state.defaultPathImgUsr;
-      ee.emit("changePathImgUsr", {
+      ee.emit("changePathImgUsr@ee", {
         path: path
       });
       return this.setState({
@@ -177,10 +217,10 @@ Header = React.createClass({
     })(this));
   },
   render: function() {
-    return React.createElement("div", {
-      "className": "container-fluid"
-    }, React.createElement("header", {
+    return React.createElement("header", {
       "className": "chat_header"
+    }, React.createElement("div", {
+      "className": "container-fluid"
     }, React.createElement("div", {
       "className": "row"
     }, React.createElement("div", {
@@ -210,7 +250,10 @@ Header = React.createClass({
     }, "Save")), React.createElement("div", {
       "className": "changeAva"
     }, React.createElement("label", {
-      "for": "ava"
+      "for": "ava",
+      "style": {
+        display: this.state.ava ? "none" : "block"
+      }
     }, React.createElement("input", {
       "name": "ava",
       "id": "ava",
@@ -283,7 +326,28 @@ Main = React.createClass({
       "className": "container"
     }, React.createElement("div", {
       "className": "massages"
-    }), React.createElement("div", {
+    }, React.createElement("div", {
+      "className": "fixed_top_panel"
+    }, React.createElement("p", null, "Привет участникам соревнований!")), React.createElement("div", {
+      "className": "wrp_massages"
+    }, React.createElement(MyMassage, {
+      "text": "Lorem ipsum dolor sit amet, consectetur adipisicing elit. Distinctio molestiae laudantium nulla et similique reprehenderit!"
+    }), React.createElement(Massage, {
+      "srcUrlImg": "/imgFiles/avatars/admin.jpg",
+      "name": "Daniil"
+    }), React.createElement(MyMassage, {
+      "text": "Lorem ipsum dolor sit amet, consectetur adipisicing elit. Distinctio molestiae laudantium nulla et similique reprehenderit!"
+    }), React.createElement(Massage, {
+      "srcUrlImg": "/imgFiles/avatars/admin.jpg",
+      "name": "Daniil"
+    }), React.createElement(MyMassage, {
+      "text": "Lorem ipsum dolor sit amet, consectetur adipisicing elit. Distinctio molestiae laudantium nulla et similique reprehenderit!"
+    }), React.createElement(Massage, {
+      "srcUrlImg": "/imgFiles/avatars/admin.jpg",
+      "name": "Daniil"
+    }), React.createElement(MyMassage, {
+      "text": "Lorem ipsum dolor sit amet, consectetur adipisicing elit. Distinctio molestiae laudantium nulla et similique reprehenderit!"
+    }))), React.createElement("div", {
       "className": "bottom_panel"
     }, React.createElement("textarea", {
       "rows": "5",
@@ -298,10 +362,18 @@ Main = React.createClass({
     }), React.createElement("div", {
       "className": "panel_icon"
     }, React.createElement("div", {
-      "className": "smile_icon"
-    }), React.createElement("div", {
-      "className": "clip_icon"
-    })))));
+      "className": "smile_icon icon"
+    }, React.createElement("i", {
+      "className": "fas fa-paperclip"
+    })), React.createElement("div", {
+      "className": "clip_icon icon"
+    }, React.createElement("i", {
+      "className": "far fa-smile"
+    })))), React.createElement("footer", {
+      "className": "main_footer"
+    }, React.createElement("p", {
+      "className": "text-center"
+    }, "Daniil Shenyagin©2018 - @projectsSchool#3 - Murom"))));
   }
 });
 
@@ -318,16 +390,22 @@ Massage = React.createClass({
   displayName: "Massage",
   render: function() {
     return React.createElement("div", {
-      "className": "massage"
+      "className": "other_massage"
     }, React.createElement("div", {
       "className": "wrp"
     }, React.createElement("div", {
-      "className": "ava"
+      "className": "info"
+    }, React.createElement("div", {
+      "className": "wrp_img"
     }, React.createElement("img", {
       "src": this.props.srcUrlImg
-    })), React.createElement("span", {
-      "className": "name"
-    }, this.props.name)), React.createElement("div", {
+    })), React.createElement("div", {
+      "className": "name_usr"
+    }, React.createElement("span", null, this.props.name))), React.createElement("div", {
+      "className": "cnt_massage"
+    }, React.createElement("p", null, "Lorem ipsum dolor sit amet, consectetur adipisicing elit. Recusandae mollitia quam eligendi, ullam laboriosam! Aut.")), React.createElement("i", {
+      "className": "fas fa-caret-left"
+    })), React.createElement("div", {
       "className": "text"
     }, this.props.text));
   }
@@ -347,17 +425,9 @@ MyMassage = React.createClass({
   render: function() {
     return React.createElement("div", {
       "className": "my_massage"
-    }, React.createElement("div", {
-      "className": "wrp"
-    }, React.createElement("span", {
-      "className": "name"
-    }, this.props.name), React.createElement("div", {
-      "className": "ava"
-    }, React.createElement("img", {
-      "src": this.props.srcUrlImg
-    }))), React.createElement("div", {
-      "className": "text"
-    }, this.props.text));
+    }, React.createElement("p", null, this.props.text), React.createElement("i", {
+      "className": "fas fa-caret-right"
+    }));
   }
 });
 

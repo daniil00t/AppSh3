@@ -4,11 +4,10 @@ MyMassage = React.createClass
 	displayName: "MyMassage"
 	render: ->
 		<div className="my_massage">
-			<div className="wrp">
-				<span className="name">{@props.name}</span>
-				<div className="ava"><img src={@props.srcUrlImg}/></div>
-			</div>
-			<div className="text">{@props.text}</div>
+			<p>
+				{@props.text}
+			</p>
+			<i className="fas fa-caret-right"></i>
 		</div>
 
 module.exports = MyMassage

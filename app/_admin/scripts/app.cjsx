@@ -45,6 +45,10 @@ App = React.createClass
 		
 		ee.on "deleteUserAndMassage_ee", (data)=>
 			socket.emit "deleteUserAndMassage", data
+
+
+		# socket.on "errorSrv@soc", (data)=>
+		# 	alert "TypeError: #{data.type}. #{data.err}"
 	render: ->
 		<div className="wrp_admin">
 			<div className="preloader" style={display: if !@state.preloader then "none"}>

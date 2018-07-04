@@ -1,6 +1,7 @@
 React = require "react"
 
 Users = require "./comps/users"
+Chat = require "./comps/chat"
 Test = require "./comps/tests"
 DB_panel = require "./comps/db"
 Features = require "./comps/feature"
@@ -9,6 +10,7 @@ Header_panel = require "./comps/header_panel"
 
 ul = [
 	"Users",
+	"Chat"
 	"Tests"
 	"DB"
 	"Features"
@@ -38,9 +40,10 @@ Panel = React.createClass
 					{
 						switch @state.sidebarvalue
 							when 0 then <Users />
-							when 1 then <Test />
-							when 2 then <DB_panel />
-							when 3 then <Features />
+							when 1 then <Chat />
+							when 2 then <Test />
+							when 3 then <DB_panel />
+							when 4 then <Features />
 							else <div>Help!</div>
 					}
 				</div>

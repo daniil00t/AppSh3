@@ -10,7 +10,7 @@ Header = React.createClass
 			<div className="fr">
 				<ul>
 					<li className="settings"><i className="fa fa-cogs"></i>Настройки</li>
-					<li className="logout" onClick={@handleClickLogout}><i className="fa fa-sign-out"></i>Выйти</li>
+					<li className="logout" onClick={@handleClickLogout}><i className="fa fa-sign-out-alt"></i>Выйти</li>
 				</ul>
 			</div>
 		</div>

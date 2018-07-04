@@ -10,29 +10,32 @@ learner_chat = (socket, store)->
 	# Registr new client
 	id = socket.id
 	ip = socket.handshake.address
-	console.log "connected user, id: #{id}"
+	console.log "connected user, id: #{id}, ip: #{ip}"
 	store.addNewClient 
 		id: id
-		ip: socket.handshake.address
+		ip: ip
 		type: "learner"
-		privileges: 3
 		app: "chat"
 	socket.emit 'connected', id: id, ip: ip
 
 
 	### Main methods learner ###
-	socket.on "setNameLearner", (data)->
+	socket.on "changeNameUsr@soc", (data)->
 		# Проверка имени на совподаемость
+		console.log data
 		nameOnline = no
 		for i in store.getClients()
 			if i.name == data.name
 				nameOnline = on
 				break
 		if !nameOnline
-			# store.updateClient data.id, {name: data.name}
+			store.updateClient data.id, {name: data.name}
 		else
+			socket.emit "errorUsr@soc", {nameError: "name is holded", noError: 1, descError: "Вы использовали уже занятое имя другим пользователем.", helpError: "Пожалуйста, придумайте другое имя пользователя."}
 			console.log "name is holded"
-			
+	socket.on "changePathImgUsr@soc", (data)->
+		store.updateClient data.id, {path: data.path}
+
 		# console.log store.getClients()
 
 	socket.on "newMassageToChat", (data)->
@@ -43,10 +46,11 @@ learner_chat = (socket, store)->
 		
 		# appendToFile "./db.log", "#{data.id}: #{data.text}\n"
 
-		###Closed Bar Browser method###
-	socket.on "closed", (data)->
-		console.log "disconnect user, id: #{data.id}"
-		store.deleteClient data.id
+		
+	socket.on "disconnect", (e) =>
+		id = socket.id
+		console.log "disconnect user, id: #{id}"
+		store.deleteClient id
 
 encryptHash = (data, key)->
 	cipher = crypto.createCipher('aes-256-cbc', key)
@@ -86,7 +90,8 @@ decryptLogPass = (hash)->
 
 admin = (socket, store)->
 	###Admin funcs and methods...###
-
+	ee.on "errorSrv", (data)=>
+		socket.emit "errorSrv@soc", err: data.err, type: date.type
 	# console.log decryptLogPass "f933e820c03a31975c7ccd788f5c5fda0607"
 	# console.log decryptLogPass "fdae23efce058f58a26f061f52a81a730607"
 	# 	{ "_id" : ObjectId("59bac5cd33c3a832db76b1dc"), "name" : "Tom" }

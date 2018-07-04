@@ -1,9 +1,11 @@
 gulp = require 'gulp'
-less = require 'gulp-less'
+sass = require 'gulp-sass'
 rename = require 'gulp-rename'
 autoprefixer = require 'gulp-autoprefixer'
 sourcemaps = require 'gulp-sourcemaps'
 handleErrors = require '../util/handleErrors'
+
+cleanCSS    = require('gulp-clean-css')
 
 ###
 	return gulp.src('sass/*.sass')
@@ -17,12 +19,14 @@ handleErrors = require '../util/handleErrors'
 	.pipe(browserSync.stream());
 ###
 
-gulp.task 'less', ->
-  gulp.src './app/stylesheets/main.less'
-    .pipe sourcemaps.init()
-    .pipe less()
+gulp.task 'sass', ->
+	gulp.src './app/stylesheets/sass/main.sass'
+		.pipe sourcemaps.init()
+    .pipe sass({
+    	includePaths: require('node-bourbon').includePaths
+    })
     .on 'error', handleErrors
     .pipe autoprefixer({cascade: false, browsers: ['last 2 versions']})
     .pipe sourcemaps.write()
-    .pipe rename 'style.css'
+    .pipe rename 'style_sass.css'
     .pipe gulp.dest('./Public/stylesheets')
