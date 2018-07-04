@@ -10,217 +10,124 @@ React.render(React.createElement(App, null), document.getElementById('app'));
 
 
 },{"./app":2,"react":"react"}],2:[function(require,module,exports){
-var App, DefQ, Header, InpQ, JoinQ, MultQ, React, config, ee, io, socket;
+var App, Header, Main, React, configs, ee, io, socket;
 
-React = require('react');
+React = require("react");
 
 io = require("socket.io-client");
 
+socket = io('');
+
+Header = require("./components/header");
+
+Main = require("./components/main_cnt");
+
 ee = require("./ee");
 
-socket = io("");
-
-Header = require("./components/Header");
-
-DefQ = require("./components/defQ");
-
-MultQ = require("./components/multQ");
-
-JoinQ = require("./components/joinQ");
-
-InpQ = require("./components/inpQ");
-
-config = {};
+configs = {};
 
 socket.on("connected", function(data) {
-  console.log(data);
-  config["id"] = data.id;
-  return config["ip"] = data.ip;
+  return configs = data;
 });
 
-window.onbeforeunload = function() {
-  return socket.emit("closed", {
-    id: config.id
-  });
-};
-
-console.log(config);
-
 App = React.createClass({
-  displayName: 'App',
+  displayName: "App",
   getInitialState: function() {
     return {
-      DATA: [],
-      _data: [],
-      preloader: true,
-      variant: 1,
-      data_user: {},
-      start: false,
-      ban: false
+      massages: [],
+      configsUsr: {}
     };
   },
-  endTest: function(massage) {
-    ee.emit("endTest", {
-      type: true
-    });
-    socket.emit("sendDataTest", {
-      data: this.state._data,
-      data_user: this.state.data_user
-    });
-    alert(massage);
-    return window.location.replace("http://" + window.location.host + "/learner");
-  },
-  handleEndTest: function() {
-    return this.endTest("Пожайлуста, подождите. Данные вот-вот доберутся до сервера...");
-  },
   componentWillMount: function() {
-    socket.on("getDataTest", (function(_this) {
+
+    /* _ Preload _ */
+    var isTouchDevice;
+    isTouchDevice = !!navigator.userAgent.match(/(iPhone|iPod|iPad|Android|playbook|silk|BlackBerry|BB10|Windows Phone|Tizen|Bada|webOS|IEMobile|Opera Mini)/);
+    if (isTouchDevice) {
+      if (!confirm("Мы хотим вас предупредить, что наше приложение работает нестабильно на мобильных устройствах. Продолжить?")) {
+        window.location.replace("http://192.168.100.9:3000/learner");
+      }
+    }
+
+    /* _ Socket events _ */
+    socket.on("connected", (function(_this) {
       return function(data) {
-        var arr, i, k, len;
-        arr = [];
-        for (k = 0, len = data.length; k < len; k++) {
-          i = data[k];
-          arr.push(i);
-        }
+        return _this.setState({
+          configsUsr: data
+        });
+      };
+    })(this));
+    socket.on("errorUsr@soc", (function(_this) {
+      return function(data) {
+        return alert("Error: " + data.nameError + ". NumError: " + data.noError);
+      };
+    })(this));
+    socket.on("newMassageToChatUsers", (function(_this) {
+      return function(data) {
+        var arr;
+        arr = _this.state.massages;
+        arr.push(data);
+        return _this.setState({
+          massages: arr
+        });
+      };
+    })(this));
+    socket.on("changeHello@soc", (function(_this) {
+      return function(data) {
+        var _configsUsr;
+        _configsUsr = _this.state.configsUsr;
+        _configsUsr.hello = data.cnt;
+        return _this.setState({
+          configsUsr: _configsUsr
+        });
+      };
+    })(this));
+
+    /* _ EventEmitter events _ */
+    ee.on("changeNameUsr@ee", (function(_this) {
+      return function(data) {
+        return socket.emit("changeNameUsr@soc", {
+          id: _this.state.configsUsr.id,
+          name: data.name
+        });
+      };
+    })(this));
+    ee.on("changePathImgUsr@ee", (function(_this) {
+      return function(data) {
+        return socket.emit("changePathImgUsr@soc", {
+          id: _this.state.configsUsr.id,
+          path: data.path
+        });
+      };
+    })(this));
+    return ee.on("addMassage", (function(_this) {
+      return function(data) {
+        var _data, arr;
+        arr = _this.state.massages;
+        _data = data;
+        _data.id = _this.state.configsUsr.id;
+        console.log(_data);
+        arr.push(_data);
         _this.setState({
-          DATA: arr
+          massages: arr
         });
-        return _this.setState({
-          preloader: false
-        });
-      };
-    })(this));
-    ee.on("sendAnswer", (function(_this) {
-      return function(data) {
-        var Data;
-        Data = _this.state._data;
-        Data.push(data);
-        return _this.setState({
-          _data: Data
-        });
-      };
-    })(this));
-    ee.on("changeVariant", (function(_this) {
-      return function(data) {
-        return _this.setState({
-          variant: +data.value
-        });
-      };
-    })(this));
-    ee.on("changeUserData", (function(_this) {
-      return function(data) {
-        var obj;
-        obj = {};
-        obj.firstname_user = data.firstname;
-        obj.lastname_user = data.lastname;
-        socket.emit("setNameForTest", {
-          id: config.id,
-          firstname_user: obj.firstname_user,
-          lastname_user: obj.lastname_user
-        });
-        return _this.setState({
-          data_user: obj
-        });
-      };
-    })(this));
-    ee.on("stopTimer", (function(_this) {
-      return function(data) {
-        return _this.endTest("К сожалению, время закончилось. Сохраняю ваши данные...");
-      };
-    })(this));
-    ee.on("startTestapp", (function(_this) {
-      return function(data) {
-        if ((_this.state.data_user.firstname_user != null) && (_this.state.data_user.lastname_user != null)) {
-          ee.emit("startTesth", {
-            type: true
-          });
-          return _this.setState({
-            start: data.type
-          });
-        } else {
-          return ee.emit("startTesth", {
-            type: false
-          });
-        }
-      };
-    })(this));
-    socket.on("deleteUser_toClient", (function(_this) {
-      return function(data) {
-        if (config.id === data.id) {
-          alert(data.massage);
-          return _this.setState({
-            ban: true
-          });
-        }
-      };
-    })(this));
-    return socket.on("UserInBan", (function(_this) {
-      return function(data) {
-        return _this.setState({
-          ban: data.type ? false : void 0
+        return socket.emit("addMassageToChat@soc", {
+          id: _data.id,
+          nameUsr: _data.nameUsr,
+          pathAva: _data.pathAva,
+          massage: _data.massage
         });
       };
     })(this));
   },
   render: function() {
-    if (!this.state.ban) {
-      return React.createElement("div", null, React.createElement("div", {
-        "className": "preloader",
-        "style": {
-          display: !this.state.preloader ? "none" : void 0
-        }
-      }, React.createElement("div", {
-        "className": "cssload-thecube"
-      }, React.createElement("div", {
-        "className": "cssload-cube cssload-c1"
-      }), React.createElement("div", {
-        "className": "cssload-cube cssload-c2"
-      }), React.createElement("div", {
-        "className": "cssload-cube cssload-c4"
-      }), React.createElement("div", {
-        "className": "cssload-cube cssload-c3"
-      }))), React.createElement("div", {
-        "className": "container"
-      }, React.createElement(Header, {
-        "data": this.state.DATA
-      }), (this.state.DATA.length !== 0 && this.state.start ? this.state.DATA.map((function(_this) {
-        return function(i, j) {
-          if (_this.state.variant === j + 1 && i.data.length !== 0) {
-            return i.data.map(function(q, w) {
-              switch (q.type) {
-                case "defQ":
-                  return React.createElement("div", null, React.createElement(DefQ, {
-                    "data": q
-                  }), React.createElement("hr", null));
-                case "multQ":
-                  return React.createElement("div", null, React.createElement(MultQ, {
-                    "data": q
-                  }), React.createElement("hr", null));
-                case "joinQ":
-                  return React.createElement("div", null, React.createElement(JoinQ, {
-                    "data": q
-                  }), React.createElement("hr", null));
-                case "inpQ":
-                  return React.createElement("div", null, React.createElement(InpQ, {
-                    "data": q
-                  }));
-                default:
-                  return console.log("elses");
-              }
-            });
-          }
-        };
-      })(this)) : this.state.DATA.length === 0 ? React.createElement("div", null, "К сожалению, данных нет.") : !this.state.start ? React.createElement("div", {
-        "className": "text-center nostart"
-      }, "Нажмите на кнопку старта таймера и давайте начинать!") : void 0), React.createElement("button", {
-        "onClick": this.handleEndTest,
-        "className": "endTest"
-      }, "Завершить"), React.createElement("footer", {
-        "className": "main_footer"
-      })));
-    } else {
-      return React.createElement("span", null, "Поздравляю, вы в бане!");
-    }
+    return React.createElement("div", {
+      "className": "CHAT_APP"
+    }, React.createElement(Header, null), React.createElement(Main, {
+      "massages": this.state.massages,
+      "mydata": this.state.configsUsr,
+      "hello": this.state.configsUsr.hello
+    }));
   }
 });
 
@@ -228,137 +135,191 @@ module.exports = App;
 
 
 
-},{"./components/Header":3,"./components/defQ":4,"./components/inpQ":5,"./components/joinQ":6,"./components/multQ":7,"./ee":8,"react":"react","socket.io-client":44}],3:[function(require,module,exports){
-var Header, React, ee;
+},{"./components/header":3,"./components/main_cnt":4,"./ee":7,"react":"react","socket.io-client":43}],3:[function(require,module,exports){
+var Avatars, Header, React, ee, parseValue;
 
 React = require("react");
 
 ee = require("../ee");
 
+Avatars = [["admin", "/imgFiles/avatars/admin.jpg"], ["daniil", "/imgFiles/avatars/admin.jpg"]];
+
+
+/*
+	parseValue ("{{admin}}", arr)  -->  "/imgFiles/avatars/admin.png"
+ */
+
+parseValue = function(val) {
+  var _val, ans, i, j, len;
+  _val = val.replace(/\{\{(\w*)\}\}/g, function(match, $1) {
+    return $1;
+  });
+  console.log(_val);
+  ans = null;
+  for (j = 0, len = Avatars.length; j < len; j++) {
+    i = Avatars[j];
+    if (i[0] === _val) {
+      ans = i[1];
+      break;
+    }
+  }
+  if (ans != null) {
+    return ans;
+  } else {
+    return _val;
+  }
+};
+
 Header = React.createClass({
   displayName: "Header",
   getInitialState: function() {
     return {
-      time: {}
+      ava: false,
+      nameUsr: "",
+      defaultPathImgUsr: "/imgFiles/no-avatar.png",
+      pathImgUsr: ""
     };
   },
-  handleClickSaveName: function() {
-    return ee.emit("changeUserData", {
-      firstname: document.getElementById("name_user").value,
-      lastname: document.getElementById("lastname_user").value
-    });
+  haveAva: function(e) {
+    if (e.target.checked) {
+      this.setState({
+        ava: true
+      });
+      return $(".out").removeClass("noactive").addClass("active");
+    } else {
+      this.setState({
+        ava: false
+      });
+      return $(".out").removeClass("active").addClass("noactive");
+    }
   },
-  handleChangeSelect: function(e) {
-    return ee.emit("changeVariant", {
-      value: e.target.value
-    });
+  changeNameUsr: function() {
+    var name;
+    name = document.getElementById("name").value;
+    if (name.length > 3) {
+      ee.emit("changeNameUsr@ee", {
+        name: name
+      });
+      return this.setState({
+        nameUsr: name
+      });
+    } else {
+      return alert("Введите имя корректно!");
+    }
   },
-  handleStartTest: function() {
-    return ee.emit("startTestapp", {
-      time: this.state.time,
-      type: true
-    });
+  changeNameUsrForInput: function(e) {
+    var name, val;
+    val = e.key;
+    if (val === "Enter") {
+      name = e.target.value;
+      if (name.length > 3) {
+        ee.emit("changeNameUsr@ee", {
+          name: name
+        });
+        return this.setState({
+          nameUsr: name
+        });
+      } else {
+        return alert("Введите имя корректно!");
+      }
+    }
   },
-  componentWillReceiveProps: function() {
-    var minutes, obj, seconds, time_seconds;
-    time_seconds = 0;
-    this.props.data.map((function(_this) {
-      return function(i, j) {
-        if (j === 0) {
-          return time_seconds = i.time;
-        }
-      };
-    })(this));
-    console.log(time_seconds);
-    seconds = time_seconds % 60;
-    minutes = Math.floor(time_seconds / 60);
-    obj = {};
-    obj.seconds = seconds;
-    obj.minutes = minutes;
-    return this.setState({
-      time: obj
-    });
+  changePathImgUsr: function(e) {
+    var path, val;
+    val = e.key;
+    if (val === "Enter") {
+      path = e.target.value;
+      path = parseValue(path) != null ? parseValue(path) : this.state.defaultPathImgUsr;
+      ee.emit("changePathImgUsr@ee", {
+        path: path
+      });
+      return this.setState({
+        pathImgUsr: path
+      });
+    }
   },
   componentWillMount: function() {
-    return ee.on("startTesth", (function(_this) {
+    return ee.on("addMassage__toHeader", (function(_this) {
       return function(data) {
-        var SI, timeall;
-        if (data.type) {
-          timeall = _this.state.time.minutes * 60 + _this.state.time.seconds;
-          console.log(timeall);
-          return SI = setInterval((function() {
-            var obj;
-            if (timeall === 1) {
-              clearInterval(SI);
-              return ee.emit("stopTimer", {
-                type: true
-              });
-            } else {
-              timeall--;
-              obj = {};
-              obj.seconds = timeall % 60;
-              obj.minutes = Math.floor(timeall / 60);
-              return _this.setState({
-                time: obj
-              });
-            }
-          }), 1000);
-        } else {
-          return alert("Введите свое имя и фамилие!");
-        }
+        return ee.emit("addMassage", {
+          massage: data.massage,
+          nameUsr: _this.state.nameUsr,
+          pathAva: _this.state.pathImgUsr !== "" ? _this.state.pathImgUsr : _this.state.defaultPathImgUsr
+        });
       };
     })(this));
   },
   render: function() {
     return React.createElement("header", {
-      "className": "main_header"
-    }, React.createElement("h1", {
-      "className": "brand_app"
-    }, React.createElement("span", {
-      "className": "t_brand"
-    }, "T"), "est"), React.createElement("div", {
-      "className": "inf_user"
+      "className": "chat_header"
     }, React.createElement("div", {
-      "className": "lbs_header"
-    }, React.createElement("span", null, "Имя:"), React.createElement("br", null), React.createElement("span", null, "Фамилия: ")), React.createElement("div", {
-      "className": "inps_header"
+      "className": "container-fluid"
+    }, React.createElement("div", {
+      "className": "row"
+    }, React.createElement("div", {
+      "className": "col-md-3 col-lg-3"
+    }, React.createElement("div", {
+      "className": "logo"
+    }, React.createElement("a", {
+      "href": "/learner/chat"
+    }, React.createElement("img", {
+      "src": "/imgFiles/logo_chat.png"
+    })))), React.createElement("div", {
+      "className": "col-md-6 col-lg-6 main_part_header"
+    }, React.createElement("div", {
+      "className": "changeNameUser"
     }, React.createElement("input", {
       "type": "text",
-      "id": "name_user"
-    }), React.createElement("br", null), React.createElement("input", {
-      "type": "text",
-      "id": "lastname_user"
-    })), React.createElement("br", null), React.createElement("button", {
-      "className": "save_inf_user",
-      "onClick": this.handleClickSaveName
-    }, "Сохранить")), React.createElement("div", {
-      "className": "changeVariant"
-    }, React.createElement("h4", null, "Вариант: "), React.createElement("select", {
-      "id": "selectVariant",
-      "onChange": ((function(_this) {
+      "id": "name",
+      "placeholder": "Name..",
+      "onKeyDown": ((function(_this) {
         return function(e) {
-          return _this.handleChangeSelect(e);
+          return _this.changeNameUsrForInput(e);
         };
       })(this))
-    }, this.props.data.map((function(_this) {
-      return function(i, j) {
-        if (j === 0) {
-          return React.createElement("option", {
-            "selected": "selected",
-            "value": "1"
-          }, "1");
-        } else {
-          return React.createElement("option", {
-            "value": j + 1
-          }, j + 1);
-        }
-      };
-    })(this)))), React.createElement("div", {
-      "className": "TimerTest"
-    }, React.createElement("h1", null, (this.state.time.minutes < 10 ? "0" + this.state.time.minutes : this.state.time.minutes) + ":" + (this.state.time.seconds < 10 ? "0" + this.state.time.seconds : this.state.time.seconds)), React.createElement("i", {
-      "className": "fa fa-play",
-      "onClick": this.handleStartTest
-    })));
+    }), React.createElement("br", null), React.createElement("button", {
+      "className": "btn btn-default save_name",
+      "onClick": this.changeNameUsr
+    }, "Save")), React.createElement("div", {
+      "className": "changeAva"
+    }, React.createElement("label", {
+      "for": "ava",
+      "style": {
+        display: this.state.ava ? "none" : "block"
+      }
+    }, React.createElement("input", {
+      "name": "ava",
+      "id": "ava",
+      "type": "checkbox",
+      "onChange": ((function(_this) {
+        return function(e) {
+          return _this.haveAva(e);
+        };
+      })(this)),
+      "disabled": (this.state.nameUsr !== "" ? "" : "disabled")
+    }), "\t\t\t\t\t\t\tУ меня есть ава"), React.createElement("br", null), React.createElement("div", {
+      "className": "out noactive"
+    }, React.createElement("div", {
+      "className": "ava_wrp_img"
+    }, React.createElement("img", {
+      "src": (this.state.pathImgUsr !== "" ? this.state.pathImgUsr : this.state.defaultPathImgUsr)
+    })), React.createElement("input", {
+      "type": "text",
+      "id": "url",
+      "onKeyDown": ((function(_this) {
+        return function(e) {
+          return _this.changePathImgUsr(e);
+        };
+      })(this)),
+      "placeholder": "Url.."
+    })))), React.createElement("div", {
+      "className": "col-md-3 col-lg-3 menu-left"
+    }, React.createElement("a", {
+      "className": "btn btn-default logout_button",
+      "href": "/learner"
+    }, React.createElement("i", {
+      "className": "fas fa-sign-out-alt"
+    }), "Выйти")))));
   }
 });
 
@@ -366,439 +327,145 @@ module.exports = Header;
 
 
 
-},{"../ee":8,"react":"react"}],4:[function(require,module,exports){
-var DefQ, React, ee;
+},{"../ee":7,"react":"react"}],4:[function(require,module,exports){
+var Main, Massage, MyMassage, React, ee;
 
 React = require("react");
 
+MyMassage = require("./my_massage");
+
+Massage = require("./massage");
+
 ee = require("../ee");
 
-DefQ = React.createClass({
-  displayName: "DefQ",
-  getInitialState: function() {
-    return {
-      num: this.props.data.num,
-      activeItem: -1,
-      alphabet: {
-        rus: ["а", "б", "в", "г", "д", "е", "ж", "з", "и", "к"],
-        en: ["a", "b", "c", "d", "e", "f", "g", "h", "i", "j"]
-      },
-      myans: {}
-    };
-  },
-  handleClickIl: function(i, e) {
-    var id, value;
-    if (e.target.localName === "span" || e.target.localName === "li") {
-      id = "Q_" + this.state.num + "_" + i;
-      document.getElementById(id).checked = true;
-      value = +i;
-      this.setState({
-        myans: {
-          type: "defQ",
-          num: this.state.num,
-          val: value
-        }
-      });
-      return this.setState({
-        activeItem: value
+Main = React.createClass({
+  displayName: "Main_cnt",
+  addMassage: function(e) {
+    var massage, val;
+    val = e.key;
+    if (val === "Enter" && !e.shiftKey) {
+      massage = e.target.value;
+      document.getElementById(e.target.id).value = "";
+      e.preventDefault();
+      return ee.emit("addMassage__toHeader", {
+        massage: massage
       });
     }
   },
-  componentWillMount: function() {
-    return ee.on("endTest", (function(_this) {
-      return function(data) {
-        return ee.emit("sendAnswer", _this.state.myans);
-      };
-    })(this));
-  },
   render: function() {
     return React.createElement("div", {
-      "className": "ItemDefQ"
-    }, React.createElement("h3", {
-      "className": "question defQuestion"
-    }, this.state.num + 1 + ". " + this.props.data.question), React.createElement("ul", {
-      "className": "ulanses defulanses"
-    }, this.props.data.anses.map((function(_this) {
+      "className": "main_cnt"
+    }, React.createElement("div", {
+      "className": "container"
+    }, React.createElement("div", {
+      "className": "massages"
+    }, React.createElement("div", {
+      "className": "fixed_top_panel"
+    }, React.createElement("p", null, this.props.hello)), React.createElement("div", {
+      "className": "wrp_massages"
+    }, this.props.massages.map((function(_this) {
       return function(i, j) {
-        return React.createElement("li", {
-          "onClick": (function(e) {
-            return _this.handleClickIl.bind(_this, j)(e);
-          }),
-          "key": j,
-          "style": (j === _this.state.activeItem ? {
-            backgroundColor: "#3670F7",
-            color: "#fff",
-            boxShadow: "0 0 15px rgba(0,0,0,0.6)"
-          } : void 0)
-        }, React.createElement("label", null, React.createElement("input", {
-          "type": "radio",
-          "name": "Q_" + _this.state.num,
-          "id": "Q_" + _this.state.num + "_" + j,
-          "disabled": "disabled",
-          "value": j,
-          "dangerouslySetInnerHTML": {
-            __html: (_this.state.alphabet.rus[j].toUpperCase()) + ". " + i
-          }
-        })));
+        if (i.id === _this.props.mydata.id) {
+          return React.createElement(MyMassage, {
+            "text": i.massage
+          });
+        } else {
+          return React.createElement(Massage, {
+            "srcUrlImg": i.pathAva,
+            "name": i.nameUsr,
+            "massage": i.massage
+          });
+        }
       };
-    })(this))));
+    })(this)))), React.createElement("div", {
+      "className": "bottom_panel"
+    }, React.createElement("textarea", {
+      "rows": "5",
+      "cols": "70",
+      "placeholder": "Pishi zdes'!",
+      "id": "addMassage",
+      "onKeyDown": ((function(_this) {
+        return function(e) {
+          return _this.addMassage(e);
+        };
+      })(this))
+    }), React.createElement("div", {
+      "className": "panel_icon"
+    }, React.createElement("div", {
+      "className": "smile_icon icon"
+    }, React.createElement("i", {
+      "className": "fas fa-paperclip"
+    })), React.createElement("div", {
+      "className": "clip_icon icon"
+    }, React.createElement("i", {
+      "className": "far fa-smile"
+    })))), React.createElement("footer", {
+      "className": "main_footer"
+    }, React.createElement("p", {
+      "className": "text-center"
+    }, "Daniil Shenyagin©2018 - @projectsSchool#3 - Murom"))));
   }
 });
 
-module.exports = DefQ;
+module.exports = Main;
 
 
 
-},{"../ee":8,"react":"react"}],5:[function(require,module,exports){
-var InpQ, React, ee;
+},{"../ee":7,"./massage":5,"./my_massage":6,"react":"react"}],5:[function(require,module,exports){
+var Massage, React;
 
 React = require("react");
 
-ee = require("../ee");
-
-InpQ = React.createClass({
-  displayName: "InpQ",
-  componentWillMount: function() {
-    return ee.on("endTest", (function(_this) {
-      return function(data) {
-        return ee.emit("sendAnswer", {
-          type: "inpQ",
-          num: _this.props.data.num,
-          val: document.getElementById("ans").value
-        });
-      };
-    })(this));
-  },
+Massage = React.createClass({
+  displayName: "Massage",
   render: function() {
     return React.createElement("div", {
-      "className": "inpQ"
-    }, React.createElement("h3", {
-      "className": "question defQuestion"
-    }, this.props.data.num + 1 + ". " + this.props.data.question), React.createElement("p", null, this.props.data.text), React.createElement("input", {
-      "type": "text",
-      "id": "ans"
+      "className": "other_massage"
+    }, React.createElement("div", {
+      "className": "wrp"
+    }, React.createElement("div", {
+      "className": "info"
+    }, React.createElement("div", {
+      "className": "wrp_img"
+    }, React.createElement("img", {
+      "src": this.props.srcUrlImg
+    })), React.createElement("div", {
+      "className": "name_usr"
+    }, React.createElement("span", null, this.props.name))), React.createElement("div", {
+      "className": "cnt_massage"
+    }, React.createElement("p", null, this.props.massage)), React.createElement("i", {
+      "className": "fas fa-caret-left"
+    })), React.createElement("div", {
+      "className": "text"
+    }, this.props.text));
+  }
+});
+
+module.exports = Massage;
+
+
+
+},{"react":"react"}],6:[function(require,module,exports){
+var MyMassage, React;
+
+React = require("react");
+
+MyMassage = React.createClass({
+  displayName: "MyMassage",
+  render: function() {
+    return React.createElement("div", {
+      "className": "my_massage"
+    }, React.createElement("p", null, this.props.text), React.createElement("i", {
+      "className": "fas fa-caret-right"
     }));
   }
 });
 
-module.exports = InpQ;
+module.exports = MyMassage;
 
 
 
-},{"../ee":8,"react":"react"}],6:[function(require,module,exports){
-var JoinQ, React, ee;
-
-React = require("react");
-
-ee = require("../ee");
-
-JoinQ = React.createClass({
-  displayName: "JoinQ",
-  getInitialState: function() {
-    return {
-      configs: {
-        count_items: this.props.data.anses[0].firstItems.length
-      },
-      heightSVG: 0,
-      colors: ["#2B9483", "#2866F7", "#FC911A", "#DB381B"],
-      coordsItems: {
-        first: ["0 19", "0 60", "0 100"],
-        second: ["300 19", "300 60", "300 100"]
-      },
-      paths: [],
-      tmpPath: [],
-      arrCoordsPaths: [],
-      alphabet: {
-        rus: ["а", "б", "в", "г", "д", "е", "ж", "з", "и", "к"],
-        en: ["a", "b", "c", "d", "e", "f", "g", "h", "i", "j"]
-      }
-    };
-  },
-  componentDidMount: function() {
-    return this.setState({
-      heightSVG: document.getElementsByClassName("firstAnses")[0].offsetHeight
-    });
-  },
-  hoverOverLiFirstAns: function(j) {
-    var arr, bgc;
-    bgc = document.getElementById("Q_F_" + j).style.backgroundColor;
-    arr = [];
-    bgc.replace(/rgb\((\w*), (\w*), (\w*)\)/g, function(match, g1, g2, g3) {
-      return arr.push(g1, g2, g3);
-    });
-    return document.getElementById("Q_F_" + j).style.backgroundColor = "rgba(" + arr[0] + ", " + arr[1] + ", " + arr[2] + ", 0.9)";
-  },
-  hoverOutLiFirstAns: function(j) {
-    return document.getElementById("Q_F_" + j).style.backgroundColor = this.state.colors[j];
-  },
-  handleJoin: function(j, e, type) {
-    var _data, data;
-    if (this.state.paths.length < this.state.configs.count_items) {
-      if (type === "f") {
-        data = this.state.tmpPath;
-        data.push({
-          num: j,
-          type: type
-        });
-        return this.setState({
-          tmpPath: data
-        });
-      } else {
-        if (this.state.tmpPath.length !== 0) {
-          data = this.state.tmpPath;
-          data.push({
-            num: j,
-            type: type
-          });
-          this.setState({
-            tmpPath: data
-          });
-          this.drawPath([this.state.tmpPath[0].num, this.state.tmpPath[1].num]);
-          _data = this.state.paths;
-          _data.push(this.state.tmpPath);
-          this.setState({
-            paths: _data
-          });
-          return this.setState({
-            tmpPath: []
-          });
-        }
-      }
-    }
-  },
-  drawPath: function(arrCoords) {
-    var data;
-    data = this.state.arrCoordsPaths;
-    data.push(arrCoords);
-    return this.setState({
-      arrCoordsPaths: data
-    });
-  },
-  componentWillMount: function() {
-    return ee.on("endTest", (function(_this) {
-      return function(data) {
-        return ee.emit("sendAnswer", {
-          type: "joinQ",
-          num: _this.props.data.num,
-          ans: _this.state.paths
-        });
-      };
-    })(this));
-  },
-  render: function() {
-    var arr, i, j, len, max;
-    return React.createElement("div", {
-      "className": "joinQ"
-    }, React.createElement("h3", {
-      "className": "question"
-    }, (this.props.data.num + 1) + ". " + this.props.data.question), React.createElement("div", {
-      "className": "wrap"
-    }, React.createElement("div", {
-      "className": "firstAnses one"
-    }, React.createElement("ul", null, this.props.data.anses[0].firstItems.map((function(_this) {
-      return function(i, j) {
-        return React.createElement("li", {
-          "onClick": (function(e) {
-            return _this.handleJoin.bind(_this, j)(e, "f");
-          }),
-          "style": {
-            backgroundColor: _this.state.colors[j]
-          },
-          "onMouseOver": _this.hoverOverLiFirstAns.bind(_this, j),
-          "onMouseOut": _this.hoverOutLiFirstAns.bind(_this, j),
-          "id": "Q_F_" + j
-        }, (_this.state.alphabet.rus[j].toUpperCase()) + ". " + i, React.createElement("br", null));
-      };
-    })(this)))), React.createElement("svg", {
-      "className": "lines joinQsvg",
-      "height": this.state.heightSVG
-    }, (this.state.arrCoordsPaths.length !== 0 ? this.state.arrCoordsPaths.map((function(_this) {
-      return function(i) {
-        return React.createElement("path", {
-          "d": "M " + _this.state.coordsItems.first[i[0]] + " L " + _this.state.coordsItems.second[i[1]] + " Z",
-          "fill": "transparent",
-          "stroke": "#333",
-          "style": {
-            strokeWidth: 2
-          }
-        });
-      };
-    })(this)) : void 0)), React.createElement("div", {
-      "className": "secondAnses two"
-    }, React.createElement("ul", null, this.props.data.anses[0].secondItems.map((function(_this) {
-      return function(i, j) {
-        return React.createElement("li", {
-          "onClick": (function(e) {
-            return _this.handleJoin.bind(_this, j)(e, "s");
-          }),
-          "id": "Q_S_" + j
-        }, (j + 1) + ". " + i, React.createElement("br", null));
-      };
-    })(this)))), React.createElement("table", {
-      "className": "ansesTable",
-      "border": "2"
-    }, React.createElement("tr", null, this.props.data.anses[0].firstItems.map((function(_this) {
-      return function(i, j) {
-        return React.createElement("td", null, _this.state.alphabet.rus[j].toUpperCase());
-      };
-    })(this))), React.createElement("tr", null, ((function() {
-      arr = this.state.paths;
-      len = arr.length - 1;
-      i = 0;
-      while (i < len) {
-        j = 0;
-        while (j < len - i) {
-          if (arr[j][0].num > arr[j + 1][0].num) {
-            max = arr[j];
-            arr[j] = arr[j + 1];
-            arr[j + 1] = max;
-          }
-          j++;
-        }
-        i++;
-      }
-      return arr.map((function(_this) {
-        return function(i, j) {
-          if (i[0].num === j) {
-            return React.createElement("td", null, i[1].num + 1);
-          }
-        };
-      })(this));
-    }).call(this))))));
-  }
-});
-
-module.exports = JoinQ;
-
-
-
-},{"../ee":8,"react":"react"}],7:[function(require,module,exports){
-var MultQ, React, ee;
-
-React = require("react");
-
-ee = require("../ee");
-
-MultQ = React.createClass({
-  displayName: "MultQ",
-  getInitialState: function() {
-    return {
-      num: this.props.data.num,
-      activeItems: [],
-      myans: []
-    };
-  },
-  handleClickIl: function(i, e) {
-    var _data, data, id, k, l, len, q, ref, value;
-    if (this.state.activeItems.length < 2) {
-      id = "Q_" + this.state.num + "_" + i;
-      document.getElementById(id).checked = !document.getElementById(id).checked;
-      value = +i;
-      _data = this.state.myans;
-      _data.push({
-        type: "multQ",
-        num: this.state.num,
-        val: value
-      });
-      this.setState({
-        myans: _data
-      });
-      data = this.state.activeItems;
-      data.push(i);
-      return this.setState({
-        activeItems: data
-      });
-    } else {
-      if (e.altKey) {
-        ref = this.state.activeItems;
-        for (l = k = 0, len = ref.length; k < len; l = ++k) {
-          q = ref[l];
-          if (q === i) {
-            data = this.state.activeItems;
-            data.splice(l, 1);
-            this.setState({
-              activeItems: data
-            });
-          }
-        }
-        id = "Q_" + this.state.num + "_" + i;
-        return document.getElementById(id).checked = false;
-      }
-    }
-  },
-  handleDoubleClick: function(e) {
-    var data, i, id, k, l, len, q, ref;
-    i = +e.target.attributes[0].value.match(/(\$(\d+))/g)[0].match(/\d+/)[0];
-    ref = this.state.activeItems;
-    for (l = k = 0, len = ref.length; k < len; l = ++k) {
-      q = ref[l];
-      if (q === i) {
-        data = this.state.activeItems;
-        data.splice(l, 1);
-        this.setState({
-          activeItems: data
-        });
-      }
-    }
-    id = "Q_" + this.state.num + "_" + i;
-    return document.getElementById(id).checked = false;
-  },
-  refCallback: function(item) {
-    if (item) {
-      return item.getDOMNode().ondblclick = this.handleDoubleClick;
-    }
-  },
-  componentWillMount: function() {
-    return ee.on("endTest", (function(_this) {
-      return function(data) {
-        return ee.emit("sendAnswer", {
-          type: "multQ",
-          num: _this.props.data.num,
-          ans: _this.state.myans
-        });
-      };
-    })(this));
-  },
-  render: function() {
-    return React.createElement("div", {
-      "className": "ItemMultQ"
-    }, React.createElement("h3", {
-      "className": "question multQuestion"
-    }, this.state.num + 1 + ". " + this.props.data.question), React.createElement("ul", {
-      "className": "ulanses multulanses"
-    }, this.props.data.anses.map((function(_this) {
-      return function(i, j) {
-        return React.createElement("li", {
-          "onClick": (function(e) {
-            return _this.handleClickIl.bind(_this, j)(e);
-          }),
-          "ref": _this.refCallback,
-          "key": j,
-          "style": (j === _this.state.activeItems[_this.state.activeItems.length - 1] || j === _this.state.activeItems[_this.state.activeItems.length - 2] ? {
-            backgroundColor: "#3670F7",
-            color: "#fff",
-            boxShadow: "0 0 15px rgba(0,0,0,0.6)"
-          } : void 0)
-        }, React.createElement("label", {
-          "onClick": false
-        }, React.createElement("input", {
-          "onClick": false,
-          "type": "checkbox",
-          "disabled": "disabled",
-          "name": "Q_" + _this.state.num,
-          "id": "Q_" + _this.state.num + "_" + j,
-          "value": j
-        }), i));
-      };
-    })(this))));
-  }
-});
-
-module.exports = MultQ;
-
-
-
-},{"../ee":8,"react":"react"}],8:[function(require,module,exports){
+},{"react":"react"}],7:[function(require,module,exports){
 var EventEmitter, ee;
 
 EventEmitter = require("events").EventEmitter;
@@ -809,7 +476,7 @@ module.exports = ee;
 
 
 
-},{"events":34}],9:[function(require,module,exports){
+},{"events":33}],8:[function(require,module,exports){
 module.exports = after
 
 function after(count, callback, err_cb) {
@@ -839,7 +506,7 @@ function after(count, callback, err_cb) {
 
 function noop() {}
 
-},{}],10:[function(require,module,exports){
+},{}],9:[function(require,module,exports){
 /**
  * An abstraction for slicing an arraybuffer even when
  * ArrayBuffer.prototype.slice is not supported
@@ -870,7 +537,7 @@ module.exports = function(arraybuffer, start, end) {
   return result.buffer;
 };
 
-},{}],11:[function(require,module,exports){
+},{}],10:[function(require,module,exports){
 
 /**
  * Expose `Backoff`.
@@ -957,7 +624,7 @@ Backoff.prototype.setJitter = function(jitter){
 };
 
 
-},{}],12:[function(require,module,exports){
+},{}],11:[function(require,module,exports){
 /*
  * base64-arraybuffer
  * https://github.com/niklasvh/base64-arraybuffer
@@ -1026,7 +693,7 @@ Backoff.prototype.setJitter = function(jitter){
   };
 })();
 
-},{}],13:[function(require,module,exports){
+},{}],12:[function(require,module,exports){
 (function (global){
 /**
  * Create a blob builder even when vendor prefixes exist
@@ -1126,9 +793,9 @@ module.exports = (function() {
 })();
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],14:[function(require,module,exports){
+},{}],13:[function(require,module,exports){
 
-},{}],15:[function(require,module,exports){
+},{}],14:[function(require,module,exports){
 /**
  * Slice reference.
  */
@@ -1153,7 +820,7 @@ module.exports = function(obj, fn){
   }
 };
 
-},{}],16:[function(require,module,exports){
+},{}],15:[function(require,module,exports){
 
 /**
  * Expose `Emitter`.
@@ -1319,7 +986,7 @@ Emitter.prototype.hasListeners = function(event){
   return !! this.listeners(event).length;
 };
 
-},{}],17:[function(require,module,exports){
+},{}],16:[function(require,module,exports){
 
 module.exports = function(a, b){
   var fn = function(){};
@@ -1327,11 +994,11 @@ module.exports = function(a, b){
   a.prototype = new fn;
   a.prototype.constructor = a;
 };
-},{}],18:[function(require,module,exports){
+},{}],17:[function(require,module,exports){
 
 module.exports = require('./lib/index');
 
-},{"./lib/index":19}],19:[function(require,module,exports){
+},{"./lib/index":18}],18:[function(require,module,exports){
 
 module.exports = require('./socket');
 
@@ -1343,7 +1010,7 @@ module.exports = require('./socket');
  */
 module.exports.parser = require('engine.io-parser');
 
-},{"./socket":20,"engine.io-parser":32}],20:[function(require,module,exports){
+},{"./socket":19,"engine.io-parser":31}],19:[function(require,module,exports){
 (function (global){
 /**
  * Module dependencies.
@@ -2085,7 +1752,7 @@ Socket.prototype.filterUpgrades = function (upgrades) {
 };
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./transport":21,"./transports/index":22,"component-emitter":28,"debug":29,"engine.io-parser":32,"indexof":37,"parsejson":40,"parseqs":41,"parseuri":42}],21:[function(require,module,exports){
+},{"./transport":20,"./transports/index":21,"component-emitter":27,"debug":28,"engine.io-parser":31,"indexof":36,"parsejson":39,"parseqs":40,"parseuri":41}],20:[function(require,module,exports){
 /**
  * Module dependencies.
  */
@@ -2244,7 +1911,7 @@ Transport.prototype.onClose = function () {
   this.emit('close');
 };
 
-},{"component-emitter":28,"engine.io-parser":32}],22:[function(require,module,exports){
+},{"component-emitter":27,"engine.io-parser":31}],21:[function(require,module,exports){
 (function (global){
 /**
  * Module dependencies
@@ -2301,7 +1968,7 @@ function polling (opts) {
 }
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./polling-jsonp":23,"./polling-xhr":24,"./websocket":26,"xmlhttprequest-ssl":27}],23:[function(require,module,exports){
+},{"./polling-jsonp":22,"./polling-xhr":23,"./websocket":25,"xmlhttprequest-ssl":26}],22:[function(require,module,exports){
 (function (global){
 
 /**
@@ -2536,7 +2203,7 @@ JSONPPolling.prototype.doWrite = function (data, fn) {
 };
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./polling":25,"component-inherit":17}],24:[function(require,module,exports){
+},{"./polling":24,"component-inherit":16}],23:[function(require,module,exports){
 (function (global){
 /**
  * Module requirements.
@@ -2964,7 +2631,7 @@ function unloadHandler () {
 }
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./polling":25,"component-emitter":28,"component-inherit":17,"debug":29,"xmlhttprequest-ssl":27}],25:[function(require,module,exports){
+},{"./polling":24,"component-emitter":27,"component-inherit":16,"debug":28,"xmlhttprequest-ssl":26}],24:[function(require,module,exports){
 /**
  * Module dependencies.
  */
@@ -3211,7 +2878,7 @@ Polling.prototype.uri = function () {
   return schema + '://' + (ipv6 ? '[' + this.hostname + ']' : this.hostname) + port + this.path + query;
 };
 
-},{"../transport":21,"component-inherit":17,"debug":29,"engine.io-parser":32,"parseqs":41,"xmlhttprequest-ssl":27,"yeast":61}],26:[function(require,module,exports){
+},{"../transport":20,"component-inherit":16,"debug":28,"engine.io-parser":31,"parseqs":40,"xmlhttprequest-ssl":26,"yeast":60}],25:[function(require,module,exports){
 (function (global){
 /**
  * Module dependencies.
@@ -3500,7 +3167,7 @@ WS.prototype.check = function () {
 };
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../transport":21,"component-inherit":17,"debug":29,"engine.io-parser":32,"parseqs":41,"ws":14,"yeast":61}],27:[function(require,module,exports){
+},{"../transport":20,"component-inherit":16,"debug":28,"engine.io-parser":31,"parseqs":40,"ws":13,"yeast":60}],26:[function(require,module,exports){
 (function (global){
 // browser shim for xmlhttprequest module
 
@@ -3541,7 +3208,7 @@ module.exports = function (opts) {
 };
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"has-cors":36}],28:[function(require,module,exports){
+},{"has-cors":35}],27:[function(require,module,exports){
 
 /**
  * Expose `Emitter`.
@@ -3706,7 +3373,7 @@ Emitter.prototype.hasListeners = function(event){
   return !! this.listeners(event).length;
 };
 
-},{}],29:[function(require,module,exports){
+},{}],28:[function(require,module,exports){
 (function (process){
 
 /**
@@ -3887,7 +3554,7 @@ function localstorage(){
 }
 
 }).call(this,require('_process'))
-},{"./debug":30,"_process":43}],30:[function(require,module,exports){
+},{"./debug":29,"_process":42}],29:[function(require,module,exports){
 
 /**
  * This is the common logic for both the Node.js and web browser
@@ -4089,7 +3756,7 @@ function coerce(val) {
   return val;
 }
 
-},{"ms":31}],31:[function(require,module,exports){
+},{"ms":30}],30:[function(require,module,exports){
 /**
  * Helpers.
  */
@@ -4240,7 +3907,7 @@ function plural(ms, n, name) {
   return Math.ceil(ms / n) + ' ' + name + 's'
 }
 
-},{}],32:[function(require,module,exports){
+},{}],31:[function(require,module,exports){
 (function (global){
 /**
  * Module dependencies.
@@ -4853,7 +4520,7 @@ exports.decodePayloadAsBinary = function (data, binaryType, callback) {
 };
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./keys":33,"after":9,"arraybuffer.slice":10,"base64-arraybuffer":12,"blob":13,"has-binary":35,"wtf-8":60}],33:[function(require,module,exports){
+},{"./keys":32,"after":8,"arraybuffer.slice":9,"base64-arraybuffer":11,"blob":12,"has-binary":34,"wtf-8":59}],32:[function(require,module,exports){
 
 /**
  * Gets the keys for an object.
@@ -4874,7 +4541,7 @@ module.exports = Object.keys || function keys (obj){
   return arr;
 };
 
-},{}],34:[function(require,module,exports){
+},{}],33:[function(require,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -5177,7 +4844,7 @@ function isUndefined(arg) {
   return arg === void 0;
 }
 
-},{}],35:[function(require,module,exports){
+},{}],34:[function(require,module,exports){
 (function (global){
 
 /*
@@ -5240,7 +4907,7 @@ function hasBinary(data) {
 }
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"isarray":38}],36:[function(require,module,exports){
+},{"isarray":37}],35:[function(require,module,exports){
 
 /**
  * Module exports.
@@ -5259,7 +4926,7 @@ try {
   module.exports = false;
 }
 
-},{}],37:[function(require,module,exports){
+},{}],36:[function(require,module,exports){
 
 var indexOf = [].indexOf;
 
@@ -5270,12 +4937,12 @@ module.exports = function(arr, obj){
   }
   return -1;
 };
-},{}],38:[function(require,module,exports){
+},{}],37:[function(require,module,exports){
 module.exports = Array.isArray || function (arr) {
   return Object.prototype.toString.call(arr) == '[object Array]';
 };
 
-},{}],39:[function(require,module,exports){
+},{}],38:[function(require,module,exports){
 (function (global){
 /*! JSON v3.3.2 | http://bestiejs.github.io/json3 | Copyright 2012-2014, Kit Cambridge | http://kit.mit-license.org */
 ;(function () {
@@ -6181,7 +5848,7 @@ module.exports = Array.isArray || function (arr) {
 }).call(this);
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],40:[function(require,module,exports){
+},{}],39:[function(require,module,exports){
 (function (global){
 /**
  * JSON parse.
@@ -6216,7 +5883,7 @@ module.exports = function parsejson(data) {
   }
 };
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],41:[function(require,module,exports){
+},{}],40:[function(require,module,exports){
 /**
  * Compiles a querystring
  * Returns string representation of the object
@@ -6255,7 +5922,7 @@ exports.decode = function(qs){
   return qry;
 };
 
-},{}],42:[function(require,module,exports){
+},{}],41:[function(require,module,exports){
 /**
  * Parses an URI
  *
@@ -6296,7 +5963,7 @@ module.exports = function parseuri(str) {
     return uri;
 };
 
-},{}],43:[function(require,module,exports){
+},{}],42:[function(require,module,exports){
 // shim for using process in browser
 
 var process = module.exports = {};
@@ -6384,7 +6051,7 @@ process.chdir = function (dir) {
     throw new Error('process.chdir is not supported');
 };
 
-},{}],44:[function(require,module,exports){
+},{}],43:[function(require,module,exports){
 
 /**
  * Module dependencies.
@@ -6495,7 +6162,7 @@ exports.connect = lookup;
 exports.Manager = require('./manager');
 exports.Socket = require('./socket');
 
-},{"./manager":45,"./socket":47,"./url":48,"debug":50,"socket.io-parser":54}],45:[function(require,module,exports){
+},{"./manager":44,"./socket":46,"./url":47,"debug":49,"socket.io-parser":53}],44:[function(require,module,exports){
 
 /**
  * Module dependencies.
@@ -7057,7 +6724,7 @@ Manager.prototype.onreconnect = function () {
   this.emitAll('reconnect', attempt);
 };
 
-},{"./on":46,"./socket":47,"backo2":11,"component-bind":15,"component-emitter":49,"debug":50,"engine.io-client":18,"indexof":37,"socket.io-parser":54}],46:[function(require,module,exports){
+},{"./on":45,"./socket":46,"backo2":10,"component-bind":14,"component-emitter":48,"debug":49,"engine.io-client":17,"indexof":36,"socket.io-parser":53}],45:[function(require,module,exports){
 
 /**
  * Module exports.
@@ -7083,7 +6750,7 @@ function on (obj, ev, fn) {
   };
 }
 
-},{}],47:[function(require,module,exports){
+},{}],46:[function(require,module,exports){
 
 /**
  * Module dependencies.
@@ -7504,7 +7171,7 @@ Socket.prototype.compress = function (compress) {
   return this;
 };
 
-},{"./on":46,"component-bind":15,"component-emitter":49,"debug":50,"has-binary":35,"socket.io-parser":54,"to-array":59}],48:[function(require,module,exports){
+},{"./on":45,"component-bind":14,"component-emitter":48,"debug":49,"has-binary":34,"socket.io-parser":53,"to-array":58}],47:[function(require,module,exports){
 (function (global){
 
 /**
@@ -7583,15 +7250,15 @@ function url (uri, loc) {
 }
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"debug":50,"parseuri":42}],49:[function(require,module,exports){
+},{"debug":49,"parseuri":41}],48:[function(require,module,exports){
+module.exports=require(27)
+},{"E:\\_web\\nodeJsProjects\\Socket_io\\node_modules\\engine.io-client\\node_modules\\component-emitter\\index.js":27}],49:[function(require,module,exports){
 module.exports=require(28)
-},{"E:\\_web\\nodeJsProjects\\Socket_io\\node_modules\\engine.io-client\\node_modules\\component-emitter\\index.js":28}],50:[function(require,module,exports){
+},{"./debug":50,"E:\\_web\\nodeJsProjects\\Socket_io\\node_modules\\engine.io-client\\node_modules\\debug\\browser.js":28,"_process":42}],50:[function(require,module,exports){
 module.exports=require(29)
-},{"./debug":51,"E:\\_web\\nodeJsProjects\\Socket_io\\node_modules\\engine.io-client\\node_modules\\debug\\browser.js":29,"_process":43}],51:[function(require,module,exports){
+},{"E:\\_web\\nodeJsProjects\\Socket_io\\node_modules\\engine.io-client\\node_modules\\debug\\debug.js":29,"ms":51}],51:[function(require,module,exports){
 module.exports=require(30)
-},{"E:\\_web\\nodeJsProjects\\Socket_io\\node_modules\\engine.io-client\\node_modules\\debug\\debug.js":30,"ms":52}],52:[function(require,module,exports){
-module.exports=require(31)
-},{"E:\\_web\\nodeJsProjects\\Socket_io\\node_modules\\engine.io-client\\node_modules\\ms\\index.js":31}],53:[function(require,module,exports){
+},{"E:\\_web\\nodeJsProjects\\Socket_io\\node_modules\\engine.io-client\\node_modules\\ms\\index.js":30}],52:[function(require,module,exports){
 (function (global){
 /*global Blob,File*/
 
@@ -7736,7 +7403,7 @@ exports.removeBlobs = function(data, callback) {
 };
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./is-buffer":55,"isarray":38}],54:[function(require,module,exports){
+},{"./is-buffer":54,"isarray":37}],53:[function(require,module,exports){
 
 /**
  * Module dependencies.
@@ -8142,7 +7809,7 @@ function error(data){
   };
 }
 
-},{"./binary":53,"./is-buffer":55,"component-emitter":16,"debug":56,"json3":39}],55:[function(require,module,exports){
+},{"./binary":52,"./is-buffer":54,"component-emitter":15,"debug":55,"json3":38}],54:[function(require,module,exports){
 (function (global){
 
 module.exports = isBuf;
@@ -8159,7 +7826,7 @@ function isBuf(obj) {
 }
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],56:[function(require,module,exports){
+},{}],55:[function(require,module,exports){
 
 /**
  * This is the web browser implementation of `debug()`.
@@ -8329,7 +7996,7 @@ function localstorage(){
   } catch (e) {}
 }
 
-},{"./debug":57}],57:[function(require,module,exports){
+},{"./debug":56}],56:[function(require,module,exports){
 
 /**
  * This is the common logic for both the Node.js and web browser
@@ -8528,7 +8195,7 @@ function coerce(val) {
   return val;
 }
 
-},{"ms":58}],58:[function(require,module,exports){
+},{"ms":57}],57:[function(require,module,exports){
 /**
  * Helpers.
  */
@@ -8655,7 +8322,7 @@ function plural(ms, n, name) {
   return Math.ceil(ms / n) + ' ' + name + 's';
 }
 
-},{}],59:[function(require,module,exports){
+},{}],58:[function(require,module,exports){
 module.exports = toArray
 
 function toArray(list, index) {
@@ -8670,7 +8337,7 @@ function toArray(list, index) {
     return array
 }
 
-},{}],60:[function(require,module,exports){
+},{}],59:[function(require,module,exports){
 (function (global){
 /*! https://mths.be/wtf8 v1.0.0 by @mathias */
 ;(function(root) {
@@ -8908,7 +8575,7 @@ function toArray(list, index) {
 }(this));
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],61:[function(require,module,exports){
+},{}],60:[function(require,module,exports){
 'use strict';
 
 var alphabet = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz-_'.split('')

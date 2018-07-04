@@ -14,7 +14,7 @@ Massage = React.createClass
 					</div>
 				</div>
 				<div className="cnt_massage">
-					<p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Recusandae mollitia quam eligendi, ullam laboriosam! Aut.</p>
+					<p>{@props.massage}</p>
 				</div>
 				<i className="fas fa-caret-left"></i>
 			</div>

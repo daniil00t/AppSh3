@@ -1,11 +1,11 @@
 {
   "name": "ReactCourse",
   "version": "0.0.1",
-  "description": "React fundamentals by LoftBlog",
-  "author": "Sergey Laptev <iamsergeylaptev@gmail.com> (https://twitter.com/iamsergeylaptev)",
+  "description": "app school #3",
+  "author": "Daniil Shenyagin https://github.com/den50; vk.com/daniil00t",
   "repository": {
     "type": "git",
-    "url": "git@github.com:sergeylaptev/react-fundamentals.git"
+    "url": "https://github.com/den50/AppSh3.git"
   },
   "scripts": {
     "server": "nodemon ./server/main.coffee"
@@ -34,7 +34,6 @@
     "lodash": "^3.5.0",
     "node-bourbon": "^4.2.8",
     "pretty-hrtime": "^0.2.2",
-    "require-dir": "^1.0.0",
     "run-sequence": "^1.0.1",
     "socket.io": "^1.7.4",
     "vinyl-buffer": "^1.0.0",
@@ -54,9 +53,11 @@
     "mongoose": "^5.0.11",
     "react": "^0.13.1",
     "react-cookies": "^0.1.0",
+    "react-dom": "^16.4.1",
     "react-router": "^4.2.0",
     "react-router-dom": "^4.2.2",
     "react-tap-event-plugin": "^0.1.6",
+    "require-dir": "^1.0.0",
     "url": "^0.11.0"
   }
 }

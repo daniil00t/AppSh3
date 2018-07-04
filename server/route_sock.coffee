@@ -5,6 +5,10 @@ DB = require "./utils/db"
 UsersSchema = require "./utils/schema_user"
 Users = require "./modules/test.learner.module"
 
+Chat_store = require "./chat.store"
+
+chat_store = new Chat_store("Привет! Ты попал в чат! Пользуйся чем хочешь, но не сквернословь!", 10)
+
 learner_chat = (socket, store)->
 
 	# Registr new client
@@ -16,10 +20,14 @@ learner_chat = (socket, store)->
 		ip: ip
 		type: "learner"
 		app: "chat"
-	socket.emit 'connected', id: id, ip: ip
+	socket.emit 'connected', id: id, ip: ip, hello: chat_store.getHello()
 
 
 	### Main methods learner ###
+
+	### _ SOCKET LESTENERS _ ###
+
+	# Lesteners
 	socket.on "changeNameUsr@soc", (data)->
 		# Проверка имени на совподаемость
 		console.log data
@@ -33,25 +41,26 @@ learner_chat = (socket, store)->
 		else
 			socket.emit "errorUsr@soc", {nameError: "name is holded", noError: 1, descError: "Вы использовали уже занятое имя другим пользователем.", helpError: "Пожалуйста, придумайте другое имя пользователя."}
 			console.log "name is holded"
+
 	socket.on "changePathImgUsr@soc", (data)->
 		store.updateClient data.id, {path: data.path}
 
-		# console.log store.getClients()
+	socket.on "addMassageToChat@soc", (_data)->
+		# console.log "id: #{data.id} | text: #{data.massage}"
+		console.log _data
+		socket.broadcast.emit "newMassageToChatUsers", {id: _data.id, nameUsr: _data.nameUsr, pathAva: _data.pathAva, massage: _data.massage}
+		# socket.emit "newMassageToChatUsers", {id: _data.id, nameUsr: _data.nameUsr, pathAva: _data.pathAva, massage: _data.massage}
 
-	socket.on "newMassageToChat", (data)->
-		console.log "id: #{data.id} | text: #{data.text}"
-
-		socket.broadcast.emit "newMassageToChatUsers", {id: data.id, name: data.name, text: data.text}
-		socket.emit "newMassageToChatUsers", {id: data.id, name: data.name, text: data.text}
-		
-		# appendToFile "./db.log", "#{data.id}: #{data.text}\n"
-
-		
 	socket.on "disconnect", (e) =>
 		id = socket.id
 		console.log "disconnect user, id: #{id}"
 		store.deleteClient id
 
+	### _ EventEmmiter _ ###
+
+	# events from stores
+	ee.on "changeHello_chat@ee", (data)->
+		socket.emit "changeHello@soc", cnt: data.cnt
 encryptHash = (data, key)->
 	cipher = crypto.createCipher('aes-256-cbc', key)
 	crypted = cipher.update(data, 'utf-8', 'hex')
@@ -167,4 +176,16 @@ admin = (socket, store)->
 		store.addUserToBan data.ip
 		console.log store.getUsersBan()
 		socket.broadcast.emit "deleteUser_toClient", data
+
+
+	### _ Chat _ ###
+
+	# Lesteners
+	socket.on "changeHelloChat", (data)=>
+		chat_store.changeHello data.cnt
+
+	# Outputs
+	socket.emit "getLoadData@soc", {chatHello: chat_store.getHello()}
+
+
 module.exports = {learner_chat: learner_chat, admin: admin}

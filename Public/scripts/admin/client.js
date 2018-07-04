@@ -31,7 +31,8 @@ App = React.createClass({
       numErr: -1,
       adminOnline: false,
       auth: false,
-      preloader: true
+      preloader: true,
+      chatHello: ""
     };
   },
   handleLogin: function() {
@@ -103,9 +104,25 @@ App = React.createClass({
         });
       }
     });
-    return ee.on("deleteUserAndMassage_ee", (function(_this) {
+    ee.on("deleteUserAndMassage_ee", (function(_this) {
       return function(data) {
         return socket.emit("deleteUserAndMassage", data);
+      };
+    })(this));
+
+    /* _ Chat _ */
+    socket.on("getLoadData@soc", (function(_this) {
+      return function(data) {
+        return _this.setState({
+          chatHello: data.chatHello
+        });
+      };
+    })(this));
+    return ee.on("changeHello@ee", (function(_this) {
+      return function(data) {
+        return socket.emit("changeHelloChat", {
+          cnt: data.cnt
+        });
       };
     })(this));
   },
@@ -149,7 +166,13 @@ App = React.createClass({
       "placeholder": "password"
     })), React.createElement("button", {
       "onClick": this.handleLogin
-    }, "Login"))) : (console.log(this.state.auth), this.state.auth ? React.createElement(Panel, null) : React.createElement("span", null, this.state.numErr)))));
+    }, "Login"))) : (console.log(this.state.auth), this.state.auth ? React.createElement(Panel, {
+      "data": {
+        chat: {
+          chatHello: this.state.chatHello
+        }
+      }
+    }) : React.createElement("span", null, this.state.numErr)))));
   }
 });
 
@@ -213,7 +236,9 @@ Panel = React.createClass({
         case 0:
           return React.createElement(Users, null);
         case 1:
-          return React.createElement(Chat, null);
+          return React.createElement(Chat, {
+            "data": this.props.data.chat
+          });
         case 2:
           return React.createElement(Test, null);
         case 3:
@@ -232,20 +257,21 @@ module.exports = Panel;
 
 
 },{"./comps/chat":4,"./comps/db":5,"./comps/feature":6,"./comps/header_panel":7,"./comps/tests":8,"./comps/users":9,"react":"react"}],4:[function(require,module,exports){
-var Chat, React;
+var Chat, React, ee;
 
 React = require("react");
+
+ee = require("../../ee");
 
 Chat = React.createClass({
   displayName: "ChatPanel",
   getInitialState: function() {
     return {
       top_panel_state: false,
-      top_panel_text: "Привет участникам соревнований!"
+      top_panel_text: ""
     };
   },
   changeStateChat_sub: function(e) {
-    console.log(e.target.nodeName);
     if (e.target.nodeName === "SPAN" || e.target.nodeName === "P") {
       return this.setState({
         top_panel_state: !this.state.top_panel_state
@@ -254,19 +280,36 @@ Chat = React.createClass({
   },
   changeStateChat: function(e) {
     if (e.key === "Enter") {
-      console.log(e.target.value);
       this.setState({
-        top_panel_state: !this.state.top_panel_state
-      });
-      return this.setState({
+        top_panel_state: !this.state.top_panel_state,
         top_panel_text: e.target.value
+      });
+      return ee.emit("changeHello@ee", {
+        cnt: e.target.value
       });
     }
   },
   hideMainCnt: function(e) {
+
+    /* !!! Переделать - не нравится, как сделано - Сделать адекватно !!! */
     var n;
     n = e.target.attributes[1].value;
     return $("#wrp_cnt" + n).toggle("active");
+
+    /* !!! */
+  },
+  focusInput: function(node) {
+    var _node;
+    _node = React.findDOMNode(node);
+    if (_node != null) {
+      _node.focus();
+      return _node.value = _node.placeholder;
+    }
+  },
+  componentWillMount: function() {
+    return this.setState({
+      top_panel_text: this.props.data.chatHello
+    });
   },
   render: function() {
     return React.createElement("div", {
@@ -308,7 +351,12 @@ Chat = React.createClass({
           return _this.changeStateChat(e);
         };
       })(this)),
-      "placeholder": this.state.top_panel_text
+      "placeholder": this.state.top_panel_text,
+      "ref": ((function(_this) {
+        return function(node) {
+          return _this.focusInput(node);
+        };
+      })(this))
     })))))), React.createElement("div", {
       "className": "block_chat animFadeInUp"
     }, React.createElement("div", {
@@ -328,7 +376,7 @@ module.exports = Chat;
 
 
 
-},{"react":"react"}],5:[function(require,module,exports){
+},{"../../ee":10,"react":"react"}],5:[function(require,module,exports){
 var DB, React;
 
 React = require("react");

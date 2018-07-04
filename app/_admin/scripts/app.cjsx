@@ -12,6 +12,9 @@ App = React.createClass
 		adminOnline: false
 		auth: no
 		preloader: true
+
+		# Chat states
+		chatHello: ""
 	handleLogin: ->
 		socket.emit "adminLogin",  {login: document.getElementById("login1").value, password: document.getElementById("password1").value}
 		console.log "click"
@@ -46,7 +49,13 @@ App = React.createClass
 		ee.on "deleteUserAndMassage_ee", (data)=>
 			socket.emit "deleteUserAndMassage", data
 
+		### _ Chat _ ###
 
+		socket.on "getLoadData@soc", (data)=>
+			@setState chatHello: data.chatHello
+
+		ee.on "changeHello@ee", (data)=>
+			socket.emit "changeHelloChat", cnt: data.cnt
 		# socket.on "errorSrv@soc", (data)=>
 		# 	alert "TypeError: #{data.type}. #{data.err}"
 	render: ->
@@ -74,7 +83,7 @@ App = React.createClass
 					else
 						console.log @state.auth
 						if @state.auth
-							<Panel />
+							<Panel data={{chat: {chatHello: @state.chatHello}}}/>
 						else
 							<span>{@state.numErr}</span>
 				}

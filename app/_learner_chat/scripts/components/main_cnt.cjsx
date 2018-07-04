@@ -16,21 +16,22 @@ Main = React.createClass
 			document.getElementById(e.target.id).value = ""
 			e.preventDefault()
 			ee.emit "addMassage__toHeader", {massage: massage}
+		# else
+		# 	if val == "Enter" and e.shiftKey
+
 	render: ->
 		<div className="main_cnt">
 			<div className="container">
 				<div className="massages">
-					<div className="fixed_top_panel"><p>Привет участникам соревнований!</p></div>
+					<div className="fixed_top_panel"><p>{@props.hello}</p></div>
 					<div className="wrp_massages">
-
-						<MyMassage text="Lorem ipsum dolor sit amet, consectetur adipisicing elit. Distinctio molestiae laudantium nulla et similique reprehenderit!"/>
-						<Massage srcUrlImg="/imgFiles/avatars/admin.jpg" name="Daniil"/>
-						<MyMassage text="Lorem ipsum dolor sit amet, consectetur adipisicing elit. Distinctio molestiae laudantium nulla et similique reprehenderit!"/>
-						<Massage srcUrlImg="/imgFiles/avatars/admin.jpg" name="Daniil"/>
-						<MyMassage text="Lorem ipsum dolor sit amet, consectetur adipisicing elit. Distinctio molestiae laudantium nulla et similique reprehenderit!"/>
-						<Massage srcUrlImg="/imgFiles/avatars/admin.jpg" name="Daniil"/>
-						<MyMassage text="Lorem ipsum dolor sit amet, consectetur adipisicing elit. Distinctio molestiae laudantium nulla et similique reprehenderit!"/>
-
+						{
+							@props.massages.map (i, j)=>
+								if i.id == @props.mydata.id
+									<MyMassage text={i.massage}/>
+								else
+									<Massage srcUrlImg={i.pathAva} name={i.nameUsr} massage={i.massage}/>
+						}
 					</div>
 
 				</div>

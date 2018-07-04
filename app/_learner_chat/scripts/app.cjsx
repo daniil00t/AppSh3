@@ -31,7 +31,18 @@ App = React.createClass
 		socket.on "errorUsr@soc", (data)=>
 			alert "Error: #{data.nameError}. NumError: #{data.noError}"
 
+		socket.on "newMassageToChatUsers", (data)=>
+			arr = @state.massages
+			arr.push data
+			@setState massages: arr
+
+		socket.on "changeHello@soc", (data)=>
+			_configsUsr = @state.configsUsr
+			_configsUsr.hello = data.cnt
+			@setState configsUsr: _configsUsr
+
 		### _ EventEmitter events _ ###
+
 		ee.on "changeNameUsr@ee", (data)=>
 			socket.emit "changeNameUsr@soc", {id: @state.configsUsr.id, name: data.name}
 		
@@ -40,14 +51,20 @@ App = React.createClass
 
 		ee.on "addMassage", (data)=>
 			arr = @state.massages
-			arr.push data
-			@setState massages: arr
+			_data = data
+			_data.id = @state.configsUsr.id
 
+			console.log _data
+			arr.push _data
+			@setState massages: arr
+			socket.emit "addMassageToChat@soc", 
+				{id: _data.id, nameUsr: _data.nameUsr, pathAva: _data.pathAva, massage: _data.massage}
 		
+
 	render: ->
 		<div className="CHAT_APP">
 			<Header />
-			<Main />
+			<Main massages={@state.massages} mydata={@state.configsUsr} hello={@state.configsUsr.hello}/>
 		</div>
 		
 

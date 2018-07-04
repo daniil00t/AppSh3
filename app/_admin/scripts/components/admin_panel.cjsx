@@ -40,7 +40,7 @@ Panel = React.createClass
 					{
 						switch @state.sidebarvalue
 							when 0 then <Users />
-							when 1 then <Chat />
+							when 1 then <Chat data={@props.data.chat}/>
 							when 2 then <Test />
 							when 3 then <DB_panel />
 							when 4 then <Features />

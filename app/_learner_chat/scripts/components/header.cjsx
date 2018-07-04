@@ -4,6 +4,7 @@ ee = require "../ee"
 Avatars = [
 	["admin", "/imgFiles/avatars/admin.jpg"],
 	["daniil", "/imgFiles/avatars/admin.jpg"],
+	["cool", "https://lh3.googleusercontent.com/-f5PGOS18IEc/WpgdKPUDLEI/AAAAAAAAB5E/FW1252toX4gQwe9i_LdQn8N5jp5IJ2_TQCEwYBhgL/w140-h139-p/maxresdefault.jpg"],
 	# ["Daniil", "/imgFiles/avatars/danill.png"]
 ]
 ###

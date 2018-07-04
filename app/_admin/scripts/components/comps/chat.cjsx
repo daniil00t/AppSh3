@@ -1,24 +1,29 @@
 React = require "react"
-
-
-
+ee = require "../../ee"
 
 Chat = React.createClass
 	displayName: "ChatPanel"
 	getInitialState: ->
-		top_panel_state: false
-		top_panel_text: "Привет участникам соревнований!" # Изменить в будущем
+		top_panel_state: false	# Состояние скрытости контента
+		top_panel_text: "" 			# Значение chatHello
 	changeStateChat_sub: (e)->
-		console.log e.target.nodeName
 		@setState top_panel_state: !@state.top_panel_state if e.target.nodeName == "SPAN" or e.target.nodeName == "P"
 	changeStateChat: (e)->
 		if e.key == "Enter"
-			console.log e.target.value
-			@setState top_panel_state: !@state.top_panel_state
-			@setState top_panel_text: e.target.value
+			@setState top_panel_state: !@state.top_panel_state, top_panel_text: e.target.value
+			ee.emit "changeHello@ee", cnt: e.target.value
 	hideMainCnt: (e)->
+		### !!! Переделать - не нравится, как сделано - Сделать адекватно !!! ###
 		n = e.target.attributes[1].value
 		$("#wrp_cnt#{n}").toggle("active")
+		### !!! ###
+	focusInput: (node)->
+		_node = React.findDOMNode(node) # returned <input />
+		if _node?
+			_node.focus()
+			_node.value = _node.placeholder
+	componentWillMount: ->
+		@setState top_panel_text: @props.data.chatHello
 	render: ->
 		<div className="chatPanel">
 			<h1 className="welcome_chat_panel">
@@ -32,7 +37,9 @@ Chat = React.createClass
 				<div className="wrp_cnt" id="wrp_cnt0">
 
 					<div className="fixed_top_panel">
-						<p className="text-center" id="changeStateChat" onClick={(e) => @changeStateChat_sub e}>{if !@state.top_panel_state then <span id="changeStateChatText">{@state.top_panel_text}</span> else <input onKeyDown={(e) => @changeStateChat e} placeholder={@state.top_panel_text}/>}</p>
+						<p className="text-center" id="changeStateChat" onClick={(e) => @changeStateChat_sub e}>
+							{if !@state.top_panel_state then <span id="changeStateChatText">{@state.top_panel_text}</span> else <input onKeyDown={(e) => @changeStateChat e} placeholder={@state.top_panel_text} ref={(node) => @focusInput node}/>}
+						</p>
 					</div>
 				
 				</div>
@@ -49,7 +56,6 @@ Chat = React.createClass
 				
 				</div>
 			</div>
-
 		</div>
 
 

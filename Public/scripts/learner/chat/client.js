@@ -62,6 +62,26 @@ App = React.createClass({
         return alert("Error: " + data.nameError + ". NumError: " + data.noError);
       };
     })(this));
+    socket.on("newMassageToChatUsers", (function(_this) {
+      return function(data) {
+        var arr;
+        arr = _this.state.massages;
+        arr.push(data);
+        return _this.setState({
+          massages: arr
+        });
+      };
+    })(this));
+    socket.on("changeHello@soc", (function(_this) {
+      return function(data) {
+        var _configsUsr;
+        _configsUsr = _this.state.configsUsr;
+        _configsUsr.hello = data.cnt;
+        return _this.setState({
+          configsUsr: _configsUsr
+        });
+      };
+    })(this));
 
     /* _ EventEmitter events _ */
     ee.on("changeNameUsr@ee", (function(_this) {
@@ -82,11 +102,20 @@ App = React.createClass({
     })(this));
     return ee.on("addMassage", (function(_this) {
       return function(data) {
-        var arr;
+        var _data, arr;
         arr = _this.state.massages;
-        arr.push(data);
-        return _this.setState({
+        _data = data;
+        _data.id = _this.state.configsUsr.id;
+        console.log(_data);
+        arr.push(_data);
+        _this.setState({
           massages: arr
+        });
+        return socket.emit("addMassageToChat@soc", {
+          id: _data.id,
+          nameUsr: _data.nameUsr,
+          pathAva: _data.pathAva,
+          massage: _data.massage
         });
       };
     })(this));
@@ -94,7 +123,11 @@ App = React.createClass({
   render: function() {
     return React.createElement("div", {
       "className": "CHAT_APP"
-    }, React.createElement(Header, null), React.createElement(Main, null));
+    }, React.createElement(Header, null), React.createElement(Main, {
+      "massages": this.state.massages,
+      "mydata": this.state.configsUsr,
+      "hello": this.state.configsUsr.hello
+    }));
   }
 });
 
@@ -109,7 +142,7 @@ React = require("react");
 
 ee = require("../ee");
 
-Avatars = [["admin", "/imgFiles/avatars/admin.jpg"], ["daniil", "/imgFiles/avatars/admin.jpg"]];
+Avatars = [["admin", "/imgFiles/avatars/admin.jpg"], ["daniil", "/imgFiles/avatars/admin.jpg"], ["cool", "https://lh3.googleusercontent.com/-f5PGOS18IEc/WpgdKPUDLEI/AAAAAAAAB5E/FW1252toX4gQwe9i_LdQn8N5jp5IJ2_TQCEwYBhgL/w140-h139-p/maxresdefault.jpg"]];
 
 
 /*
@@ -328,26 +361,23 @@ Main = React.createClass({
       "className": "massages"
     }, React.createElement("div", {
       "className": "fixed_top_panel"
-    }, React.createElement("p", null, "Привет участникам соревнований!")), React.createElement("div", {
+    }, React.createElement("p", null, this.props.hello)), React.createElement("div", {
       "className": "wrp_massages"
-    }, React.createElement(MyMassage, {
-      "text": "Lorem ipsum dolor sit amet, consectetur adipisicing elit. Distinctio molestiae laudantium nulla et similique reprehenderit!"
-    }), React.createElement(Massage, {
-      "srcUrlImg": "/imgFiles/avatars/admin.jpg",
-      "name": "Daniil"
-    }), React.createElement(MyMassage, {
-      "text": "Lorem ipsum dolor sit amet, consectetur adipisicing elit. Distinctio molestiae laudantium nulla et similique reprehenderit!"
-    }), React.createElement(Massage, {
-      "srcUrlImg": "/imgFiles/avatars/admin.jpg",
-      "name": "Daniil"
-    }), React.createElement(MyMassage, {
-      "text": "Lorem ipsum dolor sit amet, consectetur adipisicing elit. Distinctio molestiae laudantium nulla et similique reprehenderit!"
-    }), React.createElement(Massage, {
-      "srcUrlImg": "/imgFiles/avatars/admin.jpg",
-      "name": "Daniil"
-    }), React.createElement(MyMassage, {
-      "text": "Lorem ipsum dolor sit amet, consectetur adipisicing elit. Distinctio molestiae laudantium nulla et similique reprehenderit!"
-    }))), React.createElement("div", {
+    }, this.props.massages.map((function(_this) {
+      return function(i, j) {
+        if (i.id === _this.props.mydata.id) {
+          return React.createElement(MyMassage, {
+            "text": i.massage
+          });
+        } else {
+          return React.createElement(Massage, {
+            "srcUrlImg": i.pathAva,
+            "name": i.nameUsr,
+            "massage": i.massage
+          });
+        }
+      };
+    })(this)))), React.createElement("div", {
       "className": "bottom_panel"
     }, React.createElement("textarea", {
       "rows": "5",
@@ -403,7 +433,7 @@ Massage = React.createClass({
       "className": "name_usr"
     }, React.createElement("span", null, this.props.name))), React.createElement("div", {
       "className": "cnt_massage"
-    }, React.createElement("p", null, "Lorem ipsum dolor sit amet, consectetur adipisicing elit. Recusandae mollitia quam eligendi, ullam laboriosam! Aut.")), React.createElement("i", {
+    }, React.createElement("p", null, this.props.massage)), React.createElement("i", {
       "className": "fas fa-caret-left"
     })), React.createElement("div", {
       "className": "text"
@@ -425,7 +455,9 @@ MyMassage = React.createClass({
   render: function() {
     return React.createElement("div", {
       "className": "my_massage"
-    }, React.createElement("p", null, this.props.text), React.createElement("i", {
+    }, React.createElement("div", {
+      "className": "wrap"
+    }, React.createElement("p", null, this.props.text)), React.createElement("i", {
       "className": "fas fa-caret-right"
     }));
   }
