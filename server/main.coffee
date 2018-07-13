@@ -60,7 +60,29 @@ app.get "/learner", (req, res)->
 app.get "/learner/test", (req, res)->
 	res.sendfile path.resolve __dirname, "../Public/learner/test.html"
 
-######
+
+#app.get "/importdb", (req, res)->
+#	res.send "import"
+
+
+app.get "/exportdb", (req, res)->
+	# Сборка файла
+	#console.log URL.parse(req.url).query
+	query = JSON.parse('{"' + decodeURI(URL.parse(req.url).query.replace(/&/g, "\",\"").replace(/=/g,"\":\"")) + '"}')
+	if query.type?
+		switch query.type
+			when "users"
+				res.send "download users db"
+			when "tests"
+				res.send "download tests db"
+			else
+				res.send "err"
+	pathfile = "./etc/users.db"
+	# Скачивание файла
+	#res.download path.resolve __dirname, pathfile
+
+
+### _ Error 404 _ ###
 
 app.get "/*", (req, res)->
 	res.send "error 404"

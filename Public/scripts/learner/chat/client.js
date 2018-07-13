@@ -7254,13 +7254,13 @@ function url (uri, loc) {
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
 },{"debug":49,"parseuri":41}],48:[function(require,module,exports){
 module.exports=require(27)
-},{"E:\\_web\\nodeJsProjects\\Socket_io\\node_modules\\engine.io-client\\node_modules\\component-emitter\\index.js":27}],49:[function(require,module,exports){
+},{"/home/daniil/__projects/nodejs/AppSh3/node_modules/engine.io-client/node_modules/component-emitter/index.js":27}],49:[function(require,module,exports){
 module.exports=require(28)
-},{"./debug":50,"E:\\_web\\nodeJsProjects\\Socket_io\\node_modules\\engine.io-client\\node_modules\\debug\\browser.js":28,"_process":42}],50:[function(require,module,exports){
+},{"./debug":50,"/home/daniil/__projects/nodejs/AppSh3/node_modules/engine.io-client/node_modules/debug/browser.js":28,"_process":42}],50:[function(require,module,exports){
 module.exports=require(29)
-},{"E:\\_web\\nodeJsProjects\\Socket_io\\node_modules\\engine.io-client\\node_modules\\debug\\debug.js":29,"ms":51}],51:[function(require,module,exports){
+},{"/home/daniil/__projects/nodejs/AppSh3/node_modules/engine.io-client/node_modules/debug/debug.js":29,"ms":51}],51:[function(require,module,exports){
 module.exports=require(30)
-},{"E:\\_web\\nodeJsProjects\\Socket_io\\node_modules\\engine.io-client\\node_modules\\ms\\index.js":30}],52:[function(require,module,exports){
+},{"/home/daniil/__projects/nodejs/AppSh3/node_modules/engine.io-client/node_modules/ms/index.js":30}],52:[function(require,module,exports){
 (function (global){
 /*global Blob,File*/
 

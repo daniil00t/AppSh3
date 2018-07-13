@@ -58,6 +58,10 @@ App = React.createClass
 			socket.emit "changeHelloChat", cnt: data.cnt
 		# socket.on "errorSrv@soc", (data)=>
 		# 	alert "TypeError: #{data.type}. #{data.err}"
+
+		### _ DB _ ###
+		ee.on "importDB@ee", (data)=>
+			socket.emit "importD"
 	render: ->
 		<div className="wrp_admin">
 			<div className="preloader" style={display: if !@state.preloader then "none"}>

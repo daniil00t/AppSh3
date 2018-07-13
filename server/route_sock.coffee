@@ -187,5 +187,10 @@ admin = (socket, store)->
 	# Outputs
 	socket.emit "getLoadData@soc", {chatHello: chat_store.getHello()}
 
+	### _ DB _ ###
+
+	pathfile = "./etc/users.db"
+	
+
 
 module.exports = {learner_chat: learner_chat, admin: admin}
