@@ -275,11 +275,28 @@
 	z-index: 999;
 	margin: auto;
 	width: 350px;
-	height: 300px;
+	height: 320px;
 	background-color: #2B9483;
 	text-align: center;
 	border-radius: 5px;
 	box-shadow: 0 0 25px rgba(0,0,0,.4);
+	overflow: hidden;
+
+	.err.active{
+		background-color: #DE5B49;
+		width: 100%;
+		display: block;
+		margin-bottom: 15px;
+		p{
+			color: #fff;
+			line-height: 50px;
+			text-align: center;
+			width: 100%;
+		}
+	}
+	.err.noactive{
+		display: none;
+	}
 	h1{
 		display: inline-block;
 		color: #fff;
@@ -308,7 +325,7 @@
 	}
 	#login{
 		&::before{
-			font-family: FontAwesome;
+			font-family: font-awesome;
 			content: "\f007";
 			position: absolute;
 			font-size: 22px;
@@ -494,7 +511,6 @@ body, html {
 			float: right;
 			li{
 				display: inline-block;
-				line-height: 40px;
 				background-color: #2866f7;
 				color: #fff;
 				padding: 0 15px;
@@ -512,8 +528,16 @@ body, html {
 				&:hover{
 					background-color: #2154cc;
 				}
+				a{
+					line-height: 40px;
+					text-decoration: none;
+					display: block;
+					float: right;
+				}
 			}
 			.settings{
+				line-height: 40px;
+				
 				background-color: #DB381B;
 				transition: all ease-in-out .1s;
 				&:hover{
