@@ -129,7 +129,9 @@ App = React.createClass({
     /* _ DB _ */
     return ee.on("importDB@ee", (function(_this) {
       return function(data) {
-        return socket.emit("importD");
+        return socket.emit("importDB@soc", {
+          type: data.type
+        });
       };
     })(this));
   },

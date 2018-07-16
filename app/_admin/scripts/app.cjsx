@@ -61,7 +61,7 @@ App = React.createClass
 
 		### _ DB _ ###
 		ee.on "importDB@ee", (data)=>
-			socket.emit "importD"
+			socket.emit "importDB@soc", type: data.type
 	render: ->
 		<div className="wrp_admin">
 			<div className="preloader" style={display: if !@state.preloader then "none"}>
