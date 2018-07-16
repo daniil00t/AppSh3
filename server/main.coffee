@@ -5,13 +5,20 @@ io = require('socket.io')(server)
 path = require "path"
 fs = require('fs')
 URL = require('url')
+session = require "express-session"
+cookieParser = require "cookie-parser"
 
 # redirect = require("express-redirect")
 # redirect(app)
 route_sock = require "./route_sock"
 ee = require "./ee"
+
 Test = require "./modules/test.learner.module"
 TestSchema = require "./utils/schema_test"
+
+UsersSchema = require "./utils/schema_user"
+Users = require "./modules/test.learner.module"
+
 DB = require "./utils/db"
 
 
@@ -23,6 +30,12 @@ app.use('/libsFiles', express["static"](path.resolve __dirname, '../Public/libs'
 app.use('/jsFiles', express["static"](path.resolve __dirname, '../Public/scripts'))
 
 app.use('/imgFiles', express["static"](path.resolve __dirname, '../Public/img'))
+
+app.use(cookieParser())
+# app.use(express.cookieParser())
+# app.use(session({
+# 	secret: "Hello"
+# }))
 
 # app.use('/filesForData', express["static"](path.resolve __dirname, '../docs'))
 # app.use('/filesETC', express["static"](path.resolve __dirname, '../Public/etc'))
@@ -44,10 +57,23 @@ app.get '/', (req, res)->
   res.sendfile path.resolve __dirname, "../Public/index.html"
 
 ######
+app.get "/adminlogin", (req, res)->
+	res.sendfile path.resolve __dirname, "../Public/admin/login.html"
+
+USERS = []
+Users.getData(UsersSchema).then (__data)=>
+	for i in __data
+		USERS.push i
 
 app.get "/admin", (req, res)->
 	# ip = req.headers['x-forwarded-for'] or req.connection.remoteAddress or req.socket.remoteAddress or (if req.connection.socket then req.connection.socket.remoteAddress else null)
-	res.sendfile path.resolve __dirname, "../Public/admin/index.html"
+	if req.cookies.hash?
+		for i in USERS
+			if i.privelegs == "admin" and i.hash == req.cookies.hash
+				console.log "aga"
+				# res.sendfile path.resolve __dirname, "../Public/admin/index.html"
+	else
+		res.redirect "/adminlogin"
 
 ######
 
@@ -60,7 +86,11 @@ app.get "/learner", (req, res)->
 app.get "/learner/test", (req, res)->
 	res.sendfile path.resolve __dirname, "../Public/learner/test.html"
 
-
+# app.get "/inc", (req, res)->
+# 	console.log req.cookies.admin
+# 	res.setHeader("Set-Cookie", "admin=10")
+# 	# res.end() 
+# 	res.send "hello cookie!"
 #app.get "/importdb", (req, res)->
 #	res.send "import"
 
@@ -104,6 +134,8 @@ io.on 'connection', (socket)->
 		when "/learner/chat"
 			route_sock.learner_chat(socket, store_users)
 		when "/admin"
+			route_sock.admin(socket, store_users)
+		when "/adminlogin"
 			route_sock.admin(socket, store_users)
 		when "/learner/test"
 			ip = socket.handshake.address
@@ -167,14 +199,14 @@ io.on 'connection', (socket)->
 			
 		else
 			console.log "/"
-			route_sock.admin(socket, store_users)
-			socket.on "exportDBonFile", (data)->
-				DB.setUpConnection()
-				Test.getTests(TestSchema).then (data)->
-					fs.writeFile "./docs/db_test.json", JSON.stringify(data), "utf-8", (err)=>
-						if err then throw err
-						console.log "saved file"
-						socket.emit "sendPathExportFileDB", {path: "/FilesForData/db_test.json"}
+			# route_sock.admin(socket, store_users)
+			# socket.on "exportDBonFile", (data)->
+			# 	DB.setUpConnection()
+			# 	Test.getTests(TestSchema).then (data)->
+			# 		fs.writeFile "./docs/db_test.json", JSON.stringify(data), "utf-8", (err)=>
+			# 			if err then throw err
+			# 			console.log "saved file"
+			# 			socket.emit "sendPathExportFileDB", {path: "/FilesForData/db_test.json"}
 	# socket.on "sendMassage", (data)->
 	# 	store_users.addContent data.id, data.massage
 	# 	console.log store_users.getClient data.id

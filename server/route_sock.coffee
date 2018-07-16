@@ -99,84 +99,26 @@ decryptLogPass = (hash)->
 
 admin = (socket, store)->
 	###Admin funcs and methods...###
-	ee.on "errorSrv", (data)=>
-		socket.emit "errorSrv@soc", err: data.err, type: date.type
-	# console.log decryptLogPass "f933e820c03a31975c7ccd788f5c5fda0607"
-	# console.log decryptLogPass "fdae23efce058f58a26f061f52a81a730607"
-	# 	{ "_id" : ObjectId("59bac5cd33c3a832db76b1dc"), "name" : "Tom" }
-	# { "_id" : ObjectId("5aca31dac8f61b22e4a8cb4e"), "hash" : "dc7de35bc05384f64e971f
-	# 7c49f7b0330408", "privelegs" : "admin", "__v" : 0 }
-	# { "_id" : ObjectId("5ada149c2b97af1ba80a87aa"), "hash" : "f933e820c03a31975c7ccd
-	# 788f5c5fda0607", "privelegs" : "admin", "__v" : 0 }
-
-	# console.dir decryptLogPass "f933e820c03a31975c7ccd788f5c5fda0607"
 	adminOnline = store.getAdminOnline()
 	ip = socket.handshake.address
 
 	# console.log adminOnline
 	DB.setUpConnection()
-	# Users.addData(UsersSchema, {hash: "fdae23efce058f58a26f061f52a81a730607", privelegs: "admin"})
-	
-	# Users.removeData UsersSchema, "5aca245acc5bd644deb63732"
-	# Users.update UsersSchema, "5ada149c2b97af1ba80a87aa", { hash: "f933e820c03a31975c7ccd788f5c5fda0607"}
 
-	
-	# socket.emit "StartAdmin", {ip: ip, hash: encryptHash DATA.login, DATA.password}
-	
-
-	###Если админ не в сети###
-	if !adminOnline
-		socket.emit "StartAdmin", {online: no}
-		# socket.emit "YOUADMIN", {type: true}
-		socket.on "adminLogin", (data)->
-			_data = data
-			# data -> login, password
-			_data.ip = socket.handshake.address
-			Users.getData(UsersSchema).then (__data)=>
-				log = false
-				for i, j in __data
-					if i.privelegs == "admin" and i.hash == encryptLogPass(data.login, data.password)
-						store.setAdmin
-							ip: _data.ip
-							type: "admin"
-							login: true
-							privileges: 10
-							hash: i.hash
-						socket.emit "adminLoginSuccess", type: on
-						console.log "Login! #{_data.ip} -> admin"
-						console.log store.getAdmin()
-						log = true
-						break
-			
-
-					# ee.emit "redirectToAdmin", type: true
-					# app.redirect "/admin", "/admin"
-				if !log
-					console.log "wrong!Login or password incorrected!"
-					socket.emit "err", {num: 1}
-		###Если админ в сети###			
-	else
-		console.log "admin online"
-		if ip == store.getAdmin().ip
-			socket.emit "YOUADMIN", {type: true}
-		else
-			socket.emit "err", {num: 2}
-	socket.on "logoutAdmin", (data)->
-		console.log "delete!"
-		store.deleteAdmin()
-	ee.on "changeUsers", (data)=>
-		socket.emit "loadUsers", status: "sending", data: store.getClients()
-	socket.on "loadUsers", (data)=>
-		if data.status == "load"
-			socket.emit "loadUsers", status: "sending", data: store.getClients()
-			console.log "send"
-	socket.on "deleteUserAndMassage", (data)->
-		# ee.emit "deleteUser_toClient_ee", data
+	socket.on "adminLogin@soc", (data)=>
 		console.log data
-		store.addUserToBan data.ip
-		console.log store.getUsersBan()
-		socket.broadcast.emit "deleteUser_toClient", data
-
+		Users.getData(UsersSchema).then (__data)=>
+			for i, j in __data
+				# console.log i
+				if i.privelegs == "admin" and i.hash == encryptLogPass(data.login, data.password)
+					ee.emit "adminLogin@ee", type: true
+					# res.setHeader("Set-Cookie", ["admin=login", "hash=#{i.hash}"])
+					console.log "login!"
+					socket.emit "doneLoginAdmin@soc", str: "hash=#{i.hash}"
+				else
+					# ERROR
+					# console.log "error login"
+					# break
 
 	### _ Chat _ ###
 

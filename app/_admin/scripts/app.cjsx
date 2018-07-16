@@ -17,7 +17,6 @@ App = React.createClass
 		chatHello: ""
 	handleLogin: ->
 		socket.emit "adminLogin",  {login: document.getElementById("login1").value, password: document.getElementById("password1").value}
-		console.log "click"
 	componentWillMount: ->
 		socket.on "StartAdmin", (data)=>
 			# @setState adminOnline: data.online
