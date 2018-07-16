@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Login admin</title>
+	<meta name="description" content="">
+
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+	<link href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet"></link>
+	<link href="https://cdnjs.cloudflare.com/ajax/libs/normalize/7.0.0/normalize.min.css" rel="stylesheet"></link>
+	<link rel="stylesheet" href="/cssFiles/style.css">
+	<link rel="stylesheet" href="/cssFiles/main.min.css">
+	<link rel="stylesheet" href="/cssFiles/preloader.css">
+	<link rel="stylesheet" href="/cssFiles/style_sass.css">
+	<link rel="stylesheet" href="/libsFiles/font-awesome/css/font-awesome.min.css">
+
+	<!-- <link rel="stylesheet" href="/libsFiles/font-awesome/css/fontawesome-all.min.css"> -->
+	<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.1.0/css/all.css">
+</head>
+<body>
+	<div>
+		<div class="wrp-login">
+			<h1>Admin Login</h1>
+			<div id="login"><input type="text" id="login1" placeholder="login"/></div>
+			<div id="pass"><input type="password" id="password" placeholder="password"/></div>
+			<button id="done">Login</button>
+		</div>
+	</div>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.1.1/socket.io.js"></script>
+	<script>
+		var socket = io();
+		function getCookie(name) {
+			var matches = document.cookie.match(new RegExp(
+				"(?:^|; )" + name.replace(/([\.$?*|{}\(\)\[\]\\\/\+^])/g, '\\$1') + "=([^;]*)"
+			));
+			return matches ? decodeURIComponent(matches[1]) : undefined;
+		}
+
+
+
+		document.getElementById("done").onclick = function(){
+			var login = document.getElementById("login1").value;
+			var password = document.getElementById("password").value;
+			socket.emit("adminLogin@soc",{login: login, password: password});
+		};
+
+		socket.on("doneLoginAdmin@soc", function(data){
+			document.cookie = data.str;
+			console.log(document.cookie);
+			window.location.replace("/admin");
+		});
+	</script>
+</body>
+</html>
