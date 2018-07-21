@@ -5,8 +5,10 @@ io = require('socket.io')(server)
 path = require "path"
 fs = require('fs')
 URL = require('url')
+crypto = require('crypto')
 session = require "express-session"
 cookieParser = require "cookie-parser"
+bodyParser = require "body-parser"
 
 # redirect = require("express-redirect")
 # redirect(app)
@@ -32,6 +34,10 @@ app.use('/jsFiles', express["static"](path.resolve __dirname, '../Public/scripts
 app.use('/imgFiles', express["static"](path.resolve __dirname, '../Public/img'))
 
 app.use(cookieParser())
+app.use( bodyParser.json() )
+app.use(bodyParser.urlencoded({
+  extended: true
+}))
 # app.use(express.cookieParser())
 # app.use(session({
 # 	secret: "Hello"
@@ -57,24 +63,85 @@ app.get '/', (req, res)->
   res.sendfile path.resolve __dirname, "../Public/index.html"
 
 ######
+encryptHash = (data, key)->
+	cipher = crypto.createCipher('aes-256-cbc', key)
+	crypted = cipher.update(data, 'utf-8', 'hex')
+	crypted += cipher.final('hex')
+	return crypted
+
+
+decryptHash = (data, key)->
+	decipher = crypto.createDecipher('aes-256-cbc', key)
+	decrypted = decipher.update(data, 'hex', 'utf-8')
+	decrypted += decipher.final('utf-8')
+	return decrypted
+
+
+# encryptLogPass - функция, умеющая кодировать логин и пароль в хэш(ключ используется - Осман)
+encryptLogPass = (login, pass)->
+	l1 = if login.length < 9 then "0#{login.length}" else login.length
+	p1 = if pass.length < 9 then "0#{pass.length}" else pass.length
+	key = "Osman" + l1 + p1
+	encryptHash(login + pass, key) + l1 + p1
+
+
+# decryptLogPass - функция, умеющая декодировать хэш в обычный объкт, сост. из логина и пароля
+decryptLogPass = (hash)->
+	_hash = hash.substr(0, hash.length-4)
+	_nums =  hash.substr(hash.length-4, hash.length)
+
+	n1 = Number _nums.substr(0, 2)
+	n2 = Number _nums.substr(2, 4)
+
+	key = "Osman" + _nums
+	{str: decryptHash(_hash, key), login: decryptHash(_hash, key).substr(0, n1), pass: decryptHash(_hash, key).substr(n1, n1+n2)}
+
+
 app.get "/adminlogin", (req, res)->
 	res.sendfile path.resolve __dirname, "../Public/admin/login.html"
 
-USERS = []
-Users.getData(UsersSchema).then (__data)=>
-	for i in __data
-		USERS.push i
+
+
+
+DB.setUpConnection()
+app.post "/admin", (req, res)->
+	hash = encryptLogPass(req.body.login, req.body.password)
+	t = 0
+	Users.getData(UsersSchema).then (__data)=>
+		t = no
+		for i in __data
+			console.log i
+			if i.hash == hash
+				t = on
+				res.cookie("secret", "#{encryptHash("TheBestFriends", "Osman")}")
+				res.cookie("key", "Osman")
+				res.redirect "/admin"
+				break
+		if !t then res.redirect "/adminlogin?errnum=1"
 
 app.get "/admin", (req, res)->
 	# ip = req.headers['x-forwarded-for'] or req.connection.remoteAddress or req.socket.remoteAddress or (if req.connection.socket then req.connection.socket.remoteAddress else null)
-	if req.cookies.hash?
-		for i in USERS
-			if i.privelegs == "admin" and i.hash == req.cookies.hash
-				console.log "aga"
-				# res.sendfile path.resolve __dirname, "../Public/admin/index.html"
+	if req.cookies.secret?
+		try
+			if "TheBestFriends" == decryptHash(req.cookies.secret, req.cookies.key)
+				res.sendfile path.resolve __dirname, "../Public/admin/index.html"
+			else
+				res.clearCookie("secret")
+				res.clearCookie("key")
+				res.redirect "/adminlogin"
+		catch
+			res.clearCookie("secret",)
+			res.clearCookie("key")
+			res.redirect "/adminlogin"
 	else
 		res.redirect "/adminlogin"
 
+app.get "/logout", (req, res)->
+	res.clearCookie("secret")
+	res.clearCookie("key")
+	console.log req.cookies
+	#res.send "logout..."
+	res.redirect "/adminlogin"
 ######
 
 app.get "/learner/chat", (req, res)->

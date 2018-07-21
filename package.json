@@ -47,6 +47,7 @@
     "node": ">=0.10.32"
   },
   "dependencies": {
+    "body-parser": "^1.18.3",
     "bootstrap": "^4.0.0",
     "crypto": "^1.0.1",
     "express-redirect": "^1.2.2",
