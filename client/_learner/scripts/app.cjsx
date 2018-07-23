@@ -81,7 +81,7 @@ App = React.createClass
 			@setState ban: if data.type then false
 	render: ->
 		if !@state.ban
-			<div>
+			<div className="testing">
 				<div className="preloader" style={display: if !@state.preloader then "none"}>
 					<div className="cssload-thecube">
 						<div className="cssload-cube cssload-c1"></div>
@@ -90,8 +90,8 @@ App = React.createClass
 						<div className="cssload-cube cssload-c3"></div>
 					</div>
 				</div>
+				<Header data={@state.DATA}/>
 				<div className="container">
-					<Header data={@state.DATA}/>
 					{
 						if @state.DATA.length isnt 0 and @state.start
 							@state.DATA.map (i, j)=>

@@ -26,6 +26,7 @@ app.use('/cssFiles', express["static"](path.resolve(__dirname, '../Public/media/
 app.use('/libsFiles', express["static"](path.resolve(__dirname, '../Public/media/libs')));
 app.use('/jsFiles', express["static"](path.resolve(__dirname, '../Public/media/scripts')));
 app.use('/imgFiles', express["static"](path.resolve(__dirname, '../Public/media/img')));
+app.use('/fontsFiles', express["static"](path.resolve(__dirname, '../Public/media/fonts')));
 
 app.use(cookieParser());
 app.use( bodyParser.json() );
