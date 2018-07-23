@@ -1,5 +1,6 @@
 import express from 'express';
 import path from "path";
+import cookie_parser from "cookie-parser";
 
 // import data from configs
 import { serverPort } from '../etc/config.json';
@@ -23,7 +24,7 @@ app.use('/libsFiles', express["static"](path.resolve(__dirname, '../Public/media
 app.use('/jsFiles', express["static"](path.resolve(__dirname, '../Public/media/scripts')));
 app.use('/imgFiles', express["static"](path.resolve(__dirname, '../Public/media/img')));
 
-
+app.use(cookie_parser());
 
 // index
 app.get('/', (req, res) => {
@@ -48,7 +49,10 @@ routeLearner.get("/test", (req, res) => {
 	res.sendfile(path.resolve(__dirname, "../Public/pages/learner/test.html"));
 });
 
-
+app.get("/admin", (req, res) => {
+	res.sendfile(path.resolve(__dirname, "../Public/pages/admin/login.html"));
+	console.log(req.cookies);
+});
 
 // error 404
 app.get("/*", (req, res) => {

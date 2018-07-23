@@ -12,6 +12,7 @@ import Dispatcher from "./stores/dispatcher";
 */
 import chat from "./apps/chat.socket";
 import test from "./apps/test.socket";
+import admin from "./apps/admin.socket";
 
 /*
 	MainSock - это класс, включающий в себя все основные свойства и фенкции сокет-клиента
@@ -41,6 +42,12 @@ class MainSock {
 
 					// socket ONs' ChatApp
 					test(_socket, self.store, db);
+
+				}break;
+				case "admin": {
+
+					// socket ONs' ChatApp
+					admin(_socket, self.store, db);
 
 				}break;
 				default:{
