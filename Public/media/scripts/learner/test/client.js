@@ -105,11 +105,6 @@ App = React.createClass({
         obj = {};
         obj.firstname_user = data.firstname;
         obj.lastname_user = data.lastname;
-        socket.emit("setNameForTest", {
-          id: config.id,
-          firstname_user: obj.firstname_user,
-          lastname_user: obj.lastname_user
-        });
         return _this.setState({
           data_user: obj
         });
