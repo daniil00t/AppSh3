@@ -10,5 +10,4 @@ export default function(socket, store, db){
 	db.listTests().then((data) => {
 		socket.emit("getDataTest", data);
 	})
-
 }
