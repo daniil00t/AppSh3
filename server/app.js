@@ -1,6 +1,9 @@
 import express from 'express';
 import path from "path";
-import cookie_parser from "cookie-parser";
+import cookieParser from "cookie-parser";
+import bodyParser from "body-parser";
+import nunjucks from "nunjucks";
+
 
 // import data from configs
 import { serverPort } from '../etc/config.json';
@@ -24,11 +27,20 @@ app.use('/libsFiles', express["static"](path.resolve(__dirname, '../Public/media
 app.use('/jsFiles', express["static"](path.resolve(__dirname, '../Public/media/scripts')));
 app.use('/imgFiles', express["static"](path.resolve(__dirname, '../Public/media/img')));
 
-app.use(cookie_parser());
+app.use(cookieParser());
+app.use( bodyParser.json() );
+app.use(bodyParser.urlencoded({
+  extended: true
+}));
+
+nunjucks.configure("./Public/pages", {
+	autoscape: true,
+	express: app
+});
 
 // index
 app.get('/', (req, res) => {
-	res.sendfile(path.resolve(__dirname, "../Public/pages/index.html"));
+	res.render("index.html", { date: new Date() });
 });
 
 // main learner routes
@@ -39,15 +51,17 @@ routeLearner.get("/", (req, res) => {
 });
 
 routeLearner.get("/chat", (req, res) => {
-	res.sendfile(path.resolve(__dirname, "../Public/pages/learner/chat.html"));
+	res.render("learner/chat.html", {});
 });
 
 routeLearner.get("/test", (req, res) => {
 	// db.listTests().then((data) => {
 	// 	res.send(data);
 	// });
-	res.sendfile(path.resolve(__dirname, "../Public/pages/learner/test.html"));
+	res.render("learner/test.html", {});
 });
+
+// Admin routes
 
 app.get("/admin", (req, res) => {
 	res.sendfile(path.resolve(__dirname, "../Public/pages/admin/login.html"));

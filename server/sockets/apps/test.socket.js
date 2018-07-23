@@ -1,3 +1,11 @@
+const filterTAnses = (arr) => {
+	let _arr = arr;
+	_arr.map((i, j) => {
+		_arr[j].data[0].trueanses = null;
+	});
+	return _arr;
+};
+
 export default function(socket, store, db){
 	let self = this;
 	let id = socket.id;
@@ -8,6 +16,6 @@ export default function(socket, store, db){
 		ip: ip
 	})
 	db.listTests().then((data) => {
-		socket.emit("getDataTest", data);
+		socket.emit("getDataTest", filterTAnses(data));
 	})
 }
