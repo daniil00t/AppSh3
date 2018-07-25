@@ -3,7 +3,7 @@ import { EventEmitter } from "events";
 import URL from "url";
 
 import MainStore from "./stores/store";
-import Dispatcher from "./stores/dispatcher";
+
 
 
 
