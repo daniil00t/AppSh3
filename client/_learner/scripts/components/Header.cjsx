@@ -43,63 +43,44 @@ Header = React.createClass
 			else
 				alert "Введите свое имя и фамилие!"
 	render: ->
-		<header className="main_header">
-			<h1 className="brand_app"><span className="t_brand">T</span>est</h1>
-			<div className="inf_user">
-				<div className="lbs_header">
-					<span>Имя:</span><br/>
-					<span>Фамилия: </span>
+		<header className="main_header_test">
+			<div className="container-fluid">
+				<div className="row">
+					<div className="col-md-3 col-lg-3 col-sm-0 logo">
+						<div className="logo">
+							<a href="/learner/test"><img src="http://localhost:8080/imgFiles/testing_black.png" /></a>
+						</div>
+					</div>
+					<div className="col-md-6 col-lg-6 col-sm-8 main_part_header">
+						<form action="" className="change_dataUsr">
+							<div className="labels">
+								<label for="fname">имя:</label><br />
+								<label for="lname">фамилия:</label>
+							</div>
+							<div className="inputs">
+								<input type="text" id="fname" placeholder="Daniil" />
+								<input type="text" id="lname" placeholder="Shenyagin" />
+							</div>
+						</form>
+							<select name="variant" id="vars">
+								<option value="1">1 вариант</option>
+								<option value="2">2 вариант</option>
+								<option value="3">3 вариант</option>
+								<option value="4">4 вариант</option>
+							</select>
+						
+					</div>
+					<div className="col-md-3 col-lg-3 col-sm-4 menu-left">
+						<div className="timer">
+							<span className="time">10:00</span>
+							<div className="controlls">
+								<i className="fa fa-play"></i>
+							</div>
+						</div>
+					</div>
 				</div>
-
-				<div className="inps_header">
-					<input type="text" id="name_user" /><br/>
-					<input type="text" id="lastname_user" />
-				</div><br/>
-				<button className="save_inf_user" onClick={@handleClickSaveName}>Сохранить</button>
-			</div>
-			<div className="changeVariant">
-				<h4>Вариант: </h4>
-				<select id="selectVariant" onChange={(e) => @handleChangeSelect e}>
-					{
-						@props.data.map (i, j)=>
-							if j is 0
-								<option selected="selected" value="1">1</option>
-							else
-								<option value={j + 1}>{j + 1}</option>
-					}
-				</select>
-			</div>
-			<div className="TimerTest">
-				<h1>{"#{if @state.time.minutes < 10 then "0#{@state.time.minutes}" else @state.time.minutes}:#{if @state.time.seconds < 10 then "0#{@state.time.seconds}" else @state.time.seconds}"}</h1>
-				<i className="fa fa-play" onClick={@handleStartTest}></i>
 			</div>
 		</header>
 
-# <div class="item html">
-# 		    <h2>0</h2>
-# 		    <svg width="160" height="160" xmlns="http://www.w3.org/2000/svg">
-# 		     <g>
-# 		      <title>Layer 1</title>
-# 		      <circle id="circle" class="circle_animation" r="69.85699" cy="81" cx="81" stroke-width="8" stroke="#6fdb6f" fill="none"/>
-# 		     </g>
-# 		    </svg>
-# 		</div>
-# 		<script>
-# 			time = 60
-# 			initialOffset = '440'
-# 			i = 1
 
-
-# 			$('.circle_animation').css('stroke-dashoffset', initialOffset-(1*(initialOffset/time)))
-
-# 			interval = setInterval(->
-# 				$('h2').text(i)
-# 				if i == time
-# 					clearInterval(interval)
-# 					return
-				
-# 				$('.circle_animation').css('stroke-dashoffset', initialOffset-((i+1)*(initialOffset/time)))
-# 				i++;
-# 			}, 1000);
-# 		</script>
 module.exports = Header

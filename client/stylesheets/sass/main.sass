@@ -1,5 +1,5 @@
 @import "bourbon"
-// @import "vars.sass"
+@import "fonts.sass"
 
 //Load Libs SASS
 // @import "app/libs/animate/animate.sass"
@@ -32,6 +32,8 @@ html
 body
 	height: 100%
 	background-color: #e4ebf0
+	padding: 0
+	margin: 0
 	//Custom Styles Here
 	#app
 		height: 100%
@@ -316,3 +318,71 @@ body
 							cursor: pointer
 							line-height: 30px
 							padding-right: 10px
+
+/* Test */
+header.main_header_test
+	// border-bottom: 2px solid rgba(0,0,0,.2)
+	box-shadow: 0 0 15px rgba(0,0,0,.3)
+	height: 120px
+	background-color: #fff
+	.container-fluid
+		height: 100%
+		// padding: 0
+		overflow: hidden
+		& .row 
+			height: 100%
+			& > *
+				height: 100%
+				display: -webkit-flex
+				display: -moz-flex
+				display: -ms-flex
+				display: -o-flex
+				display: flex
+				align-items: center
+				justify-content: center
+				padding: 0
+			.main_part_header
+				// background-color: red
+				form.change_dataUsr
+					width: 50%
+					.labels
+						width: 33%
+						text-align: right
+						display: inline-block
+						padding-right: 5px
+						font-family: MontserratMedium
+						label:first-child
+							padding-bottom: 7px
+					.inputs
+						width: 65%
+						display: inline-block
+						input
+							width: 100%
+							&:first-child
+								margin-bottom: 7px
+				select#vars
+					width: 100px
+					margin-left: 20px
+					font-family: MontserratRegular
+			.timer
+				background-color: #0d89e2
+				color: #fff
+				border-radius: none
+				padding: 7px 20px
+				height: 60%
+				width: 55%
+				display: block
+				// text-align: center
+				span.time
+					font-family: MontserratBold
+					font-size: 28px
+					line-height: 56px
+					float: left
+					padding-right: 20px
+				.controlls
+					// display: inline-block
+					margin-top: 17px
+					i
+						font-size: 20px
+						cursor: pointer
+					// line-height: 52px
