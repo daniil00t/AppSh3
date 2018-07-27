@@ -2,6 +2,7 @@ React = require 'react'
 io = require "socket.io-client"
 ee = require "./ee"
 socket = io ""
+
 Header = require "./components/Header"
 
 DefQ = require "./components/defQ"
@@ -11,66 +12,64 @@ InpQ = require "./components/inpQ"
 
 
 App = React.createClass
-	displayName: '_App'
+	displayName: 'App'
 	getInitialState: ->
-		DATA: []
-		_data: []
+		data_test: []
+		data_anses: []
+		data_user: {}
 		preloader: true
 		variant: 1
-		data_user: {}
 		start: false
-		ban: false
-		configsUsr: {}
-	# handleLogin: ->
-	# 	socket.emit "adminLogin", {login: document.getElementById("login").value, password: document.getElementById("password").value}
+
 	endTest: (massage) ->
 		ee.emit "endTest", {type: on}
-		socket.emit "sendDataTest", data: @state._data, data_user: @state.data_user
+		socket.emit "sendDataTest", data: @state.data_anses, data_user: @state.data_user
 		alert massage
 		window.location.replace("http://#{window.location.host}/learner")
 	handleEndTest: ->
 		@endTest "Пожайлуста, подождите. Данные вот-вот доберутся до сервера..."
 	componentWillMount: ->
-		# socket.on "connected", (data)=>
-		# 	@setState id: data.id, ip: data.ip
-		socket.on "connected", (data)=>
-			@setState configsUsr: data
+		### _ Sockets _ ###
 
+		# Получение данных (клиента) с сервера (DB)
+		socket.on "connected", (data)=>
+			@setState data_user: data
+
+		# Получение данных(тестов) с сервера (DB)
 		socket.on "getDataTest", (data)=>
 			arr = []
 			for i in data
 				arr.push i
-			@setState DATA: arr
+			@setState data_test: arr
 			@setState preloader: no
 
-		# ee.on "updateAnswer", (data)=>
-		# 	Data = @state._data
-		# 	Data.push data
-		# 	@setState _data: Data
-		# 	console.log data
+		### _ EventEmitter_  ###
+		# Сохранение данных пользователя: имени и фамилии
+		ee.on 'changeNameUsr@ee', (data)=>
+			for key, value of data
+				obj = @state.data_user
+				obj[key] = value
+				@setState data_user: obj
 
-		ee.on "sendAnswer", (data)=>
-			Data = @state._data
-			Data.push data
-			@setState _data: Data
-		ee.on "changeVariant", (data)=>
-			@setState variant: +data.value
-		ee.on "changeUserData", (data)=>
-			obj = {}
-			obj.firstname_user = data.firstname
-			obj.lastname_user = data.lastname
-			# socket.emit "setNameForTest", {id: config.id, firstname_user: obj.firstname_user, lastname_user: obj.lastname_user}
-			@setState data_user: obj
-			# @setState firstname_user: data.firstname
-			# @setState lastname_user: data.lastname
-		ee.on "stopTimer", (data)=>
-			@endTest "К сожалению, время закончилось. Сохраняю ваши данные..."
-		ee.on "startTestapp", (data)=>
-			if @state.data_user.firstname_user? and @state.data_user.lastname_user?
-				ee.emit "startTesth", type: on
+		ee.on "startTestApp", (data)=>
+			if @state.data_user.fname? and @state.data_user.lname?
+				ee.emit "startTest", type: on
 				@setState start: data.type
 			else
-				ee.emit "startTesth", type: no
+				ee.emit "startTest", type: no
+
+
+		ee.on "sendAnswer", (data)=>
+			Data = @state.data_anses
+			Data.push data
+			@setState data_anses: Data
+		ee.on "changeVariant", (data)=>
+			@setState variant: +data.value
+
+		ee.on "stopTimer", (data)=>
+			@endTest "К сожалению, время закончилось. Сохраняю ваши данные..."
+
+
 		socket.on "deleteUser_toClient", (data)=>
 			if config.id is data.id
 
@@ -90,11 +89,11 @@ App = React.createClass
 						<div className="cssload-cube cssload-c3"></div>
 					</div>
 				</div>
-				<Header data={@state.DATA}/>
-				<div className="container">
+				<Header data={@state.data_test}/>
+				<div className="container main_cnt">
 					{
-						if @state.DATA.length isnt 0 and @state.start
-							@state.DATA.map (i, j)=>
+						if @state.data_test.length isnt 0 and @state.start
+							@state.data_test.map (i, j)=>
 								if @state.variant == j + 1 and i.data.length isnt 0
 									i.data.map (q, w)->
 										switch q.type
@@ -109,7 +108,7 @@ App = React.createClass
 											else
 												console.log "elses"
 						else
-							if @state.DATA.length is 0
+							if @state.data_test.length is 0
 								<div>К сожалению, данных нет.</div>
 							else
 								if !@state.start
@@ -117,7 +116,7 @@ App = React.createClass
 					}
 					<button onClick={@handleEndTest} className="endTest">Завершить</button>
 				<footer className="main_footer">
-
+					<p className="text-center">Daniil Shenyagin&copy;2018 - TestingApp - SchoolProjects#3</p>
 				</footer>
 				</div>
 			</div>

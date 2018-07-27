@@ -10,7 +10,7 @@ DefQ = React.createClass
 		alphabet: {rus: ["а", "б", "в", "г", "д", "е", "ж", "з", "и", "к"], en: ["a", "b", "c", "d", "e", "f", "g", "h", "i", "j", ]}
 		myans: {}
 	handleClickIl: (i, e)->
-		if e.target.localName == "span" or e.target.localName == "li"
+		if e.target.localName == "span" or e.target.localName == "li" or e.target.localName == "label"
 			id = "Q_#{@state.num}_#{i}"
 			document.getElementById(id).checked = true
 			value = +i

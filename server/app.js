@@ -9,6 +9,7 @@ import nunjucks from "nunjucks";
 import { serverPort } from '../etc/config.json';
 
 import * as db from './utils/DBUtils';
+import * as ct from './utils/cryptHash';
 // Initialization of express application
 const app = express();
 
@@ -28,7 +29,7 @@ app.use('/jsFiles', express["static"](path.resolve(__dirname, '../Public/media/s
 app.use('/imgFiles', express["static"](path.resolve(__dirname, '../Public/media/img')));
 app.use('/fontsFiles', express["static"](path.resolve(__dirname, '../Public/media/fonts')));
 
-app.use(cookieParser());
+app.use( cookieParser() );
 app.use( bodyParser.json() );
 app.use(bodyParser.urlencoded({
   extended: true
@@ -63,11 +64,82 @@ routeLearner.get("/test", (req, res) => {
 });
 
 // Admin routes
+app.get("/adminlogin", (req, res) => {
+	res.render("admin/login.html", {});
+});
+app.post("/admin", (req, res) => {
+	let hash = ct.encryptLogPass(req.body.login, req.body.password);
+	db.listUsers().then((data) => {
+		let t = false;
+		data.map((i, j) => {
+			if(i.hash == hash){
+				t = true;
+				res.cookie("secret", `${ct.encryptHash("TheBestFriends", "Osman")}`);
+				res.cookie("key", "Osman");
+				res.redirect("/admin");
+			}
+		})
+		if(!t) {
+			res.redirect("/adminlogin?errnum=1");
+		} 
+			
+	});
+});
 
 app.get("/admin", (req, res) => {
-	res.sendfile(path.resolve(__dirname, "../Public/pages/admin/login.html"));
-	console.log(req.cookies);
+	if(req.cookies.secret != null && req.cookies.secret != undefined){
+		try{
+			if("TheBestFriends" == ct.decryptHash(req.cookies.secret, req.cookies.key)){
+				res.render("admin/index.html", {});
+			}
+			else{
+				res.clearCookie("secret");
+				res.clearCookie("key");
+				res.redirect("/adminlogin");
+			}
+				
+		}catch(err){
+			res.clearCookie("secret");
+			res.clearCookie("key");
+			res.redirect("/adminlogin");
+		}
+	}
+	else{
+		res.redirect("/adminlogin");
+	}
+});	
+
+app.get("/logout", (req, res) => {
+	res.clearCookie("secret");
+	res.clearCookie("key");
+	res.redirect("/adminlogin");
 });
+
+// console.log("init");
+
+// async function ST(){
+// 	setTimeout(()=>{
+// 		console.log("прошло 2 сек");
+// 	}, 2000);
+// }
+// (async () => {
+// 	await ST();
+// })();
+
+// console.log("app");
+
+// app.get("/admin", (req, res) => {
+// 	if(req.cookies.secret != null and req.cookies.secret != undefined){
+// 		db.listUsers().then((data) => {
+// 			if(data.id == ct.decryptLogPass(req.cookies.secret, req.cookies.key))
+// 		});
+// 		if()
+// 	}
+// 	res.sendfile(path.resolve(__dirname, "../Public/pages/admin/login.html"));
+// 	console.log(req.cookies);
+// });
+
+
 
 // error 404
 app.get("/*", (req, res) => {

@@ -18,4 +18,5 @@ export default function(socket, store, db){
 	db.listTests().then((data) => {
 		socket.emit("getDataTest", filterTAnses(data));
 	})
+	// db.updateTest("5ac8ea66e45b041348128ac5", { time: 360 })
 }

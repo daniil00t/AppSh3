@@ -135,7 +135,7 @@ module.exports = App;
 
 
 
-},{"./components/header":3,"./components/main_cnt":4,"./ee":7,"react":"react","socket.io-client":42}],3:[function(require,module,exports){
+},{"./components/header":3,"./components/main_cnt":4,"./ee":7,"react":"react","socket.io-client":43}],3:[function(require,module,exports){
 var Avatars, Header, React, ee, parseValue;
 
 React = require("react");
@@ -1101,6 +1101,66 @@ function isUndefined(arg) {
 }
 
 },{}],15:[function(require,module,exports){
+// shim for using process in browser
+
+var process = module.exports = {};
+var queue = [];
+var draining = false;
+
+function drainQueue() {
+    if (draining) {
+        return;
+    }
+    draining = true;
+    var currentQueue;
+    var len = queue.length;
+    while(len) {
+        currentQueue = queue;
+        queue = [];
+        var i = -1;
+        while (++i < len) {
+            currentQueue[i]();
+        }
+        len = queue.length;
+    }
+    draining = false;
+}
+process.nextTick = function (fun) {
+    queue.push(fun);
+    if (!draining) {
+        setTimeout(drainQueue, 0);
+    }
+};
+
+process.title = 'browser';
+process.browser = true;
+process.env = {};
+process.argv = [];
+process.version = ''; // empty string to avoid regexp issues
+process.versions = {};
+
+function noop() {}
+
+process.on = noop;
+process.addListener = noop;
+process.once = noop;
+process.off = noop;
+process.removeListener = noop;
+process.removeAllListeners = noop;
+process.emit = noop;
+
+process.binding = function (name) {
+    throw new Error('process.binding is not supported');
+};
+
+// TODO(shtylman)
+process.cwd = function () { return '/' };
+process.chdir = function (dir) {
+    throw new Error('process.chdir is not supported');
+};
+process.umask = function() { return 0; };
+
+},{}],16:[function(require,module,exports){
 /**
  * Slice reference.
  */
@@ -1125,15 +1185,13 @@ module.exports = function(obj, fn){
   }
 };
 
-},{}],16:[function(require,module,exports){
+},{}],17:[function(require,module,exports){
 
 /**
  * Expose `Emitter`.
  */
 
-if (typeof module !== 'undefined') {
-  module.exports = Emitter;
-}
+module.exports = Emitter;
 
 /**
  * Initialize a new `Emitter`.
@@ -1172,7 +1230,7 @@ function mixin(obj) {
 Emitter.prototype.on =
 Emitter.prototype.addEventListener = function(event, fn){
   this._callbacks = this._callbacks || {};
-  (this._callbacks['$' + event] = this._callbacks['$' + event] || [])
+  (this._callbacks[event] = this._callbacks[event] || [])
     .push(fn);
   return this;
 };
@@ -1188,8 +1246,11 @@ Emitter.prototype.addEventListener = function(event, fn){
  */
 
 Emitter.prototype.once = function(event, fn){
+  var self = this;
+  this._callbacks = this._callbacks || {};
+
   function on() {
-    this.off(event, on);
+    self.off(event, on);
     fn.apply(this, arguments);
   }
 
@@ -1221,12 +1282,12 @@ Emitter.prototype.removeEventListener = function(event, fn){
   }
 
   // specific event
-  var callbacks = this._callbacks['$' + event];
+  var callbacks = this._callbacks[event];
   if (!callbacks) return this;
 
   // remove all handlers
   if (1 == arguments.length) {
-    delete this._callbacks['$' + event];
+    delete this._callbacks[event];
     return this;
   }
 
@@ -1253,7 +1314,7 @@ Emitter.prototype.removeEventListener = function(event, fn){
 Emitter.prototype.emit = function(event){
   this._callbacks = this._callbacks || {};
   var args = [].slice.call(arguments, 1)
-    , callbacks = this._callbacks['$' + event];
+    , callbacks = this._callbacks[event];
 
   if (callbacks) {
     callbacks = callbacks.slice(0);
@@ -1275,7 +1336,7 @@ Emitter.prototype.emit = function(event){
 
 Emitter.prototype.listeners = function(event){
   this._callbacks = this._callbacks || {};
-  return this._callbacks['$' + event] || [];
+  return this._callbacks[event] || [];
 };
 
 /**
@@ -1290,7 +1351,7 @@ Emitter.prototype.hasListeners = function(event){
   return !! this.listeners(event).length;
 };
 
-},{}],17:[function(require,module,exports){
+},{}],18:[function(require,module,exports){
 
 module.exports = function(a, b){
   var fn = function(){};
@@ -1298,11 +1359,11 @@ module.exports = function(a, b){
   a.prototype = new fn;
   a.prototype.constructor = a;
 };
-},{}],18:[function(require,module,exports){
+},{}],19:[function(require,module,exports){
 
 module.exports = require('./lib/index');
 
-},{"./lib/index":19}],19:[function(require,module,exports){
+},{"./lib/index":20}],20:[function(require,module,exports){
 
 module.exports = require('./socket');
 
@@ -1314,7 +1375,7 @@ module.exports = require('./socket');
  */
 module.exports.parser = require('engine.io-parser');
 
-},{"./socket":20,"engine.io-parser":31}],20:[function(require,module,exports){
+},{"./socket":21,"engine.io-parser":33}],21:[function(require,module,exports){
 (function (global){
 /**
  * Module dependencies.
@@ -2056,7 +2117,7 @@ Socket.prototype.filterUpgrades = function (upgrades) {
 };
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./transport":21,"./transports/index":22,"component-emitter":16,"debug":28,"engine.io-parser":31,"indexof":36,"parsejson":38,"parseqs":39,"parseuri":40}],21:[function(require,module,exports){
+},{"./transport":22,"./transports/index":23,"component-emitter":29,"debug":30,"engine.io-parser":33,"indexof":38,"parsejson":40,"parseqs":41,"parseuri":42}],22:[function(require,module,exports){
 /**
  * Module dependencies.
  */
@@ -2215,7 +2276,7 @@ Transport.prototype.onClose = function () {
   this.emit('close');
 };
 
-},{"component-emitter":16,"engine.io-parser":31}],22:[function(require,module,exports){
+},{"component-emitter":29,"engine.io-parser":33}],23:[function(require,module,exports){
 (function (global){
 /**
  * Module dependencies
@@ -2272,7 +2333,7 @@ function polling (opts) {
 }
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./polling-jsonp":23,"./polling-xhr":24,"./websocket":26,"xmlhttprequest-ssl":27}],23:[function(require,module,exports){
+},{"./polling-jsonp":24,"./polling-xhr":25,"./websocket":27,"xmlhttprequest-ssl":28}],24:[function(require,module,exports){
 (function (global){
 
 /**
@@ -2507,7 +2568,7 @@ JSONPPolling.prototype.doWrite = function (data, fn) {
 };
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./polling":25,"component-inherit":17}],24:[function(require,module,exports){
+},{"./polling":26,"component-inherit":18}],25:[function(require,module,exports){
 (function (global){
 /**
  * Module requirements.
@@ -2935,7 +2996,7 @@ function unloadHandler () {
 }
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./polling":25,"component-emitter":16,"component-inherit":17,"debug":28,"xmlhttprequest-ssl":27}],25:[function(require,module,exports){
+},{"./polling":26,"component-emitter":29,"component-inherit":18,"debug":30,"xmlhttprequest-ssl":28}],26:[function(require,module,exports){
 /**
  * Module dependencies.
  */
@@ -3182,7 +3243,7 @@ Polling.prototype.uri = function () {
   return schema + '://' + (ipv6 ? '[' + this.hostname + ']' : this.hostname) + port + this.path + query;
 };
 
-},{"../transport":21,"component-inherit":17,"debug":28,"engine.io-parser":31,"parseqs":39,"xmlhttprequest-ssl":27,"yeast":60}],26:[function(require,module,exports){
+},{"../transport":22,"component-inherit":18,"debug":30,"engine.io-parser":33,"parseqs":41,"xmlhttprequest-ssl":28,"yeast":61}],27:[function(require,module,exports){
 (function (global){
 /**
  * Module dependencies.
@@ -3471,7 +3532,7 @@ WS.prototype.check = function () {
 };
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../transport":21,"component-inherit":17,"debug":28,"engine.io-parser":31,"parseqs":39,"ws":13,"yeast":60}],27:[function(require,module,exports){
+},{"../transport":22,"component-inherit":18,"debug":30,"engine.io-parser":33,"parseqs":41,"ws":13,"yeast":61}],28:[function(require,module,exports){
 (function (global){
 // browser shim for xmlhttprequest module
 
@@ -3512,7 +3573,172 @@ module.exports = function (opts) {
 };
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"has-cors":35}],28:[function(require,module,exports){
+},{"has-cors":37}],29:[function(require,module,exports){
+
+/**
+ * Expose `Emitter`.
+ */
+
+if (typeof module !== 'undefined') {
+  module.exports = Emitter;
+}
+
+/**
+ * Initialize a new `Emitter`.
+ *
+ * @api public
+ */
+
+function Emitter(obj) {
+  if (obj) return mixin(obj);
+};
+
+/**
+ * Mixin the emitter properties.
+ *
+ * @param {Object} obj
+ * @return {Object}
+ * @api private
+ */
+
+function mixin(obj) {
+  for (var key in Emitter.prototype) {
+    obj[key] = Emitter.prototype[key];
+  }
+  return obj;
+}
+
+/**
+ * Listen on the given `event` with `fn`.
+ *
+ * @param {String} event
+ * @param {Function} fn
+ * @return {Emitter}
+ * @api public
+ */
+
+Emitter.prototype.on =
+Emitter.prototype.addEventListener = function(event, fn){
+  this._callbacks = this._callbacks || {};
+  (this._callbacks['$' + event] = this._callbacks['$' + event] || [])
+    .push(fn);
+  return this;
+};
+
+/**
+ * Adds an `event` listener that will be invoked a single
+ * time then automatically removed.
+ *
+ * @param {String} event
+ * @param {Function} fn
+ * @return {Emitter}
+ * @api public
+ */
+
+Emitter.prototype.once = function(event, fn){
+  function on() {
+    this.off(event, on);
+    fn.apply(this, arguments);
+  }
+
+  on.fn = fn;
+  this.on(event, on);
+  return this;
+};
+
+/**
+ * Remove the given callback for `event` or all
+ * registered callbacks.
+ *
+ * @param {String} event
+ * @param {Function} fn
+ * @return {Emitter}
+ * @api public
+ */
+
+Emitter.prototype.off =
+Emitter.prototype.removeListener =
+Emitter.prototype.removeAllListeners =
+Emitter.prototype.removeEventListener = function(event, fn){
+  this._callbacks = this._callbacks || {};
+
+  // all
+  if (0 == arguments.length) {
+    this._callbacks = {};
+    return this;
+  }
+
+  // specific event
+  var callbacks = this._callbacks['$' + event];
+  if (!callbacks) return this;
+
+  // remove all handlers
+  if (1 == arguments.length) {
+    delete this._callbacks['$' + event];
+    return this;
+  }
+
+  // remove specific handler
+  var cb;
+  for (var i = 0; i < callbacks.length; i++) {
+    cb = callbacks[i];
+    if (cb === fn || cb.fn === fn) {
+      callbacks.splice(i, 1);
+      break;
+    }
+  }
+  return this;
+};
+
+/**
+ * Emit `event` with the given args.
+ *
+ * @param {String} event
+ * @param {Mixed} ...
+ * @return {Emitter}
+ */
+
+Emitter.prototype.emit = function(event){
+  this._callbacks = this._callbacks || {};
+  var args = [].slice.call(arguments, 1)
+    , callbacks = this._callbacks['$' + event];
+
+  if (callbacks) {
+    callbacks = callbacks.slice(0);
+    for (var i = 0, len = callbacks.length; i < len; ++i) {
+      callbacks[i].apply(this, args);
+    }
+  }
+
+  return this;
+};
+
+/**
+ * Return array of callbacks for `event`.
+ *
+ * @param {String} event
+ * @return {Array}
+ * @api public
+ */
+
+Emitter.prototype.listeners = function(event){
+  this._callbacks = this._callbacks || {};
+  return this._callbacks['$' + event] || [];
+};
+
+/**
+ * Check if this emitter has `event` handlers.
+ *
+ * @param {String} event
+ * @return {Boolean}
+ * @api public
+ */
+
+Emitter.prototype.hasListeners = function(event){
+  return !! this.listeners(event).length;
+};
+
+},{}],30:[function(require,module,exports){
 (function (process){
 
 /**
@@ -3693,7 +3919,7 @@ function localstorage(){
 }
 
 }).call(this,require('_process'))
-},{"./debug":29,"_process":41}],29:[function(require,module,exports){
+},{"./debug":31,"_process":15}],31:[function(require,module,exports){
 
 /**
  * This is the common logic for both the Node.js and web browser
@@ -3895,7 +4121,7 @@ function coerce(val) {
   return val;
 }
 
-},{"ms":30}],30:[function(require,module,exports){
+},{"ms":32}],32:[function(require,module,exports){
 /**
  * Helpers.
  */
@@ -4046,7 +4272,7 @@ function plural(ms, n, name) {
   return Math.ceil(ms / n) + ' ' + name + 's'
 }
 
-},{}],31:[function(require,module,exports){
+},{}],33:[function(require,module,exports){
 (function (global){
 /**
  * Module dependencies.
@@ -4659,7 +4885,7 @@ exports.decodePayloadAsBinary = function (data, binaryType, callback) {
 };
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./keys":32,"after":8,"arraybuffer.slice":9,"base64-arraybuffer":11,"blob":12,"has-binary":33,"wtf-8":59}],32:[function(require,module,exports){
+},{"./keys":34,"after":8,"arraybuffer.slice":9,"base64-arraybuffer":11,"blob":12,"has-binary":35,"wtf-8":60}],34:[function(require,module,exports){
 
 /**
  * Gets the keys for an object.
@@ -4680,7 +4906,7 @@ module.exports = Object.keys || function keys (obj){
   return arr;
 };
 
-},{}],33:[function(require,module,exports){
+},{}],35:[function(require,module,exports){
 (function (global){
 
 /*
@@ -4743,12 +4969,12 @@ function hasBinary(data) {
 }
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"isarray":34}],34:[function(require,module,exports){
+},{"isarray":36}],36:[function(require,module,exports){
 module.exports = Array.isArray || function (arr) {
   return Object.prototype.toString.call(arr) == '[object Array]';
 };
 
-},{}],35:[function(require,module,exports){
+},{}],37:[function(require,module,exports){
 
 /**
  * Module exports.
@@ -4767,7 +4993,7 @@ try {
   module.exports = false;
 }
 
-},{}],36:[function(require,module,exports){
+},{}],38:[function(require,module,exports){
 
 var indexOf = [].indexOf;
 
@@ -4778,7 +5004,7 @@ module.exports = function(arr, obj){
   }
   return -1;
 };
-},{}],37:[function(require,module,exports){
+},{}],39:[function(require,module,exports){
 (function (global){
 /*! JSON v3.3.2 | http://bestiejs.github.io/json3 | Copyright 2012-2014, Kit Cambridge | http://kit.mit-license.org */
 ;(function () {
@@ -5684,7 +5910,7 @@ module.exports = function(arr, obj){
 }).call(this);
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],38:[function(require,module,exports){
+},{}],40:[function(require,module,exports){
 (function (global){
 /**
  * JSON parse.
@@ -5719,7 +5945,7 @@ module.exports = function parsejson(data) {
   }
 };
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],39:[function(require,module,exports){
+},{}],41:[function(require,module,exports){
 /**
  * Compiles a querystring
  * Returns string representation of the object
@@ -5758,7 +5984,7 @@ exports.decode = function(qs){
   return qry;
 };
 
-},{}],40:[function(require,module,exports){
+},{}],42:[function(require,module,exports){
 /**
  * Parses an URI
  *
@@ -5799,67 +6025,7 @@ module.exports = function parseuri(str) {
     return uri;
 };
 
-},{}],41:[function(require,module,exports){
-// shim for using process in browser
-
-var process = module.exports = {};
-var queue = [];
-var draining = false;
-
-function drainQueue() {
-    if (draining) {
-        return;
-    }
-    draining = true;
-    var currentQueue;
-    var len = queue.length;
-    while(len) {
-        currentQueue = queue;
-        queue = [];
-        var i = -1;
-        while (++i < len) {
-            currentQueue[i]();
-        }
-        len = queue.length;
-    }
-    draining = false;
-}
-process.nextTick = function (fun) {
-    queue.push(fun);
-    if (!draining) {
-        setTimeout(drainQueue, 0);
-    }
-};
-
-process.title = 'browser';
-process.browser = true;
-process.env = {};
-process.argv = [];
-process.version = ''; // empty string to avoid regexp issues
-process.versions = {};
-
-function noop() {}
-
-process.on = noop;
-process.addListener = noop;
-process.once = noop;
-process.off = noop;
-process.removeListener = noop;
-process.removeAllListeners = noop;
-process.emit = noop;
-
-process.binding = function (name) {
-    throw new Error('process.binding is not supported');
-};
-
-// TODO(shtylman)
-process.cwd = function () { return '/' };
-process.chdir = function (dir) {
-    throw new Error('process.chdir is not supported');
-};
-process.umask = function() { return 0; };
-
-},{}],42:[function(require,module,exports){
+},{}],43:[function(require,module,exports){
 
 /**
  * Module dependencies.
@@ -5970,7 +6136,7 @@ exports.connect = lookup;
 exports.Manager = require('./manager');
 exports.Socket = require('./socket');
 
-},{"./manager":43,"./socket":45,"./url":46,"debug":47,"socket.io-parser":51}],43:[function(require,module,exports){
+},{"./manager":44,"./socket":46,"./url":47,"debug":49,"socket.io-parser":53}],44:[function(require,module,exports){
 
 /**
  * Module dependencies.
@@ -6532,7 +6698,7 @@ Manager.prototype.onreconnect = function () {
   this.emitAll('reconnect', attempt);
 };
 
-},{"./on":44,"./socket":45,"backo2":10,"component-bind":15,"component-emitter":16,"debug":47,"engine.io-client":18,"indexof":36,"socket.io-parser":51}],44:[function(require,module,exports){
+},{"./on":45,"./socket":46,"backo2":10,"component-bind":16,"component-emitter":48,"debug":49,"engine.io-client":19,"indexof":38,"socket.io-parser":53}],45:[function(require,module,exports){
 
 /**
  * Module exports.
@@ -6558,7 +6724,7 @@ function on (obj, ev, fn) {
   };
 }
 
-},{}],45:[function(require,module,exports){
+},{}],46:[function(require,module,exports){
 
 /**
  * Module dependencies.
@@ -6979,7 +7145,7 @@ Socket.prototype.compress = function (compress) {
   return this;
 };
 
-},{"./on":44,"component-bind":15,"component-emitter":16,"debug":47,"has-binary":33,"socket.io-parser":51,"to-array":58}],46:[function(require,module,exports){
+},{"./on":45,"component-bind":16,"component-emitter":48,"debug":49,"has-binary":35,"socket.io-parser":53,"to-array":59}],47:[function(require,module,exports){
 (function (global){
 
 /**
@@ -7058,13 +7224,15 @@ function url (uri, loc) {
 }
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"debug":47,"parseuri":40}],47:[function(require,module,exports){
-arguments[4][28][0].apply(exports,arguments)
-},{"./debug":48,"_process":41,"dup":28}],48:[function(require,module,exports){
+},{"debug":49,"parseuri":42}],48:[function(require,module,exports){
 arguments[4][29][0].apply(exports,arguments)
-},{"dup":29,"ms":49}],49:[function(require,module,exports){
+},{"dup":29}],49:[function(require,module,exports){
 arguments[4][30][0].apply(exports,arguments)
-},{"dup":30}],50:[function(require,module,exports){
+},{"./debug":50,"_process":15,"dup":30}],50:[function(require,module,exports){
+arguments[4][31][0].apply(exports,arguments)
+},{"dup":31,"ms":51}],51:[function(require,module,exports){
+arguments[4][32][0].apply(exports,arguments)
+},{"dup":32}],52:[function(require,module,exports){
 (function (global){
 /*global Blob,File*/
 
@@ -7209,7 +7377,7 @@ exports.removeBlobs = function(data, callback) {
 };
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./is-buffer":52,"isarray":56}],51:[function(require,module,exports){
+},{"./is-buffer":54,"isarray":57}],53:[function(require,module,exports){
 
 /**
  * Module dependencies.
@@ -7615,7 +7783,7 @@ function error(data){
   };
 }
 
-},{"./binary":50,"./is-buffer":52,"component-emitter":53,"debug":54,"json3":37}],52:[function(require,module,exports){
+},{"./binary":52,"./is-buffer":54,"component-emitter":17,"debug":55,"json3":39}],54:[function(require,module,exports){
 (function (global){
 
 module.exports = isBuf;
@@ -7632,173 +7800,7 @@ function isBuf(obj) {
 }
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],53:[function(require,module,exports){
-
-/**
- * Expose `Emitter`.
- */
-
-module.exports = Emitter;
-
-/**
- * Initialize a new `Emitter`.
- *
- * @api public
- */
-
-function Emitter(obj) {
-  if (obj) return mixin(obj);
-};
-
-/**
- * Mixin the emitter properties.
- *
- * @param {Object} obj
- * @return {Object}
- * @api private
- */
-
-function mixin(obj) {
-  for (var key in Emitter.prototype) {
-    obj[key] = Emitter.prototype[key];
-  }
-  return obj;
-}
-
-/**
- * Listen on the given `event` with `fn`.
- *
- * @param {String} event
- * @param {Function} fn
- * @return {Emitter}
- * @api public
- */
-
-Emitter.prototype.on =
-Emitter.prototype.addEventListener = function(event, fn){
-  this._callbacks = this._callbacks || {};
-  (this._callbacks[event] = this._callbacks[event] || [])
-    .push(fn);
-  return this;
-};
-
-/**
- * Adds an `event` listener that will be invoked a single
- * time then automatically removed.
- *
- * @param {String} event
- * @param {Function} fn
- * @return {Emitter}
- * @api public
- */
-
-Emitter.prototype.once = function(event, fn){
-  var self = this;
-  this._callbacks = this._callbacks || {};
-
-  function on() {
-    self.off(event, on);
-    fn.apply(this, arguments);
-  }
-
-  on.fn = fn;
-  this.on(event, on);
-  return this;
-};
-
-/**
- * Remove the given callback for `event` or all
- * registered callbacks.
- *
- * @param {String} event
- * @param {Function} fn
- * @return {Emitter}
- * @api public
- */
-
-Emitter.prototype.off =
-Emitter.prototype.removeListener =
-Emitter.prototype.removeAllListeners =
-Emitter.prototype.removeEventListener = function(event, fn){
-  this._callbacks = this._callbacks || {};
-
-  // all
-  if (0 == arguments.length) {
-    this._callbacks = {};
-    return this;
-  }
-
-  // specific event
-  var callbacks = this._callbacks[event];
-  if (!callbacks) return this;
-
-  // remove all handlers
-  if (1 == arguments.length) {
-    delete this._callbacks[event];
-    return this;
-  }
-
-  // remove specific handler
-  var cb;
-  for (var i = 0; i < callbacks.length; i++) {
-    cb = callbacks[i];
-    if (cb === fn || cb.fn === fn) {
-      callbacks.splice(i, 1);
-      break;
-    }
-  }
-  return this;
-};
-
-/**
- * Emit `event` with the given args.
- *
- * @param {String} event
- * @param {Mixed} ...
- * @return {Emitter}
- */
-
-Emitter.prototype.emit = function(event){
-  this._callbacks = this._callbacks || {};
-  var args = [].slice.call(arguments, 1)
-    , callbacks = this._callbacks[event];
-
-  if (callbacks) {
-    callbacks = callbacks.slice(0);
-    for (var i = 0, len = callbacks.length; i < len; ++i) {
-      callbacks[i].apply(this, args);
-    }
-  }
-
-  return this;
-};
-
-/**
- * Return array of callbacks for `event`.
- *
- * @param {String} event
- * @return {Array}
- * @api public
- */
-
-Emitter.prototype.listeners = function(event){
-  this._callbacks = this._callbacks || {};
-  return this._callbacks[event] || [];
-};
-
-/**
- * Check if this emitter has `event` handlers.
- *
- * @param {String} event
- * @return {Boolean}
- * @api public
- */
-
-Emitter.prototype.hasListeners = function(event){
-  return !! this.listeners(event).length;
-};
-
-},{}],54:[function(require,module,exports){
+},{}],55:[function(require,module,exports){
 
 /**
  * This is the web browser implementation of `debug()`.
@@ -7968,7 +7970,7 @@ function localstorage(){
   } catch (e) {}
 }
 
-},{"./debug":55}],55:[function(require,module,exports){
+},{"./debug":56}],56:[function(require,module,exports){
 
 /**
  * This is the common logic for both the Node.js and web browser
@@ -8167,9 +8169,9 @@ function coerce(val) {
   return val;
 }
 
-},{"ms":57}],56:[function(require,module,exports){
-arguments[4][34][0].apply(exports,arguments)
-},{"dup":34}],57:[function(require,module,exports){
+},{"ms":58}],57:[function(require,module,exports){
+arguments[4][36][0].apply(exports,arguments)
+},{"dup":36}],58:[function(require,module,exports){
 /**
  * Helpers.
  */
@@ -8296,7 +8298,7 @@ function plural(ms, n, name) {
   return Math.ceil(ms / n) + ' ' + name + 's';
 }
 
-},{}],58:[function(require,module,exports){
+},{}],59:[function(require,module,exports){
 module.exports = toArray
 
 function toArray(list, index) {
@@ -8311,7 +8313,7 @@ function toArray(list, index) {
     return array
 }
 
-},{}],59:[function(require,module,exports){
+},{}],60:[function(require,module,exports){
 (function (global){
 /*! https://mths.be/wtf8 v1.0.0 by @mathias */
 ;(function(root) {
@@ -8549,7 +8551,7 @@ function toArray(list, index) {
 }(this));
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],60:[function(require,module,exports){
+},{}],61:[function(require,module,exports){
 'use strict';
 
 var alphabet = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz-_'.split('')

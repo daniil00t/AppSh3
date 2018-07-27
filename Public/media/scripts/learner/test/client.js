@@ -31,17 +31,15 @@ JoinQ = require("./components/joinQ");
 InpQ = require("./components/inpQ");
 
 App = React.createClass({
-  displayName: '_App',
+  displayName: 'App',
   getInitialState: function() {
     return {
-      DATA: [],
-      _data: [],
+      data_test: [],
+      data_anses: [],
+      data_user: {},
       preloader: true,
       variant: 1,
-      data_user: {},
-      start: false,
-      ban: false,
-      configsUsr: {}
+      start: false
     };
   },
   endTest: function(massage) {
@@ -49,7 +47,7 @@ App = React.createClass({
       type: true
     });
     socket.emit("sendDataTest", {
-      data: this.state._data,
+      data: this.state.data_anses,
       data_user: this.state.data_user
     });
     alert(massage);
@@ -59,10 +57,12 @@ App = React.createClass({
     return this.endTest("Пожайлуста, подождите. Данные вот-вот доберутся до сервера...");
   },
   componentWillMount: function() {
+
+    /* _ Sockets _ */
     socket.on("connected", (function(_this) {
       return function(data) {
         return _this.setState({
-          configsUsr: data
+          data_user: data
         });
       };
     })(this));
@@ -75,20 +75,53 @@ App = React.createClass({
           arr.push(i);
         }
         _this.setState({
-          DATA: arr
+          data_test: arr
         });
         return _this.setState({
           preloader: false
         });
       };
     })(this));
+
+    /* _ EventEmitter_ */
+    ee.on('changeNameUsr@ee', (function(_this) {
+      return function(data) {
+        var key, obj, results, value;
+        results = [];
+        for (key in data) {
+          value = data[key];
+          obj = _this.state.data_user;
+          obj[key] = value;
+          results.push(_this.setState({
+            data_user: obj
+          }));
+        }
+        return results;
+      };
+    })(this));
+    ee.on("startTestApp", (function(_this) {
+      return function(data) {
+        if ((_this.state.data_user.fname != null) && (_this.state.data_user.lname != null)) {
+          ee.emit("startTest", {
+            type: true
+          });
+          return _this.setState({
+            start: data.type
+          });
+        } else {
+          return ee.emit("startTest", {
+            type: false
+          });
+        }
+      };
+    })(this));
     ee.on("sendAnswer", (function(_this) {
       return function(data) {
         var Data;
-        Data = _this.state._data;
+        Data = _this.state.data_anses;
         Data.push(data);
         return _this.setState({
-          _data: Data
+          data_anses: Data
         });
       };
     })(this));
@@ -99,36 +132,9 @@ App = React.createClass({
         });
       };
     })(this));
-    ee.on("changeUserData", (function(_this) {
-      return function(data) {
-        var obj;
-        obj = {};
-        obj.firstname_user = data.firstname;
-        obj.lastname_user = data.lastname;
-        return _this.setState({
-          data_user: obj
-        });
-      };
-    })(this));
     ee.on("stopTimer", (function(_this) {
       return function(data) {
         return _this.endTest("К сожалению, время закончилось. Сохраняю ваши данные...");
-      };
-    })(this));
-    ee.on("startTestapp", (function(_this) {
-      return function(data) {
-        if ((_this.state.data_user.firstname_user != null) && (_this.state.data_user.lastname_user != null)) {
-          ee.emit("startTesth", {
-            type: true
-          });
-          return _this.setState({
-            start: data.type
-          });
-        } else {
-          return ee.emit("startTesth", {
-            type: false
-          });
-        }
       };
     })(this));
     socket.on("deleteUser_toClient", (function(_this) {
@@ -169,10 +175,10 @@ App = React.createClass({
       }), React.createElement("div", {
         "className": "cssload-cube cssload-c3"
       }))), React.createElement(Header, {
-        "data": this.state.DATA
+        "data": this.state.data_test
       }), React.createElement("div", {
-        "className": "container"
-      }, (this.state.DATA.length !== 0 && this.state.start ? this.state.DATA.map((function(_this) {
+        "className": "container main_cnt"
+      }, (this.state.data_test.length !== 0 && this.state.start ? this.state.data_test.map((function(_this) {
         return function(i, j) {
           if (_this.state.variant === j + 1 && i.data.length !== 0) {
             return i.data.map(function(q, w) {
@@ -199,14 +205,16 @@ App = React.createClass({
             });
           }
         };
-      })(this)) : this.state.DATA.length === 0 ? React.createElement("div", null, "К сожалению, данных нет.") : !this.state.start ? React.createElement("div", {
+      })(this)) : this.state.data_test.length === 0 ? React.createElement("div", null, "К сожалению, данных нет.") : !this.state.start ? React.createElement("div", {
         "className": "text-center nostart"
       }, "Нажмите на кнопку старта таймера и давайте начинать!") : void 0), React.createElement("button", {
         "onClick": this.handleEndTest,
         "className": "endTest"
       }, "Завершить"), React.createElement("footer", {
         "className": "main_footer"
-      })));
+      }, React.createElement("p", {
+        "className": "text-center"
+      }, "Daniil Shenyagin©2018 - TestingApp - SchoolProjects#3"))));
     } else {
       return React.createElement("span", null, "Поздравляю, вы в бане!");
     }
@@ -217,7 +225,7 @@ module.exports = App;
 
 
 
-},{"./components/Header":3,"./components/defQ":4,"./components/inpQ":5,"./components/joinQ":6,"./components/multQ":7,"./ee":8,"react":"react","socket.io-client":43}],3:[function(require,module,exports){
+},{"./components/Header":3,"./components/defQ":4,"./components/inpQ":5,"./components/joinQ":6,"./components/multQ":7,"./ee":8,"react":"react","socket.io-client":44}],3:[function(require,module,exports){
 var Header, React, ee;
 
 React = require("react");
@@ -228,25 +236,23 @@ Header = React.createClass({
   displayName: "Header",
   getInitialState: function() {
     return {
-      time: {}
+      time: {},
+      start: false
     };
   },
-  handleClickSaveName: function() {
-    return ee.emit("changeUserData", {
-      firstname: document.getElementById("name_user").value,
-      lastname: document.getElementById("lastname_user").value
-    });
-  },
   handleChangeSelect: function(e) {
+    this.inputBlur(this.selectVar);
     return ee.emit("changeVariant", {
       value: e.target.value
     });
   },
   handleStartTest: function() {
-    return ee.emit("startTestapp", {
-      time: this.state.time,
-      type: true
-    });
+    if (!this.state.start) {
+      return ee.emit("startTestApp", {
+        time: this.state.time,
+        type: true
+      });
+    }
   },
   componentWillReceiveProps: function() {
     var minutes, obj, seconds, time_seconds;
@@ -258,7 +264,6 @@ Header = React.createClass({
         }
       };
     })(this));
-    console.log(time_seconds);
     seconds = time_seconds % 60;
     minutes = Math.floor(time_seconds / 60);
     obj = {};
@@ -268,11 +273,49 @@ Header = React.createClass({
       time: obj
     });
   },
+  changeName: function(e) {
+    var val, value;
+    val = e.key;
+    if (val === "Enter") {
+      value = e.target.value;
+      if (e.target.id === "fname") {
+        this.inputFocus(this.lname);
+        this.inputBlur(this.fname);
+        console.log("fname: ", value);
+        return ee.emit("changeNameUsr@ee", {
+          fname: value
+        });
+      } else {
+        console.log("lname: ", value);
+        ee.emit("changeNameUsr@ee", {
+          lname: value
+        });
+        return this.inputFocus(this.selectVar);
+      }
+    }
+  },
+  inputFocus: function(node) {
+    var _node;
+    _node = React.findDOMNode(node);
+    if (_node != null) {
+      return _node.focus();
+    }
+  },
+  inputBlur: function(node) {
+    var _node;
+    _node = React.findDOMNode(node);
+    if (_node != null) {
+      return _node.blur();
+    }
+  },
   componentWillMount: function() {
-    return ee.on("startTesth", (function(_this) {
+    return ee.on("startTest", (function(_this) {
       return function(data) {
         var SI, timeall;
         if (data.type) {
+          _this.setState({
+            start: true
+          });
           timeall = _this.state.time.minutes * 60 + _this.state.time.seconds;
           console.log(timeall);
           return SI = setInterval((function() {
@@ -298,7 +341,11 @@ Header = React.createClass({
       };
     })(this));
   },
+  componentDidMount: function() {
+    return this.inputFocus(this.fname);
+  },
   render: function() {
+    var i, j;
     return React.createElement("header", {
       "className": "main_header_test"
     }, React.createElement("div", {
@@ -324,37 +371,74 @@ Header = React.createClass({
       "for": "fname"
     }, "имя:"), React.createElement("br", null), React.createElement("label", {
       "for": "lname"
-    }, "фамилия:")), React.createElement("div", {
+    }, "фамилие:")), React.createElement("div", {
       "className": "inputs"
     }, React.createElement("input", {
       "type": "text",
       "id": "fname",
-      "placeholder": "Daniil"
+      "placeholder": "Daniil",
+      "ref": ((function(_this) {
+        return function(node) {
+          return _this.fname = node;
+        };
+      })(this)),
+      "onKeyDown": ((function(_this) {
+        return function(e) {
+          return _this.changeName(e);
+        };
+      })(this))
     }), React.createElement("input", {
       "type": "text",
       "id": "lname",
-      "placeholder": "Shenyagin"
+      "placeholder": "Shenyagin",
+      "ref": ((function(_this) {
+        return function(node) {
+          return _this.lname = node;
+        };
+      })(this)),
+      "onKeyDown": ((function(_this) {
+        return function(e) {
+          return _this.changeName(e);
+        };
+      })(this))
     }))), React.createElement("select", {
       "name": "variant",
-      "id": "vars"
-    }, React.createElement("option", {
-      "value": "1"
-    }, "1 вариант"), React.createElement("option", {
-      "value": "2"
-    }, "2 вариант"), React.createElement("option", {
-      "value": "3"
-    }, "3 вариант"), React.createElement("option", {
-      "value": "4"
-    }, "4 вариант"))), React.createElement("div", {
+      "id": "selectVariant",
+      "onChange": ((function(_this) {
+        return function(e) {
+          return _this.handleChangeSelect(e);
+        };
+      })(this)),
+      "ref": ((function(_this) {
+        return function(node) {
+          return _this.selectVar = node;
+        };
+      })(this))
+    }, (function() {
+      var k, len, ref, results;
+      ref = this.props.data;
+      results = [];
+      for (j = k = 0, len = ref.length; k < len; j = ++k) {
+        i = ref[j];
+        results.push(React.createElement("option", {
+          "value": j + 1
+        }, j + 1, " вариант"));
+      }
+      return results;
+    }).call(this))), React.createElement("div", {
       "className": "col-md-3 col-lg-3 col-sm-4 menu-left"
     }, React.createElement("div", {
       "className": "timer"
     }, React.createElement("span", {
       "className": "time"
-    }, "10:00"), React.createElement("div", {
+    }, (this.state.time.minutes < 10 ? "0" + this.state.time.minutes : this.state.time.minutes) + ":" + (this.state.time.seconds < 10 ? "0" + this.state.time.seconds : this.state.time.seconds)), React.createElement("div", {
       "className": "controlls"
     }, React.createElement("i", {
-      "className": "fa fa-play"
+      "className": "fa fa-play",
+      "onClick": this.handleStartTest,
+      "style": {
+        color: this.state.start ? "#dadada" : "white"
+      }
     })))))));
   }
 });
@@ -385,7 +469,7 @@ DefQ = React.createClass({
   },
   handleClickIl: function(i, e) {
     var id, value;
-    if (e.target.localName === "span" || e.target.localName === "li") {
+    if (e.target.localName === "span" || e.target.localName === "li" || e.target.localName === "label") {
       id = "Q_" + this.state.num + "_" + i;
       document.getElementById(id).checked = true;
       value = +i;
@@ -1429,6 +1513,66 @@ function isUndefined(arg) {
 }
 
 },{}],16:[function(require,module,exports){
+// shim for using process in browser
+
+var process = module.exports = {};
+var queue = [];
+var draining = false;
+
+function drainQueue() {
+    if (draining) {
+        return;
+    }
+    draining = true;
+    var currentQueue;
+    var len = queue.length;
+    while(len) {
+        currentQueue = queue;
+        queue = [];
+        var i = -1;
+        while (++i < len) {
+            currentQueue[i]();
+        }
+        len = queue.length;
+    }
+    draining = false;
+}
+process.nextTick = function (fun) {
+    queue.push(fun);
+    if (!draining) {
+        setTimeout(drainQueue, 0);
+    }
+};
+
+process.title = 'browser';
+process.browser = true;
+process.env = {};
+process.argv = [];
+process.version = ''; // empty string to avoid regexp issues
+process.versions = {};
+
+function noop() {}
+
+process.on = noop;
+process.addListener = noop;
+process.once = noop;
+process.off = noop;
+process.removeListener = noop;
+process.removeAllListeners = noop;
+process.emit = noop;
+
+process.binding = function (name) {
+    throw new Error('process.binding is not supported');
+};
+
+// TODO(shtylman)
+process.cwd = function () { return '/' };
+process.chdir = function (dir) {
+    throw new Error('process.chdir is not supported');
+};
+process.umask = function() { return 0; };
+
+},{}],17:[function(require,module,exports){
 /**
  * Slice reference.
  */
@@ -1453,15 +1597,13 @@ module.exports = function(obj, fn){
   }
 };
 
-},{}],17:[function(require,module,exports){
+},{}],18:[function(require,module,exports){
 
 /**
  * Expose `Emitter`.
  */
 
-if (typeof module !== 'undefined') {
-  module.exports = Emitter;
-}
+module.exports = Emitter;
 
 /**
  * Initialize a new `Emitter`.
@@ -1500,7 +1642,7 @@ function mixin(obj) {
 Emitter.prototype.on =
 Emitter.prototype.addEventListener = function(event, fn){
   this._callbacks = this._callbacks || {};
-  (this._callbacks['$' + event] = this._callbacks['$' + event] || [])
+  (this._callbacks[event] = this._callbacks[event] || [])
     .push(fn);
   return this;
 };
@@ -1516,8 +1658,11 @@ Emitter.prototype.addEventListener = function(event, fn){
  */
 
 Emitter.prototype.once = function(event, fn){
+  var self = this;
+  this._callbacks = this._callbacks || {};
+
   function on() {
-    this.off(event, on);
+    self.off(event, on);
     fn.apply(this, arguments);
   }
 
@@ -1549,12 +1694,12 @@ Emitter.prototype.removeEventListener = function(event, fn){
   }
 
   // specific event
-  var callbacks = this._callbacks['$' + event];
+  var callbacks = this._callbacks[event];
   if (!callbacks) return this;
 
   // remove all handlers
   if (1 == arguments.length) {
-    delete this._callbacks['$' + event];
+    delete this._callbacks[event];
     return this;
   }
 
@@ -1581,7 +1726,7 @@ Emitter.prototype.removeEventListener = function(event, fn){
 Emitter.prototype.emit = function(event){
   this._callbacks = this._callbacks || {};
   var args = [].slice.call(arguments, 1)
-    , callbacks = this._callbacks['$' + event];
+    , callbacks = this._callbacks[event];
 
   if (callbacks) {
     callbacks = callbacks.slice(0);
@@ -1603,7 +1748,7 @@ Emitter.prototype.emit = function(event){
 
 Emitter.prototype.listeners = function(event){
   this._callbacks = this._callbacks || {};
-  return this._callbacks['$' + event] || [];
+  return this._callbacks[event] || [];
 };
 
 /**
@@ -1618,7 +1763,7 @@ Emitter.prototype.hasListeners = function(event){
   return !! this.listeners(event).length;
 };
 
-},{}],18:[function(require,module,exports){
+},{}],19:[function(require,module,exports){
 
 module.exports = function(a, b){
   var fn = function(){};
@@ -1626,11 +1771,11 @@ module.exports = function(a, b){
   a.prototype = new fn;
   a.prototype.constructor = a;
 };
-},{}],19:[function(require,module,exports){
+},{}],20:[function(require,module,exports){
 
 module.exports = require('./lib/index');
 
-},{"./lib/index":20}],20:[function(require,module,exports){
+},{"./lib/index":21}],21:[function(require,module,exports){
 
 module.exports = require('./socket');
 
@@ -1642,7 +1787,7 @@ module.exports = require('./socket');
  */
 module.exports.parser = require('engine.io-parser');
 
-},{"./socket":21,"engine.io-parser":32}],21:[function(require,module,exports){
+},{"./socket":22,"engine.io-parser":34}],22:[function(require,module,exports){
 (function (global){
 /**
  * Module dependencies.
@@ -2384,7 +2529,7 @@ Socket.prototype.filterUpgrades = function (upgrades) {
 };
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./transport":22,"./transports/index":23,"component-emitter":17,"debug":29,"engine.io-parser":32,"indexof":37,"parsejson":39,"parseqs":40,"parseuri":41}],22:[function(require,module,exports){
+},{"./transport":23,"./transports/index":24,"component-emitter":30,"debug":31,"engine.io-parser":34,"indexof":39,"parsejson":41,"parseqs":42,"parseuri":43}],23:[function(require,module,exports){
 /**
  * Module dependencies.
  */
@@ -2543,7 +2688,7 @@ Transport.prototype.onClose = function () {
   this.emit('close');
 };
 
-},{"component-emitter":17,"engine.io-parser":32}],23:[function(require,module,exports){
+},{"component-emitter":30,"engine.io-parser":34}],24:[function(require,module,exports){
 (function (global){
 /**
  * Module dependencies
@@ -2600,7 +2745,7 @@ function polling (opts) {
 }
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./polling-jsonp":24,"./polling-xhr":25,"./websocket":27,"xmlhttprequest-ssl":28}],24:[function(require,module,exports){
+},{"./polling-jsonp":25,"./polling-xhr":26,"./websocket":28,"xmlhttprequest-ssl":29}],25:[function(require,module,exports){
 (function (global){
 
 /**
@@ -2835,7 +2980,7 @@ JSONPPolling.prototype.doWrite = function (data, fn) {
 };
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./polling":26,"component-inherit":18}],25:[function(require,module,exports){
+},{"./polling":27,"component-inherit":19}],26:[function(require,module,exports){
 (function (global){
 /**
  * Module requirements.
@@ -3263,7 +3408,7 @@ function unloadHandler () {
 }
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./polling":26,"component-emitter":17,"component-inherit":18,"debug":29,"xmlhttprequest-ssl":28}],26:[function(require,module,exports){
+},{"./polling":27,"component-emitter":30,"component-inherit":19,"debug":31,"xmlhttprequest-ssl":29}],27:[function(require,module,exports){
 /**
  * Module dependencies.
  */
@@ -3510,7 +3655,7 @@ Polling.prototype.uri = function () {
   return schema + '://' + (ipv6 ? '[' + this.hostname + ']' : this.hostname) + port + this.path + query;
 };
 
-},{"../transport":22,"component-inherit":18,"debug":29,"engine.io-parser":32,"parseqs":40,"xmlhttprequest-ssl":28,"yeast":61}],27:[function(require,module,exports){
+},{"../transport":23,"component-inherit":19,"debug":31,"engine.io-parser":34,"parseqs":42,"xmlhttprequest-ssl":29,"yeast":62}],28:[function(require,module,exports){
 (function (global){
 /**
  * Module dependencies.
@@ -3799,7 +3944,7 @@ WS.prototype.check = function () {
 };
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../transport":22,"component-inherit":18,"debug":29,"engine.io-parser":32,"parseqs":40,"ws":14,"yeast":61}],28:[function(require,module,exports){
+},{"../transport":23,"component-inherit":19,"debug":31,"engine.io-parser":34,"parseqs":42,"ws":14,"yeast":62}],29:[function(require,module,exports){
 (function (global){
 // browser shim for xmlhttprequest module
 
@@ -3840,7 +3985,172 @@ module.exports = function (opts) {
 };
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"has-cors":36}],29:[function(require,module,exports){
+},{"has-cors":38}],30:[function(require,module,exports){
+
+/**
+ * Expose `Emitter`.
+ */
+
+if (typeof module !== 'undefined') {
+  module.exports = Emitter;
+}
+
+/**
+ * Initialize a new `Emitter`.
+ *
+ * @api public
+ */
+
+function Emitter(obj) {
+  if (obj) return mixin(obj);
+};
+
+/**
+ * Mixin the emitter properties.
+ *
+ * @param {Object} obj
+ * @return {Object}
+ * @api private
+ */
+
+function mixin(obj) {
+  for (var key in Emitter.prototype) {
+    obj[key] = Emitter.prototype[key];
+  }
+  return obj;
+}
+
+/**
+ * Listen on the given `event` with `fn`.
+ *
+ * @param {String} event
+ * @param {Function} fn
+ * @return {Emitter}
+ * @api public
+ */
+
+Emitter.prototype.on =
+Emitter.prototype.addEventListener = function(event, fn){
+  this._callbacks = this._callbacks || {};
+  (this._callbacks['$' + event] = this._callbacks['$' + event] || [])
+    .push(fn);
+  return this;
+};
+
+/**
+ * Adds an `event` listener that will be invoked a single
+ * time then automatically removed.
+ *
+ * @param {String} event
+ * @param {Function} fn
+ * @return {Emitter}
+ * @api public
+ */
+
+Emitter.prototype.once = function(event, fn){
+  function on() {
+    this.off(event, on);
+    fn.apply(this, arguments);
+  }
+
+  on.fn = fn;
+  this.on(event, on);
+  return this;
+};
+
+/**
+ * Remove the given callback for `event` or all
+ * registered callbacks.
+ *
+ * @param {String} event
+ * @param {Function} fn
+ * @return {Emitter}
+ * @api public
+ */
+
+Emitter.prototype.off =
+Emitter.prototype.removeListener =
+Emitter.prototype.removeAllListeners =
+Emitter.prototype.removeEventListener = function(event, fn){
+  this._callbacks = this._callbacks || {};
+
+  // all
+  if (0 == arguments.length) {
+    this._callbacks = {};
+    return this;
+  }
+
+  // specific event
+  var callbacks = this._callbacks['$' + event];
+  if (!callbacks) return this;
+
+  // remove all handlers
+  if (1 == arguments.length) {
+    delete this._callbacks['$' + event];
+    return this;
+  }
+
+  // remove specific handler
+  var cb;
+  for (var i = 0; i < callbacks.length; i++) {
+    cb = callbacks[i];
+    if (cb === fn || cb.fn === fn) {
+      callbacks.splice(i, 1);
+      break;
+    }
+  }
+  return this;
+};
+
+/**
+ * Emit `event` with the given args.
+ *
+ * @param {String} event
+ * @param {Mixed} ...
+ * @return {Emitter}
+ */
+
+Emitter.prototype.emit = function(event){
+  this._callbacks = this._callbacks || {};
+  var args = [].slice.call(arguments, 1)
+    , callbacks = this._callbacks['$' + event];
+
+  if (callbacks) {
+    callbacks = callbacks.slice(0);
+    for (var i = 0, len = callbacks.length; i < len; ++i) {
+      callbacks[i].apply(this, args);
+    }
+  }
+
+  return this;
+};
+
+/**
+ * Return array of callbacks for `event`.
+ *
+ * @param {String} event
+ * @return {Array}
+ * @api public
+ */
+
+Emitter.prototype.listeners = function(event){
+  this._callbacks = this._callbacks || {};
+  return this._callbacks['$' + event] || [];
+};
+
+/**
+ * Check if this emitter has `event` handlers.
+ *
+ * @param {String} event
+ * @return {Boolean}
+ * @api public
+ */
+
+Emitter.prototype.hasListeners = function(event){
+  return !! this.listeners(event).length;
+};
+
+},{}],31:[function(require,module,exports){
 (function (process){
 
 /**
@@ -4021,7 +4331,7 @@ function localstorage(){
 }
 
 }).call(this,require('_process'))
-},{"./debug":30,"_process":42}],30:[function(require,module,exports){
+},{"./debug":32,"_process":16}],32:[function(require,module,exports){
 
 /**
  * This is the common logic for both the Node.js and web browser
@@ -4223,7 +4533,7 @@ function coerce(val) {
   return val;
 }
 
-},{"ms":31}],31:[function(require,module,exports){
+},{"ms":33}],33:[function(require,module,exports){
 /**
  * Helpers.
  */
@@ -4374,7 +4684,7 @@ function plural(ms, n, name) {
   return Math.ceil(ms / n) + ' ' + name + 's'
 }
 
-},{}],32:[function(require,module,exports){
+},{}],34:[function(require,module,exports){
 (function (global){
 /**
  * Module dependencies.
@@ -4987,7 +5297,7 @@ exports.decodePayloadAsBinary = function (data, binaryType, callback) {
 };
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./keys":33,"after":9,"arraybuffer.slice":10,"base64-arraybuffer":12,"blob":13,"has-binary":34,"wtf-8":60}],33:[function(require,module,exports){
+},{"./keys":35,"after":9,"arraybuffer.slice":10,"base64-arraybuffer":12,"blob":13,"has-binary":36,"wtf-8":61}],35:[function(require,module,exports){
 
 /**
  * Gets the keys for an object.
@@ -5008,7 +5318,7 @@ module.exports = Object.keys || function keys (obj){
   return arr;
 };
 
-},{}],34:[function(require,module,exports){
+},{}],36:[function(require,module,exports){
 (function (global){
 
 /*
@@ -5071,12 +5381,12 @@ function hasBinary(data) {
 }
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"isarray":35}],35:[function(require,module,exports){
+},{"isarray":37}],37:[function(require,module,exports){
 module.exports = Array.isArray || function (arr) {
   return Object.prototype.toString.call(arr) == '[object Array]';
 };
 
-},{}],36:[function(require,module,exports){
+},{}],38:[function(require,module,exports){
 
 /**
  * Module exports.
@@ -5095,7 +5405,7 @@ try {
   module.exports = false;
 }
 
-},{}],37:[function(require,module,exports){
+},{}],39:[function(require,module,exports){
 
 var indexOf = [].indexOf;
 
@@ -5106,7 +5416,7 @@ module.exports = function(arr, obj){
   }
   return -1;
 };
-},{}],38:[function(require,module,exports){
+},{}],40:[function(require,module,exports){
 (function (global){
 /*! JSON v3.3.2 | http://bestiejs.github.io/json3 | Copyright 2012-2014, Kit Cambridge | http://kit.mit-license.org */
 ;(function () {
@@ -6012,7 +6322,7 @@ module.exports = function(arr, obj){
 }).call(this);
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],39:[function(require,module,exports){
+},{}],41:[function(require,module,exports){
 (function (global){
 /**
  * JSON parse.
@@ -6047,7 +6357,7 @@ module.exports = function parsejson(data) {
   }
 };
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],40:[function(require,module,exports){
+},{}],42:[function(require,module,exports){
 /**
  * Compiles a querystring
  * Returns string representation of the object
@@ -6086,7 +6396,7 @@ exports.decode = function(qs){
   return qry;
 };
 
-},{}],41:[function(require,module,exports){
+},{}],43:[function(require,module,exports){
 /**
  * Parses an URI
  *
@@ -6127,67 +6437,7 @@ module.exports = function parseuri(str) {
     return uri;
 };
 
-},{}],42:[function(require,module,exports){
-// shim for using process in browser
-
-var process = module.exports = {};
-var queue = [];
-var draining = false;
-
-function drainQueue() {
-    if (draining) {
-        return;
-    }
-    draining = true;
-    var currentQueue;
-    var len = queue.length;
-    while(len) {
-        currentQueue = queue;
-        queue = [];
-        var i = -1;
-        while (++i < len) {
-            currentQueue[i]();
-        }
-        len = queue.length;
-    }
-    draining = false;
-}
-process.nextTick = function (fun) {
-    queue.push(fun);
-    if (!draining) {
-        setTimeout(drainQueue, 0);
-    }
-};
-
-process.title = 'browser';
-process.browser = true;
-process.env = {};
-process.argv = [];
-process.version = ''; // empty string to avoid regexp issues
-process.versions = {};
-
-function noop() {}
-
-process.on = noop;
-process.addListener = noop;
-process.once = noop;
-process.off = noop;
-process.removeListener = noop;
-process.removeAllListeners = noop;
-process.emit = noop;
-
-process.binding = function (name) {
-    throw new Error('process.binding is not supported');
-};
-
-// TODO(shtylman)
-process.cwd = function () { return '/' };
-process.chdir = function (dir) {
-    throw new Error('process.chdir is not supported');
-};
-process.umask = function() { return 0; };
-
-},{}],43:[function(require,module,exports){
+},{}],44:[function(require,module,exports){
 
 /**
  * Module dependencies.
@@ -6298,7 +6548,7 @@ exports.connect = lookup;
 exports.Manager = require('./manager');
 exports.Socket = require('./socket');
 
-},{"./manager":44,"./socket":46,"./url":47,"debug":48,"socket.io-parser":52}],44:[function(require,module,exports){
+},{"./manager":45,"./socket":47,"./url":48,"debug":50,"socket.io-parser":54}],45:[function(require,module,exports){
 
 /**
  * Module dependencies.
@@ -6860,7 +7110,7 @@ Manager.prototype.onreconnect = function () {
   this.emitAll('reconnect', attempt);
 };
 
-},{"./on":45,"./socket":46,"backo2":11,"component-bind":16,"component-emitter":17,"debug":48,"engine.io-client":19,"indexof":37,"socket.io-parser":52}],45:[function(require,module,exports){
+},{"./on":46,"./socket":47,"backo2":11,"component-bind":17,"component-emitter":49,"debug":50,"engine.io-client":20,"indexof":39,"socket.io-parser":54}],46:[function(require,module,exports){
 
 /**
  * Module exports.
@@ -6886,7 +7136,7 @@ function on (obj, ev, fn) {
   };
 }
 
-},{}],46:[function(require,module,exports){
+},{}],47:[function(require,module,exports){
 
 /**
  * Module dependencies.
@@ -7307,7 +7557,7 @@ Socket.prototype.compress = function (compress) {
   return this;
 };
 
-},{"./on":45,"component-bind":16,"component-emitter":17,"debug":48,"has-binary":34,"socket.io-parser":52,"to-array":59}],47:[function(require,module,exports){
+},{"./on":46,"component-bind":17,"component-emitter":49,"debug":50,"has-binary":36,"socket.io-parser":54,"to-array":60}],48:[function(require,module,exports){
 (function (global){
 
 /**
@@ -7386,13 +7636,15 @@ function url (uri, loc) {
 }
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"debug":48,"parseuri":41}],48:[function(require,module,exports){
-arguments[4][29][0].apply(exports,arguments)
-},{"./debug":49,"_process":42,"dup":29}],49:[function(require,module,exports){
+},{"debug":50,"parseuri":43}],49:[function(require,module,exports){
 arguments[4][30][0].apply(exports,arguments)
-},{"dup":30,"ms":50}],50:[function(require,module,exports){
+},{"dup":30}],50:[function(require,module,exports){
 arguments[4][31][0].apply(exports,arguments)
-},{"dup":31}],51:[function(require,module,exports){
+},{"./debug":51,"_process":16,"dup":31}],51:[function(require,module,exports){
+arguments[4][32][0].apply(exports,arguments)
+},{"dup":32,"ms":52}],52:[function(require,module,exports){
+arguments[4][33][0].apply(exports,arguments)
+},{"dup":33}],53:[function(require,module,exports){
 (function (global){
 /*global Blob,File*/
 
@@ -7537,7 +7789,7 @@ exports.removeBlobs = function(data, callback) {
 };
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./is-buffer":53,"isarray":57}],52:[function(require,module,exports){
+},{"./is-buffer":55,"isarray":58}],54:[function(require,module,exports){
 
 /**
  * Module dependencies.
@@ -7943,7 +8195,7 @@ function error(data){
   };
 }
 
-},{"./binary":51,"./is-buffer":53,"component-emitter":54,"debug":55,"json3":38}],53:[function(require,module,exports){
+},{"./binary":53,"./is-buffer":55,"component-emitter":18,"debug":56,"json3":40}],55:[function(require,module,exports){
 (function (global){
 
 module.exports = isBuf;
@@ -7960,173 +8212,7 @@ function isBuf(obj) {
 }
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],54:[function(require,module,exports){
-
-/**
- * Expose `Emitter`.
- */
-
-module.exports = Emitter;
-
-/**
- * Initialize a new `Emitter`.
- *
- * @api public
- */
-
-function Emitter(obj) {
-  if (obj) return mixin(obj);
-};
-
-/**
- * Mixin the emitter properties.
- *
- * @param {Object} obj
- * @return {Object}
- * @api private
- */
-
-function mixin(obj) {
-  for (var key in Emitter.prototype) {
-    obj[key] = Emitter.prototype[key];
-  }
-  return obj;
-}
-
-/**
- * Listen on the given `event` with `fn`.
- *
- * @param {String} event
- * @param {Function} fn
- * @return {Emitter}
- * @api public
- */
-
-Emitter.prototype.on =
-Emitter.prototype.addEventListener = function(event, fn){
-  this._callbacks = this._callbacks || {};
-  (this._callbacks[event] = this._callbacks[event] || [])
-    .push(fn);
-  return this;
-};
-
-/**
- * Adds an `event` listener that will be invoked a single
- * time then automatically removed.
- *
- * @param {String} event
- * @param {Function} fn
- * @return {Emitter}
- * @api public
- */
-
-Emitter.prototype.once = function(event, fn){
-  var self = this;
-  this._callbacks = this._callbacks || {};
-
-  function on() {
-    self.off(event, on);
-    fn.apply(this, arguments);
-  }
-
-  on.fn = fn;
-  this.on(event, on);
-  return this;
-};
-
-/**
- * Remove the given callback for `event` or all
- * registered callbacks.
- *
- * @param {String} event
- * @param {Function} fn
- * @return {Emitter}
- * @api public
- */
-
-Emitter.prototype.off =
-Emitter.prototype.removeListener =
-Emitter.prototype.removeAllListeners =
-Emitter.prototype.removeEventListener = function(event, fn){
-  this._callbacks = this._callbacks || {};
-
-  // all
-  if (0 == arguments.length) {
-    this._callbacks = {};
-    return this;
-  }
-
-  // specific event
-  var callbacks = this._callbacks[event];
-  if (!callbacks) return this;
-
-  // remove all handlers
-  if (1 == arguments.length) {
-    delete this._callbacks[event];
-    return this;
-  }
-
-  // remove specific handler
-  var cb;
-  for (var i = 0; i < callbacks.length; i++) {
-    cb = callbacks[i];
-    if (cb === fn || cb.fn === fn) {
-      callbacks.splice(i, 1);
-      break;
-    }
-  }
-  return this;
-};
-
-/**
- * Emit `event` with the given args.
- *
- * @param {String} event
- * @param {Mixed} ...
- * @return {Emitter}
- */
-
-Emitter.prototype.emit = function(event){
-  this._callbacks = this._callbacks || {};
-  var args = [].slice.call(arguments, 1)
-    , callbacks = this._callbacks[event];
-
-  if (callbacks) {
-    callbacks = callbacks.slice(0);
-    for (var i = 0, len = callbacks.length; i < len; ++i) {
-      callbacks[i].apply(this, args);
-    }
-  }
-
-  return this;
-};
-
-/**
- * Return array of callbacks for `event`.
- *
- * @param {String} event
- * @return {Array}
- * @api public
- */
-
-Emitter.prototype.listeners = function(event){
-  this._callbacks = this._callbacks || {};
-  return this._callbacks[event] || [];
-};
-
-/**
- * Check if this emitter has `event` handlers.
- *
- * @param {String} event
- * @return {Boolean}
- * @api public
- */
-
-Emitter.prototype.hasListeners = function(event){
-  return !! this.listeners(event).length;
-};
-
-},{}],55:[function(require,module,exports){
+},{}],56:[function(require,module,exports){
 
 /**
  * This is the web browser implementation of `debug()`.
@@ -8296,7 +8382,7 @@ function localstorage(){
   } catch (e) {}
 }
 
-},{"./debug":56}],56:[function(require,module,exports){
+},{"./debug":57}],57:[function(require,module,exports){
 
 /**
  * This is the common logic for both the Node.js and web browser
@@ -8495,9 +8581,9 @@ function coerce(val) {
   return val;
 }
 
-},{"ms":58}],57:[function(require,module,exports){
-arguments[4][35][0].apply(exports,arguments)
-},{"dup":35}],58:[function(require,module,exports){
+},{"ms":59}],58:[function(require,module,exports){
+arguments[4][37][0].apply(exports,arguments)
+},{"dup":37}],59:[function(require,module,exports){
 /**
  * Helpers.
  */
@@ -8624,7 +8710,7 @@ function plural(ms, n, name) {
   return Math.ceil(ms / n) + ' ' + name + 's';
 }
 
-},{}],59:[function(require,module,exports){
+},{}],60:[function(require,module,exports){
 module.exports = toArray
 
 function toArray(list, index) {
@@ -8639,7 +8725,7 @@ function toArray(list, index) {
     return array
 }
 
-},{}],60:[function(require,module,exports){
+},{}],61:[function(require,module,exports){
 (function (global){
 /*! https://mths.be/wtf8 v1.0.0 by @mathias */
 ;(function(root) {
@@ -8877,7 +8963,7 @@ function toArray(list, index) {
 }(this));
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],61:[function(require,module,exports){
+},{}],62:[function(require,module,exports){
 'use strict';
 
 var alphabet = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz-_'.split('')
