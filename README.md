@@ -5,9 +5,15 @@
 npm i
 ```
 ---
-## Start App
+## Start App (server)
 ```bash
 npm run start
 ```
+
+## Start App (client)
+```bash
+gulp
+```
+
 P.S.
 "socket.io": "^1.7.4"
