@@ -35,6 +35,7 @@ app.use(bodyParser.urlencoded({
   extended: true
 }));
 
+// configs nunjucks
 nunjucks.configure("./Public/pages", {
 	autoscape: true,
 	express: app

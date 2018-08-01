@@ -10,13 +10,26 @@ export default function(socket, store, db){
 	let self = this;
 	let id = socket.id;
 	let ip = socket.handshake.address;
+
+	// add Client to Test stores
+	store.addClient({
+		id: id,
+		ip: ip,
+		app: "test"
+	});
+
 	console.log(`connected user, id: ${id}, ip: ${ip}`);
 	socket.emit("connected", {
 		id: id,
 		ip: ip
 	})
+
 	db.listTests().then((data) => {
 		socket.emit("getDataTest", filterTAnses(data));
 	})
 	// db.updateTest("5ac8ea66e45b041348128ac5", { time: 360 })
+
+	socket.on("changeUsrData", (data) => {
+		store.changeUsrData(data);
+	})
 }

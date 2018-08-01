@@ -8,7 +8,7 @@ export default function(socket, store){
 	store.addClient({
 		id: id,
 		ip: ip,
-		seq: 3
+		app: "chat"
 	});
 	
 	// init data to client
@@ -19,7 +19,6 @@ export default function(socket, store){
 	});
 
 	// Изменение имени клиента
-	
 	socket.on("changeNameUsr@soc", (data) => {
 		let engagedName = false;
 		store.getClients().map((i, j) => {

@@ -14,6 +14,13 @@ App = React.createClass
 		# Chat states
 		chatHello: ""
 	componentWillMount: ->
+		socket.on "CONNECT_USER", (data)=>
+			console.log "CONNECT_USER", data.payload
+		socket.on "DISCONNECT_USER", (data)=>
+			console.log "DISCONNECT_USER", data.payload
+		socket.on "UPDATE_USER", (data)=>
+			console.log "UPDATE_USER", data.payload
+
 		ee.on "loadUsers", (data)->
 			if data.status == "load"
 				socket.emit "loadUsers", status: "load"

@@ -15,7 +15,7 @@ import test from "./apps/test.socket";
 import admin from "./apps/admin.socket";
 
 /*
-	MainSock - это класс, включающий в себя все основные свойства и фенкции сокет-клиента
+	MainSock - это класс, включающий в себя все основные свойства и функции сокет-клиента
 	1. Connection
 	2. Switch - разделяется на пути (/learner/chat)
 	3. Disconnect
@@ -42,7 +42,7 @@ class MainSock {
 
 					// socket ONs' ChatApp
 					test(_socket, self.store, db);
-
+					self.disconnect(_socket);
 				}break;
 				case "admin": {
 

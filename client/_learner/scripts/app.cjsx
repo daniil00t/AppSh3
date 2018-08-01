@@ -44,12 +44,15 @@ App = React.createClass
 			@setState preloader: no
 
 		### _ EventEmitter_  ###
+
 		# Сохранение данных пользователя: имени и фамилии
 		ee.on 'changeNameUsr@ee', (data)=>
 			for key, value of data
 				obj = @state.data_user
 				obj[key] = value
 				@setState data_user: obj
+
+				socket.emit "changeUsrData", { id: @state.data_user.id, type: key, payload: { value: value } }
 
 		ee.on "startTestApp", (data)=>
 			if @state.data_user.fname? and @state.data_user.lname?
@@ -65,6 +68,8 @@ App = React.createClass
 			@setState data_anses: Data
 		ee.on "changeVariant", (data)=>
 			@setState variant: +data.value
+
+			socket.emit "changeUsrData", { id: @state.data_user.id, type: "variant", payload: {value: +data.value} }
 
 		ee.on "stopTimer", (data)=>
 			@endTest "К сожалению, время закончилось. Сохраняю ваши данные..."

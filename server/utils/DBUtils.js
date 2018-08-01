@@ -10,7 +10,10 @@ const User = mongoose.model('User');
 
 export function setUpConnection() {
 	try{
-	  mongoose.connect(`mongodb://${config.db.host}:${config.db.port}/${config.db.name}`);
+	  mongoose.connect(`mongodb://${config.db.host}:${config.db.port}/${config.db.name}`)
+	  	.catch((err) => {
+	  		console.err(err);
+	  	});
 	} catch(err){
 		throw new Error("Невозможно подключиться к базе данных)");
 	}
