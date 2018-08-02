@@ -22,7 +22,9 @@ export default (Chat) => class extends Chat {
 			}
 		}
 	}
-
+	getDataUsers(){
+		return this.data_users
+	}
 	updateAnswerUser(id, data){
 		let self = this;
 		if(this.data_users.length > 0) {

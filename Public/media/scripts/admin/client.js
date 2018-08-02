@@ -37,6 +37,22 @@ App = React.createClass({
     };
   },
   componentWillMount: function() {
+    socket.on("init", (function(_this) {
+      return function(data) {
+        switch (data.type) {
+          case "users":
+            return _this.setState({
+              users: data.data
+            });
+          case "data_users":
+            return _this.setState({
+              users_anses: data.data
+            });
+          default:
+            return console.log("no!");
+        }
+      };
+    })(this));
     socket.on("CONNECT_USER", (function(_this) {
       return function(data) {
         var arr;
@@ -50,10 +66,11 @@ App = React.createClass({
     socket.on("DISCONNECT_USER", (function(_this) {
       return function(data) {
         var arr;
-        console.log(data);
         arr = _this.state.users;
+        console.log(data);
+        console.log(arr);
         arr.map(function(i, j) {
-          if (i.payload === data.id) {
+          if (i.id === data.payload) {
             return arr.splice(j, 1);
           }
         });
@@ -558,15 +575,29 @@ Users_panel = React.createClass({
     }
   },
   renderedLiUser: function(i, j) {
+    var k, key, l, len, listToollipsDone, listToollipsFuture, value;
+    listToollipsDone = ["id", "ip", "variant", "testing"];
+    listToollipsFuture = [];
+    for (key in i) {
+      value = i[key];
+      for (l = 0, len = listToollipsDone.length; l < len; l++) {
+        k = listToollipsDone[l];
+        if (key === k) {
+          listToollipsFuture.push(k);
+        }
+      }
+    }
     return React.createElement("li", {
       "className": "animFadeInUp"
     }, React.createElement("div", {
       "className": "infoUser"
-    }, React.createElement("span", {
-      "className": "labels"
-    }, React.createElement("span", null, "id: "), React.createElement("br", null), React.createElement("span", null, "ip: ")), React.createElement("span", {
-      "className": "values"
-    }, React.createElement("span", null, i.id), React.createElement("br", null), React.createElement("span", null, i.ip))), ((i.fname != null) && (i.lname != null) ? (i.fname[0].toUpperCase()) + ". " + i.lname : i.name != null ? i.name : i.id), React.createElement("span", {
+    }, React.createElement("table", null, listToollipsFuture.map((function(_this) {
+      return function(r, t) {
+        return React.createElement("tr", null, React.createElement("td", {
+          "className": "names"
+        }, r, ": "), React.createElement("td", null, (typeof i[r] === "boolean" ? (i[r] ? "true" : "false") : i[r])));
+      };
+    })(this)))), ((i.fname != null) && (i.lname != null) ? (i.fname[0].toUpperCase()) + ". " + i.lname : i.name != null ? i.name : i.id), React.createElement("span", {
       "className": "appUsers"
     }, i.app), React.createElement("i", {
       "className": "fa fa-info-circle info",

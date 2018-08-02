@@ -1,9 +1,6 @@
 React = require "react"
 ee = require "../../ee"
 
-# <li>Daniil Shenyagin<i className="fa fa-info-circle info"></i><i className="fa fa-times-circle close"></i></li>
-# 				<li>Audrey Subbotin<i className="fa fa-info-circle info"></i><i className="fa fa-times-circle close"></i></li>
-# 				<li>Sergey Missurin<i className="fa fa-info-circle info"></i><i className="fa fa-times-circle close"></i></li>
 options = [
 	"all"
 	"test"
@@ -33,16 +30,24 @@ Users_panel = React.createClass
 					arr.splice j, 1
 			@setState users: arr
 	renderedLiUser: (i, j)->
+		listToollipsDone = ["id", "ip", "variant", "testing"]
+		listToollipsFuture = []
+		for key, value of i
+			for k in listToollipsDone
+				if key == k
+					listToollipsFuture.push k
 		<li className="animFadeInUp">
 			<div className="infoUser">
-				<span className="labels">
-					<span>id: </span><br/>
-					<span>ip: </span>
-				</span>
-				<span className="values">
-					<span>{i.id}</span><br/>
-					<span>{i.ip}</span>
-				</span>
+				<table>
+						{
+							listToollipsFuture.map (r, t)=>
+								<tr>
+									<td className="names">{r}: </td>
+									<td>{if typeof i[r] == "boolean" then (if i[r] then "true" else "false") else i[r] }</td>
+								</tr>
+						}
+				</table>
+
 			</div>
 			{
 				if i.fname? and i.lname?

@@ -15,15 +15,25 @@ App = React.createClass
 		# Chat states
 		chatHello: ""
 	componentWillMount: ->
+		socket.on "init", (data)=>
+			switch data.type
+				when "users"
+					@setState users: data.data
+				when "data_users"
+					@setState users_anses: data.data
+				else
+					console.log "no!"
+
 		socket.on "CONNECT_USER", (data)=>
 			arr = @state.users
 			arr.push data.payload
 			@setState users: arr
 		socket.on "DISCONNECT_USER", (data)=>
-			console.log data
 			arr = @state.users
+			console.log data
+			console.log arr
 			arr.map (i, j)=>
-				if i.payload == data.id
+				if i.id == data.payload
 					arr.splice j, 1
 			@setState users: arr
 		socket.on "UPDATE_USER", (data)=>
