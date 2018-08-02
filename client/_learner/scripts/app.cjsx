@@ -3,6 +3,8 @@ io = require "socket.io-client"
 ee = require "./ee"
 socket = io ""
 
+dispatcher = require "./dispatcher"
+
 Header = require "./components/Header"
 
 DefQ = require "./components/defQ"
@@ -21,13 +23,10 @@ App = React.createClass
 		variant: 1
 		start: false
 
-	endTest: (massage) ->
-		ee.emit "endTest", {type: on}
+	endTest: ->
+		# ee.emit "endTest", {type: on}
 		socket.emit "sendDataTest", data: @state.data_anses, data_user: @state.data_user
-		alert massage
 		window.location.replace("http://#{window.location.host}/learner")
-	handleEndTest: ->
-		@endTest "Пожайлуста, подождите. Данные вот-вот доберутся до сервера..."
 	componentWillMount: ->
 		### _ Sockets _ ###
 
@@ -58,6 +57,8 @@ App = React.createClass
 			if @state.data_user.fname? and @state.data_user.lname?
 				ee.emit "startTest", type: on
 				@setState start: data.type
+
+				socket.emit "changeUsrData", { id: @state.data_user.id, type: "start", payload: { state: on } }
 			else
 				ee.emit "startTest", type: no
 
@@ -72,17 +73,32 @@ App = React.createClass
 			socket.emit "changeUsrData", { id: @state.data_user.id, type: "variant", payload: {value: +data.value} }
 
 		ee.on "stopTimer", (data)=>
-			@endTest "К сожалению, время закончилось. Сохраняю ваши данные..."
+			@endTest()
 
 
-		socket.on "deleteUser_toClient", (data)=>
-			if config.id is data.id
+		# Dispatcher events
+		dispatcher.register (action)=>
+			switch action.type
+				when "UPDATE_ANSWER"
+					socket.emit "UPDATE_ANSWER_USER", 
+						id: @state.data_user.id
+						payload: action.payload
 
-				alert data.massage
-				@setState ban: true
-				# window.location.replace("http://#{window.location.host}/learner")
-		socket.on "UserInBan", (data)=>
-			@setState ban: if data.type then false
+					arr = @state.data_anses
+					if arr.length > 0
+						update = false
+						for i, j in arr
+							if i.no == action.payload.no
+								arr[j].value = action.payload.value
+								update = true
+						if !update
+							arr.push action.payload
+					else
+						arr.push action.payload
+					@setState data_anses: arr
+					
+				else
+					console.log "свитч не сработал"
 	render: ->
 		if !@state.ban
 			<div className="testing">
@@ -119,7 +135,7 @@ App = React.createClass
 								if !@state.start
 									<div className="text-center nostart">Нажмите на кнопку старта таймера и давайте начинать!</div>
 					}
-					<button onClick={@handleEndTest} className="endTest">Завершить</button>
+					<button onClick={@endTest} className="endTest">Завершить</button>
 				<footer className="main_footer">
 					<p className="text-center">Daniil Shenyagin&copy;2018 - TestingApp - SchoolProjects#3</p>
 				</footer>

@@ -78,17 +78,17 @@ Users_panel = React.createClass
 			</select>
 			<ul className="onlineusers">
 				{
-					if @state.users.length > 0
+					if @props.users.length > 0
 						switch @state.filtered
 							when "all"
-								@state.users.map (i, j)=>
+								@props.users.map (i, j)=>
 									@renderedLiUser(i, j)
 							when "test"
-								@state.users.map (i, j)=>
+								@props.users.map (i, j)=>
 									if i.app == "test"
 										@renderedLiUser(i, j)
 							when "chat"
-								@state.users.map (i, j)=>
+								@props.users.map (i, j)=>
 									if i.app == "chat"
 										@renderedLiUser(i, j)
 					else

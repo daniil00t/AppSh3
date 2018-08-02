@@ -10,16 +10,34 @@ App = React.createClass
 	displayName: 'App'
 	getInitialState: ->
 		numErr: -1
-
+		users: []
+		users_anses: []
 		# Chat states
 		chatHello: ""
 	componentWillMount: ->
 		socket.on "CONNECT_USER", (data)=>
-			console.log "CONNECT_USER", data.payload
+			arr = @state.users
+			arr.push data.payload
+			@setState users: arr
 		socket.on "DISCONNECT_USER", (data)=>
-			console.log "DISCONNECT_USER", data.payload
+			console.log data
+			arr = @state.users
+			arr.map (i, j)=>
+				if i.payload == data.id
+					arr.splice j, 1
+			@setState users: arr
 		socket.on "UPDATE_USER", (data)=>
-			console.log "UPDATE_USER", data.payload
+			console.log data.payload
+			arr = @state.users
+			for i, j in arr
+				if i.id == data.payload.id
+					for key, value of data.payload.data
+						arr[j][key] = value
+			@setState users: arr
+
+
+		socket.on "UPDATE_ANSWER_USER", (data)=>
+			@setState users_anses: data.payload
 
 		ee.on "loadUsers", (data)->
 			if data.status == "load"
@@ -55,7 +73,7 @@ App = React.createClass
 				</div>
 			</div>
 			<div className="container-fluid">
-				<Panel data={{chat: {chatHello: @state.chatHello}}}/>
+				<Panel data={ { chat: {chatHello: @state.chatHello}, users: {data: @state.users}} }/>
 			</div>
 		</div>
 

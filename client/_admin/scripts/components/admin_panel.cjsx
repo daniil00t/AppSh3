@@ -39,7 +39,7 @@ Panel = React.createClass
 				<div className="wrp">
 					{
 						switch @state.sidebarvalue
-							when 0 then <Users />
+							when 0 then <Users users={@props.data.users.data}/>
 							when 1 then <Chat data={@props.data.chat}/>
 							when 2 then <Test />
 							when 3 then <DB_panel />

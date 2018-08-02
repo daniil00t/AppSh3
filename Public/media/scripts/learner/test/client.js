@@ -10,7 +10,7 @@ React.render(React.createElement(App, null), document.getElementById('app'));
 
 
 },{"./app":2,"react":"react"}],2:[function(require,module,exports){
-var App, DefQ, Header, InpQ, JoinQ, MultQ, React, ee, io, socket;
+var App, DefQ, Header, InpQ, JoinQ, MultQ, React, dispatcher, ee, io, socket;
 
 React = require('react');
 
@@ -19,6 +19,8 @@ io = require("socket.io-client");
 ee = require("./ee");
 
 socket = io("");
+
+dispatcher = require("./dispatcher");
 
 Header = require("./components/Header");
 
@@ -42,19 +44,12 @@ App = React.createClass({
       start: false
     };
   },
-  endTest: function(massage) {
-    ee.emit("endTest", {
-      type: true
-    });
+  endTest: function() {
     socket.emit("sendDataTest", {
       data: this.state.data_anses,
       data_user: this.state.data_user
     });
-    alert(massage);
     return window.location.replace("http://" + window.location.host + "/learner");
-  },
-  handleEndTest: function() {
-    return this.endTest("Пожайлуста, подождите. Данные вот-вот доберутся до сервера...");
   },
   componentWillMount: function() {
 
@@ -112,8 +107,15 @@ App = React.createClass({
           ee.emit("startTest", {
             type: true
           });
-          return _this.setState({
+          _this.setState({
             start: data.type
+          });
+          return socket.emit("changeUsrData", {
+            id: _this.state.data_user.id,
+            type: "start",
+            payload: {
+              state: true
+            }
           });
         } else {
           return ee.emit("startTest", {
@@ -148,24 +150,40 @@ App = React.createClass({
     })(this));
     ee.on("stopTimer", (function(_this) {
       return function(data) {
-        return _this.endTest("К сожалению, время закончилось. Сохраняю ваши данные...");
+        return _this.endTest();
       };
     })(this));
-    socket.on("deleteUser_toClient", (function(_this) {
-      return function(data) {
-        if (config.id === data.id) {
-          alert(data.massage);
-          return _this.setState({
-            ban: true
-          });
+    return dispatcher.register((function(_this) {
+      return function(action) {
+        var arr, i, j, k, len, update;
+        switch (action.type) {
+          case "UPDATE_ANSWER":
+            socket.emit("UPDATE_ANSWER_USER", {
+              id: _this.state.data_user.id,
+              payload: action.payload
+            });
+            arr = _this.state.data_anses;
+            if (arr.length > 0) {
+              update = false;
+              for (j = k = 0, len = arr.length; k < len; j = ++k) {
+                i = arr[j];
+                if (i.no === action.payload.no) {
+                  arr[j].value = action.payload.value;
+                  update = true;
+                }
+              }
+              if (!update) {
+                arr.push(action.payload);
+              }
+            } else {
+              arr.push(action.payload);
+            }
+            return _this.setState({
+              data_anses: arr
+            });
+          default:
+            return console.log("свитч не сработал");
         }
-      };
-    })(this));
-    return socket.on("UserInBan", (function(_this) {
-      return function(data) {
-        return _this.setState({
-          ban: data.type ? false : void 0
-        });
       };
     })(this));
   },
@@ -222,7 +240,7 @@ App = React.createClass({
       })(this)) : this.state.data_test.length === 0 ? React.createElement("div", null, "К сожалению, данных нет.") : !this.state.start ? React.createElement("div", {
         "className": "text-center nostart"
       }, "Нажмите на кнопку старта таймера и давайте начинать!") : void 0), React.createElement("button", {
-        "onClick": this.handleEndTest,
+        "onClick": this.endTest,
         "className": "endTest"
       }, "Завершить"), React.createElement("footer", {
         "className": "main_footer"
@@ -239,7 +257,7 @@ module.exports = App;
 
 
 
-},{"./components/Header":3,"./components/defQ":4,"./components/inpQ":5,"./components/joinQ":6,"./components/multQ":7,"./ee":8,"react":"react","socket.io-client":43}],3:[function(require,module,exports){
+},{"./components/Header":3,"./components/defQ":4,"./components/inpQ":5,"./components/joinQ":6,"./components/multQ":7,"./dispatcher":8,"./ee":9,"react":"react","socket.io-client":47}],3:[function(require,module,exports){
 var Header, React, ee;
 
 React = require("react");
@@ -461,12 +479,14 @@ module.exports = Header;
 
 
 
-},{"../ee":8,"react":"react"}],4:[function(require,module,exports){
-var DefQ, React, ee;
+},{"../ee":9,"react":"react"}],4:[function(require,module,exports){
+var DefQ, React, dispatcher, ee;
 
 React = require("react");
 
 ee = require("../ee");
+
+dispatcher = require("../dispatcher");
 
 DefQ = React.createClass({
   displayName: "DefQ",
@@ -494,17 +514,18 @@ DefQ = React.createClass({
           val: value
         }
       });
+      dispatcher.dispatch({
+        type: "UPDATE_ANSWER",
+        payload: {
+          type: "defQ",
+          no: this.state.num,
+          value: value
+        }
+      });
       return this.setState({
         activeItem: value
       });
     }
-  },
-  componentWillMount: function() {
-    return ee.on("endTest", (function(_this) {
-      return function(data) {
-        return ee.emit("sendAnswer", _this.state.myans);
-      };
-    })(this));
   },
   render: function() {
     return React.createElement("div", {
@@ -544,7 +565,7 @@ module.exports = DefQ;
 
 
 
-},{"../ee":8,"react":"react"}],5:[function(require,module,exports){
+},{"../dispatcher":8,"../ee":9,"react":"react"}],5:[function(require,module,exports){
 var InpQ, React, ee;
 
 React = require("react");
@@ -580,7 +601,7 @@ module.exports = InpQ;
 
 
 
-},{"../ee":8,"react":"react"}],6:[function(require,module,exports){
+},{"../ee":9,"react":"react"}],6:[function(require,module,exports){
 var JoinQ, React, ee;
 
 React = require("react");
@@ -767,7 +788,7 @@ module.exports = JoinQ;
 
 
 
-},{"../ee":8,"react":"react"}],7:[function(require,module,exports){
+},{"../ee":9,"react":"react"}],7:[function(require,module,exports){
 var MultQ, React, ee;
 
 React = require("react");
@@ -893,7 +914,16 @@ module.exports = MultQ;
 
 
 
-},{"../ee":8,"react":"react"}],8:[function(require,module,exports){
+},{"../ee":9,"react":"react"}],8:[function(require,module,exports){
+var Dispatcher;
+
+Dispatcher = require("flux").Dispatcher;
+
+module.exports = new Dispatcher();
+
+
+
+},{"flux":36}],9:[function(require,module,exports){
 var EventEmitter, ee;
 
 EventEmitter = require("events").EventEmitter;
@@ -904,7 +934,7 @@ module.exports = ee;
 
 
 
-},{"events":15}],9:[function(require,module,exports){
+},{"events":16}],10:[function(require,module,exports){
 module.exports = after
 
 function after(count, callback, err_cb) {
@@ -934,7 +964,7 @@ function after(count, callback, err_cb) {
 
 function noop() {}
 
-},{}],10:[function(require,module,exports){
+},{}],11:[function(require,module,exports){
 /**
  * An abstraction for slicing an arraybuffer even when
  * ArrayBuffer.prototype.slice is not supported
@@ -965,7 +995,7 @@ module.exports = function(arraybuffer, start, end) {
   return result.buffer;
 };
 
-},{}],11:[function(require,module,exports){
+},{}],12:[function(require,module,exports){
 
 /**
  * Expose `Backoff`.
@@ -1052,7 +1082,7 @@ Backoff.prototype.setJitter = function(jitter){
 };
 
 
-},{}],12:[function(require,module,exports){
+},{}],13:[function(require,module,exports){
 /*
  * base64-arraybuffer
  * https://github.com/niklasvh/base64-arraybuffer
@@ -1121,7 +1151,7 @@ Backoff.prototype.setJitter = function(jitter){
   };
 })();
 
-},{}],13:[function(require,module,exports){
+},{}],14:[function(require,module,exports){
 (function (global){
 /**
  * Create a blob builder even when vendor prefixes exist
@@ -1221,9 +1251,9 @@ module.exports = (function() {
 })();
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],14:[function(require,module,exports){
-
 },{}],15:[function(require,module,exports){
+
+},{}],16:[function(require,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -1526,7 +1556,7 @@ function isUndefined(arg) {
   return arg === void 0;
 }
 
-},{}],16:[function(require,module,exports){
+},{}],17:[function(require,module,exports){
 /**
  * Slice reference.
  */
@@ -1551,7 +1581,7 @@ module.exports = function(obj, fn){
   }
 };
 
-},{}],17:[function(require,module,exports){
+},{}],18:[function(require,module,exports){
 
 /**
  * Expose `Emitter`.
@@ -1716,7 +1746,7 @@ Emitter.prototype.hasListeners = function(event){
   return !! this.listeners(event).length;
 };
 
-},{}],18:[function(require,module,exports){
+},{}],19:[function(require,module,exports){
 
 module.exports = function(a, b){
   var fn = function(){};
@@ -1724,11 +1754,11 @@ module.exports = function(a, b){
   a.prototype = new fn;
   a.prototype.constructor = a;
 };
-},{}],19:[function(require,module,exports){
+},{}],20:[function(require,module,exports){
 
 module.exports = require('./lib/index');
 
-},{"./lib/index":20}],20:[function(require,module,exports){
+},{"./lib/index":21}],21:[function(require,module,exports){
 
 module.exports = require('./socket');
 
@@ -1740,7 +1770,7 @@ module.exports = require('./socket');
  */
 module.exports.parser = require('engine.io-parser');
 
-},{"./socket":21,"engine.io-parser":32}],21:[function(require,module,exports){
+},{"./socket":22,"engine.io-parser":33}],22:[function(require,module,exports){
 (function (global){
 /**
  * Module dependencies.
@@ -2482,7 +2512,7 @@ Socket.prototype.filterUpgrades = function (upgrades) {
 };
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./transport":22,"./transports/index":23,"component-emitter":17,"debug":29,"engine.io-parser":32,"indexof":37,"parsejson":39,"parseqs":40,"parseuri":41}],22:[function(require,module,exports){
+},{"./transport":23,"./transports/index":24,"component-emitter":18,"debug":30,"engine.io-parser":33,"indexof":41,"parsejson":43,"parseqs":44,"parseuri":45}],23:[function(require,module,exports){
 /**
  * Module dependencies.
  */
@@ -2641,7 +2671,7 @@ Transport.prototype.onClose = function () {
   this.emit('close');
 };
 
-},{"component-emitter":17,"engine.io-parser":32}],23:[function(require,module,exports){
+},{"component-emitter":18,"engine.io-parser":33}],24:[function(require,module,exports){
 (function (global){
 /**
  * Module dependencies
@@ -2698,7 +2728,7 @@ function polling (opts) {
 }
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./polling-jsonp":24,"./polling-xhr":25,"./websocket":27,"xmlhttprequest-ssl":28}],24:[function(require,module,exports){
+},{"./polling-jsonp":25,"./polling-xhr":26,"./websocket":28,"xmlhttprequest-ssl":29}],25:[function(require,module,exports){
 (function (global){
 
 /**
@@ -2933,7 +2963,7 @@ JSONPPolling.prototype.doWrite = function (data, fn) {
 };
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./polling":26,"component-inherit":18}],25:[function(require,module,exports){
+},{"./polling":27,"component-inherit":19}],26:[function(require,module,exports){
 (function (global){
 /**
  * Module requirements.
@@ -3361,7 +3391,7 @@ function unloadHandler () {
 }
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./polling":26,"component-emitter":17,"component-inherit":18,"debug":29,"xmlhttprequest-ssl":28}],26:[function(require,module,exports){
+},{"./polling":27,"component-emitter":18,"component-inherit":19,"debug":30,"xmlhttprequest-ssl":29}],27:[function(require,module,exports){
 /**
  * Module dependencies.
  */
@@ -3608,7 +3638,7 @@ Polling.prototype.uri = function () {
   return schema + '://' + (ipv6 ? '[' + this.hostname + ']' : this.hostname) + port + this.path + query;
 };
 
-},{"../transport":22,"component-inherit":18,"debug":29,"engine.io-parser":32,"parseqs":40,"xmlhttprequest-ssl":28,"yeast":61}],27:[function(require,module,exports){
+},{"../transport":23,"component-inherit":19,"debug":30,"engine.io-parser":33,"parseqs":44,"xmlhttprequest-ssl":29,"yeast":65}],28:[function(require,module,exports){
 (function (global){
 /**
  * Module dependencies.
@@ -3897,7 +3927,7 @@ WS.prototype.check = function () {
 };
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../transport":22,"component-inherit":18,"debug":29,"engine.io-parser":32,"parseqs":40,"ws":14,"yeast":61}],28:[function(require,module,exports){
+},{"../transport":23,"component-inherit":19,"debug":30,"engine.io-parser":33,"parseqs":44,"ws":15,"yeast":65}],29:[function(require,module,exports){
 (function (global){
 // browser shim for xmlhttprequest module
 
@@ -3938,7 +3968,7 @@ module.exports = function (opts) {
 };
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"has-cors":36}],29:[function(require,module,exports){
+},{"has-cors":40}],30:[function(require,module,exports){
 (function (process){
 
 /**
@@ -4119,7 +4149,7 @@ function localstorage(){
 }
 
 }).call(this,require('_process'))
-},{"./debug":30,"_process":42}],30:[function(require,module,exports){
+},{"./debug":31,"_process":46}],31:[function(require,module,exports){
 
 /**
  * This is the common logic for both the Node.js and web browser
@@ -4321,7 +4351,7 @@ function coerce(val) {
   return val;
 }
 
-},{"ms":31}],31:[function(require,module,exports){
+},{"ms":32}],32:[function(require,module,exports){
 /**
  * Helpers.
  */
@@ -4472,7 +4502,7 @@ function plural(ms, n, name) {
   return Math.ceil(ms / n) + ' ' + name + 's'
 }
 
-},{}],32:[function(require,module,exports){
+},{}],33:[function(require,module,exports){
 (function (global){
 /**
  * Module dependencies.
@@ -5085,7 +5115,7 @@ exports.decodePayloadAsBinary = function (data, binaryType, callback) {
 };
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./keys":33,"after":9,"arraybuffer.slice":10,"base64-arraybuffer":12,"blob":13,"has-binary":34,"wtf-8":60}],33:[function(require,module,exports){
+},{"./keys":34,"after":10,"arraybuffer.slice":11,"base64-arraybuffer":13,"blob":14,"has-binary":38,"wtf-8":64}],34:[function(require,module,exports){
 
 /**
  * Gets the keys for an object.
@@ -5106,7 +5136,305 @@ module.exports = Object.keys || function keys (obj){
   return arr;
 };
 
-},{}],34:[function(require,module,exports){
+},{}],35:[function(require,module,exports){
+(function (process){
+/**
+ * Copyright 2013-2015, Facebook, Inc.
+ * All rights reserved.
+ *
+ * This source code is licensed under the BSD-style license found in the
+ * LICENSE file in the root directory of this source tree. An additional grant
+ * of patent rights can be found in the PATENTS file in the same directory.
+ *
+ * @providesModule invariant
+ */
+
+"use strict";
+
+/**
+ * Use invariant() to assert state which your program assumes to be true.
+ *
+ * Provide sprintf-style format (only %s is supported) and arguments
+ * to provide information about what broke and what you were
+ * expecting.
+ *
+ * The invariant message will be stripped in production, but the invariant
+ * will remain to ensure logic does not differ in production.
+ */
+
+var invariant = function (condition, format, a, b, c, d, e, f) {
+  if (process.env.NODE_ENV !== 'production') {
+    if (format === undefined) {
+      throw new Error('invariant requires an error message argument');
+    }
+  }
+
+  if (!condition) {
+    var error;
+    if (format === undefined) {
+      error = new Error('Minified exception occurred; use the non-minified dev environment ' + 'for the full error message and additional helpful warnings.');
+    } else {
+      var args = [a, b, c, d, e, f];
+      var argIndex = 0;
+      error = new Error('Invariant Violation: ' + format.replace(/%s/g, function () {
+        return args[argIndex++];
+      }));
+    }
+
+    error.framesToPop = 1; // we don't care about invariant's own frame
+    throw error;
+  }
+};
+
+module.exports = invariant;
+}).call(this,require('_process'))
+},{"_process":46}],36:[function(require,module,exports){
+/**
+ * Copyright (c) 2014-2015, Facebook, Inc.
+ * All rights reserved.
+ *
+ * This source code is licensed under the BSD-style license found in the
+ * LICENSE file in the root directory of this source tree. An additional grant
+ * of patent rights can be found in the PATENTS file in the same directory.
+ */
+
+module.exports.Dispatcher = require('./lib/Dispatcher');
+
+},{"./lib/Dispatcher":37}],37:[function(require,module,exports){
+(function (process){
+/**
+ * Copyright (c) 2014-2015, Facebook, Inc.
+ * All rights reserved.
+ *
+ * This source code is licensed under the BSD-style license found in the
+ * LICENSE file in the root directory of this source tree. An additional grant
+ * of patent rights can be found in the PATENTS file in the same directory.
+ *
+ * @providesModule Dispatcher
+ * 
+ * @preventMunge
+ */
+
+'use strict';
+
+exports.__esModule = true;
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError('Cannot call a class as a function'); } }
+
+var invariant = require('fbjs/lib/invariant');
+
+var _prefix = 'ID_';
+
+/**
+ * Dispatcher is used to broadcast payloads to registered callbacks. This is
+ * different from generic pub-sub systems in two ways:
+ *
+ *   1) Callbacks are not subscribed to particular events. Every payload is
+ *      dispatched to every registered callback.
+ *   2) Callbacks can be deferred in whole or part until other callbacks have
+ *      been executed.
+ *
+ * For example, consider this hypothetical flight destination form, which
+ * selects a default city when a country is selected:
+ *
+ *   var flightDispatcher = new Dispatcher();
+ *
+ *   // Keeps track of which country is selected
+ *   var CountryStore = {country: null};
+ *
+ *   // Keeps track of which city is selected
+ *   var CityStore = {city: null};
+ *
+ *   // Keeps track of the base flight price of the selected city
+ *   var FlightPriceStore = {price: null}
+ *
+ * When a user changes the selected city, we dispatch the payload:
+ *
+ *   flightDispatcher.dispatch({
+ *     actionType: 'city-update',
+ *     selectedCity: 'paris'
+ *   });
+ *
+ * This payload is digested by `CityStore`:
+ *
+ *   flightDispatcher.register(function(payload) {
+ *     if (payload.actionType === 'city-update') {
+ *       CityStore.city = payload.selectedCity;
+ *     }
+ *   });
+ *
+ * When the user selects a country, we dispatch the payload:
+ *
+ *   flightDispatcher.dispatch({
+ *     actionType: 'country-update',
+ *     selectedCountry: 'australia'
+ *   });
+ *
+ * This payload is digested by both stores:
+ *
+ *   CountryStore.dispatchToken = flightDispatcher.register(function(payload) {
+ *     if (payload.actionType === 'country-update') {
+ *       CountryStore.country = payload.selectedCountry;
+ *     }
+ *   });
+ *
+ * When the callback to update `CountryStore` is registered, we save a reference
+ * to the returned token. Using this token with `waitFor()`, we can guarantee
+ * that `CountryStore` is updated before the callback that updates `CityStore`
+ * needs to query its data.
+ *
+ *   CityStore.dispatchToken = flightDispatcher.register(function(payload) {
+ *     if (payload.actionType === 'country-update') {
+ *       // `CountryStore.country` may not be updated.
+ *       flightDispatcher.waitFor([CountryStore.dispatchToken]);
+ *       // `CountryStore.country` is now guaranteed to be updated.
+ *
+ *       // Select the default city for the new country
+ *       CityStore.city = getDefaultCityForCountry(CountryStore.country);
+ *     }
+ *   });
+ *
+ * The usage of `waitFor()` can be chained, for example:
+ *
+ *   FlightPriceStore.dispatchToken =
+ *     flightDispatcher.register(function(payload) {
+ *       switch (payload.actionType) {
+ *         case 'country-update':
+ *         case 'city-update':
+ *           flightDispatcher.waitFor([CityStore.dispatchToken]);
+ *           FlightPriceStore.price =
+ *             getFlightPriceStore(CountryStore.country, CityStore.city);
+ *           break;
+ *     }
+ *   });
+ *
+ * The `country-update` payload will be guaranteed to invoke the stores'
+ * registered callbacks in order: `CountryStore`, `CityStore`, then
+ * `FlightPriceStore`.
+ */
+
+var Dispatcher = (function () {
+  function Dispatcher() {
+    _classCallCheck(this, Dispatcher);
+
+    this._callbacks = {};
+    this._isDispatching = false;
+    this._isHandled = {};
+    this._isPending = {};
+    this._lastID = 1;
+  }
+
+  /**
+   * Registers a callback to be invoked with every dispatched payload. Returns
+   * a token that can be used with `waitFor()`.
+   */
+
+  Dispatcher.prototype.register = function register(callback) {
+    var id = _prefix + this._lastID++;
+    this._callbacks[id] = callback;
+    return id;
+  };
+
+  /**
+   * Removes a callback based on its token.
+   */
+
+  Dispatcher.prototype.unregister = function unregister(id) {
+    !this._callbacks[id] ? process.env.NODE_ENV !== 'production' ? invariant(false, 'Dispatcher.unregister(...): `%s` does not map to a registered callback.', id) : invariant(false) : undefined;
+    delete this._callbacks[id];
+  };
+
+  /**
+   * Waits for the callbacks specified to be invoked before continuing execution
+   * of the current callback. This method should only be used by a callback in
+   * response to a dispatched payload.
+   */
+
+  Dispatcher.prototype.waitFor = function waitFor(ids) {
+    !this._isDispatching ? process.env.NODE_ENV !== 'production' ? invariant(false, 'Dispatcher.waitFor(...): Must be invoked while dispatching.') : invariant(false) : undefined;
+    for (var ii = 0; ii < ids.length; ii++) {
+      var id = ids[ii];
+      if (this._isPending[id]) {
+        !this._isHandled[id] ? process.env.NODE_ENV !== 'production' ? invariant(false, 'Dispatcher.waitFor(...): Circular dependency detected while ' + 'waiting for `%s`.', id) : invariant(false) : undefined;
+        continue;
+      }
+      !this._callbacks[id] ? process.env.NODE_ENV !== 'production' ? invariant(false, 'Dispatcher.waitFor(...): `%s` does not map to a registered callback.', id) : invariant(false) : undefined;
+      this._invokeCallback(id);
+    }
+  };
+
+  /**
+   * Dispatches a payload to all registered callbacks.
+   */
+
+  Dispatcher.prototype.dispatch = function dispatch(payload) {
+    !!this._isDispatching ? process.env.NODE_ENV !== 'production' ? invariant(false, 'Dispatch.dispatch(...): Cannot dispatch in the middle of a dispatch.') : invariant(false) : undefined;
+    this._startDispatching(payload);
+    try {
+      for (var id in this._callbacks) {
+        if (this._isPending[id]) {
+          continue;
+        }
+        this._invokeCallback(id);
+      }
+    } finally {
+      this._stopDispatching();
+    }
+  };
+
+  /**
+   * Is this Dispatcher currently dispatching.
+   */
+
+  Dispatcher.prototype.isDispatching = function isDispatching() {
+    return this._isDispatching;
+  };
+
+  /**
+   * Call the callback stored with the given id. Also do some internal
+   * bookkeeping.
+   *
+   * @internal
+   */
+
+  Dispatcher.prototype._invokeCallback = function _invokeCallback(id) {
+    this._isPending[id] = true;
+    this._callbacks[id](this._pendingPayload);
+    this._isHandled[id] = true;
+  };
+
+  /**
+   * Set up bookkeeping needed when dispatching.
+   *
+   * @internal
+   */
+
+  Dispatcher.prototype._startDispatching = function _startDispatching(payload) {
+    for (var id in this._callbacks) {
+      this._isPending[id] = false;
+      this._isHandled[id] = false;
+    }
+    this._pendingPayload = payload;
+    this._isDispatching = true;
+  };
+
+  /**
+   * Clear bookkeeping used for dispatching.
+   *
+   * @internal
+   */
+
+  Dispatcher.prototype._stopDispatching = function _stopDispatching() {
+    delete this._pendingPayload;
+    this._isDispatching = false;
+  };
+
+  return Dispatcher;
+})();
+
+module.exports = Dispatcher;
+}).call(this,require('_process'))
+},{"_process":46,"fbjs/lib/invariant":35}],38:[function(require,module,exports){
 (function (global){
 
 /*
@@ -5169,12 +5497,12 @@ function hasBinary(data) {
 }
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"isarray":35}],35:[function(require,module,exports){
+},{"isarray":39}],39:[function(require,module,exports){
 module.exports = Array.isArray || function (arr) {
   return Object.prototype.toString.call(arr) == '[object Array]';
 };
 
-},{}],36:[function(require,module,exports){
+},{}],40:[function(require,module,exports){
 
 /**
  * Module exports.
@@ -5193,7 +5521,7 @@ try {
   module.exports = false;
 }
 
-},{}],37:[function(require,module,exports){
+},{}],41:[function(require,module,exports){
 
 var indexOf = [].indexOf;
 
@@ -5204,7 +5532,7 @@ module.exports = function(arr, obj){
   }
   return -1;
 };
-},{}],38:[function(require,module,exports){
+},{}],42:[function(require,module,exports){
 (function (global){
 /*! JSON v3.3.2 | http://bestiejs.github.io/json3 | Copyright 2012-2014, Kit Cambridge | http://kit.mit-license.org */
 ;(function () {
@@ -6110,7 +6438,7 @@ module.exports = function(arr, obj){
 }).call(this);
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],39:[function(require,module,exports){
+},{}],43:[function(require,module,exports){
 (function (global){
 /**
  * JSON parse.
@@ -6145,7 +6473,7 @@ module.exports = function parsejson(data) {
   }
 };
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],40:[function(require,module,exports){
+},{}],44:[function(require,module,exports){
 /**
  * Compiles a querystring
  * Returns string representation of the object
@@ -6184,7 +6512,7 @@ exports.decode = function(qs){
   return qry;
 };
 
-},{}],41:[function(require,module,exports){
+},{}],45:[function(require,module,exports){
 /**
  * Parses an URI
  *
@@ -6225,7 +6553,7 @@ module.exports = function parseuri(str) {
     return uri;
 };
 
-},{}],42:[function(require,module,exports){
+},{}],46:[function(require,module,exports){
 // shim for using process in browser
 
 var process = module.exports = {};
@@ -6285,7 +6613,7 @@ process.chdir = function (dir) {
 };
 process.umask = function() { return 0; };
 
-},{}],43:[function(require,module,exports){
+},{}],47:[function(require,module,exports){
 
 /**
  * Module dependencies.
@@ -6396,7 +6724,7 @@ exports.connect = lookup;
 exports.Manager = require('./manager');
 exports.Socket = require('./socket');
 
-},{"./manager":44,"./socket":46,"./url":47,"debug":48,"socket.io-parser":52}],44:[function(require,module,exports){
+},{"./manager":48,"./socket":50,"./url":51,"debug":52,"socket.io-parser":56}],48:[function(require,module,exports){
 
 /**
  * Module dependencies.
@@ -6958,7 +7286,7 @@ Manager.prototype.onreconnect = function () {
   this.emitAll('reconnect', attempt);
 };
 
-},{"./on":45,"./socket":46,"backo2":11,"component-bind":16,"component-emitter":17,"debug":48,"engine.io-client":19,"indexof":37,"socket.io-parser":52}],45:[function(require,module,exports){
+},{"./on":49,"./socket":50,"backo2":12,"component-bind":17,"component-emitter":18,"debug":52,"engine.io-client":20,"indexof":41,"socket.io-parser":56}],49:[function(require,module,exports){
 
 /**
  * Module exports.
@@ -6984,7 +7312,7 @@ function on (obj, ev, fn) {
   };
 }
 
-},{}],46:[function(require,module,exports){
+},{}],50:[function(require,module,exports){
 
 /**
  * Module dependencies.
@@ -7405,7 +7733,7 @@ Socket.prototype.compress = function (compress) {
   return this;
 };
 
-},{"./on":45,"component-bind":16,"component-emitter":17,"debug":48,"has-binary":34,"socket.io-parser":52,"to-array":59}],47:[function(require,module,exports){
+},{"./on":49,"component-bind":17,"component-emitter":18,"debug":52,"has-binary":38,"socket.io-parser":56,"to-array":63}],51:[function(require,module,exports){
 (function (global){
 
 /**
@@ -7484,13 +7812,13 @@ function url (uri, loc) {
 }
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"debug":48,"parseuri":41}],48:[function(require,module,exports){
-arguments[4][29][0].apply(exports,arguments)
-},{"./debug":49,"_process":42,"dup":29}],49:[function(require,module,exports){
+},{"debug":52,"parseuri":45}],52:[function(require,module,exports){
 arguments[4][30][0].apply(exports,arguments)
-},{"dup":30,"ms":50}],50:[function(require,module,exports){
+},{"./debug":53,"_process":46,"dup":30}],53:[function(require,module,exports){
 arguments[4][31][0].apply(exports,arguments)
-},{"dup":31}],51:[function(require,module,exports){
+},{"dup":31,"ms":54}],54:[function(require,module,exports){
+arguments[4][32][0].apply(exports,arguments)
+},{"dup":32}],55:[function(require,module,exports){
 (function (global){
 /*global Blob,File*/
 
@@ -7635,7 +7963,7 @@ exports.removeBlobs = function(data, callback) {
 };
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./is-buffer":53,"isarray":57}],52:[function(require,module,exports){
+},{"./is-buffer":57,"isarray":61}],56:[function(require,module,exports){
 
 /**
  * Module dependencies.
@@ -8041,7 +8369,7 @@ function error(data){
   };
 }
 
-},{"./binary":51,"./is-buffer":53,"component-emitter":54,"debug":55,"json3":38}],53:[function(require,module,exports){
+},{"./binary":55,"./is-buffer":57,"component-emitter":58,"debug":59,"json3":42}],57:[function(require,module,exports){
 (function (global){
 
 module.exports = isBuf;
@@ -8058,7 +8386,7 @@ function isBuf(obj) {
 }
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],54:[function(require,module,exports){
+},{}],58:[function(require,module,exports){
 
 /**
  * Expose `Emitter`.
@@ -8224,7 +8552,7 @@ Emitter.prototype.hasListeners = function(event){
   return !! this.listeners(event).length;
 };
 
-},{}],55:[function(require,module,exports){
+},{}],59:[function(require,module,exports){
 
 /**
  * This is the web browser implementation of `debug()`.
@@ -8394,7 +8722,7 @@ function localstorage(){
   } catch (e) {}
 }
 
-},{"./debug":56}],56:[function(require,module,exports){
+},{"./debug":60}],60:[function(require,module,exports){
 
 /**
  * This is the common logic for both the Node.js and web browser
@@ -8593,9 +8921,9 @@ function coerce(val) {
   return val;
 }
 
-},{"ms":58}],57:[function(require,module,exports){
-arguments[4][35][0].apply(exports,arguments)
-},{"dup":35}],58:[function(require,module,exports){
+},{"ms":62}],61:[function(require,module,exports){
+arguments[4][39][0].apply(exports,arguments)
+},{"dup":39}],62:[function(require,module,exports){
 /**
  * Helpers.
  */
@@ -8722,7 +9050,7 @@ function plural(ms, n, name) {
   return Math.ceil(ms / n) + ' ' + name + 's';
 }
 
-},{}],59:[function(require,module,exports){
+},{}],63:[function(require,module,exports){
 module.exports = toArray
 
 function toArray(list, index) {
@@ -8737,7 +9065,7 @@ function toArray(list, index) {
     return array
 }
 
-},{}],60:[function(require,module,exports){
+},{}],64:[function(require,module,exports){
 (function (global){
 /*! https://mths.be/wtf8 v1.0.0 by @mathias */
 ;(function(root) {
@@ -8975,7 +9303,7 @@ function toArray(list, index) {
 }(this));
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],61:[function(require,module,exports){
+},{}],65:[function(require,module,exports){
 'use strict';
 
 var alphabet = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz-_'.split('')

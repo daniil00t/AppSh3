@@ -31,23 +31,62 @@ App = React.createClass({
   getInitialState: function() {
     return {
       numErr: -1,
+      users: [],
+      users_anses: [],
       chatHello: ""
     };
   },
   componentWillMount: function() {
     socket.on("CONNECT_USER", (function(_this) {
       return function(data) {
-        return console.log("CONNECT_USER", data.payload);
+        var arr;
+        arr = _this.state.users;
+        arr.push(data.payload);
+        return _this.setState({
+          users: arr
+        });
       };
     })(this));
     socket.on("DISCONNECT_USER", (function(_this) {
       return function(data) {
-        return console.log("DISCONNECT_USER", data.payload);
+        var arr;
+        console.log(data);
+        arr = _this.state.users;
+        arr.map(function(i, j) {
+          if (i.payload === data.id) {
+            return arr.splice(j, 1);
+          }
+        });
+        return _this.setState({
+          users: arr
+        });
       };
     })(this));
     socket.on("UPDATE_USER", (function(_this) {
       return function(data) {
-        return console.log("UPDATE_USER", data.payload);
+        var arr, i, j, k, key, len, ref, value;
+        console.log(data.payload);
+        arr = _this.state.users;
+        for (j = k = 0, len = arr.length; k < len; j = ++k) {
+          i = arr[j];
+          if (i.id === data.payload.id) {
+            ref = data.payload.data;
+            for (key in ref) {
+              value = ref[key];
+              arr[j][key] = value;
+            }
+          }
+        }
+        return _this.setState({
+          users: arr
+        });
+      };
+    })(this));
+    socket.on("UPDATE_ANSWER_USER", (function(_this) {
+      return function(data) {
+        return _this.setState({
+          users_anses: data.payload
+        });
       };
     })(this));
     ee.on("loadUsers", function(data) {
@@ -120,6 +159,9 @@ App = React.createClass({
       "data": {
         chat: {
           chatHello: this.state.chatHello
+        },
+        users: {
+          data: this.state.users
         }
       }
     })));
@@ -184,7 +226,9 @@ Panel = React.createClass({
     }, ((function() {
       switch (this.state.sidebarvalue) {
         case 0:
-          return React.createElement(Users, null);
+          return React.createElement(Users, {
+            "users": this.props.data.users.data
+          });
         case 1:
           return React.createElement(Chat, {
             "data": this.props.data.chat
@@ -573,16 +617,16 @@ Users_panel = React.createClass({
     })(this))), React.createElement("ul", {
       "className": "onlineusers"
     }, ((function() {
-      if (this.state.users.length > 0) {
+      if (this.props.users.length > 0) {
         switch (this.state.filtered) {
           case "all":
-            return this.state.users.map((function(_this) {
+            return this.props.users.map((function(_this) {
               return function(i, j) {
                 return _this.renderedLiUser(i, j);
               };
             })(this));
           case "test":
-            return this.state.users.map((function(_this) {
+            return this.props.users.map((function(_this) {
               return function(i, j) {
                 if (i.app === "test") {
                   return _this.renderedLiUser(i, j);
@@ -590,7 +634,7 @@ Users_panel = React.createClass({
               };
             })(this));
           case "chat":
-            return this.state.users.map((function(_this) {
+            return this.props.users.map((function(_this) {
               return function(i, j) {
                 if (i.app === "chat") {
                   return _this.renderedLiUser(i, j);
