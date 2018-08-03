@@ -536,8 +536,32 @@ React = require("react");
 
 Test = React.createClass({
   displayName: "Test",
+  drawChart: function() {
+    var chart, data;
+    data = google.visualization.arrayToDataTable([['Task', 'соотношение справившихся к несправившихся'], ['Справились', 19], ['Провалили', 7]]);
+    chart = new google.visualization.PieChart(this.chartContainer);
+    return chart.draw(data);
+  },
+  componentDidMount: function() {
+    google.charts.load("current", {
+      packages: ["corechart"]
+    });
+    return google.charts.setOnLoadCallback(this.drawChart);
+  },
   render: function() {
-    return React.createElement("div", null, "\t\t\tTest");
+    return React.createElement("div", {
+      "className": "items test_admin_panel"
+    }, React.createElement("h2", null, "Статистика"), React.createElement("hr", null), React.createElement("div", {
+      "ref": ((function(_this) {
+        return function(node) {
+          return _this.chartContainer = React.findDOMNode(node);
+        };
+      })(this)),
+      "className": "item countSuccess_item",
+      "data-task": "Cоотношение справившихся к несправившихся"
+    }), "\t\t\t# ", React.createElement("div", {
+      "className": "item"
+    }));
   }
 });
 

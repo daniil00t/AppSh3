@@ -20,6 +20,7 @@
     ]
   },
   "dependencies": {
+    "@nivo/pie": "^0.34.0-1",
     "body-parser": "^1.12.3",
     "classnames": "^2.2.3",
     "cookie-parser": "^1.4.3",
@@ -31,9 +32,11 @@
     "keymirror": "^0.1.1",
     "less": "^2.6.0",
     "mongoose": "*",
+    "nivo": "^0.31.0",
     "nunjucks": "^3.1.3",
     "react": "^0.14.6",
     "react-dom": "^0.14.6",
+    "react-google-charts": "^2.0.21",
     "react-masonry-component": "^4.0.0",
     "require-dir": "^1.0.0",
     "socket.io": "^1.7.4"
@@ -60,7 +63,7 @@
     "gulp-util": "^3.0.1",
     "json-loader": "^0.5.4",
     "less-loader": "^2.2.2",
-    "lodash": "^3.5.0",
+    "lodash": "^3.10.1",
     "node-bourbon": "^4.2.8",
     "pretty-hrtime": "^0.2.2",
     "react-hot-loader": "^1.3.0",
