@@ -16,6 +16,8 @@ export default function(socket, store, db){
 		id: id,
 		ip: ip,
 		app: "test",
+		score: 0,
+		points: 0,
 		connected_time: new Date().getTime(),
 		variant: 1,
 		testing: false,
@@ -44,6 +46,9 @@ export default function(socket, store, db){
 
 	socket.on("UPDATE_ANSWER_USER", (data) => {
 		store.updateAnswerUser(data.id, data.payload)
+	})
+	socket.on("UPDATE_ANSWER_REMOVE_USER", (data) => {
+		store.updateAnswerRemoveUser(data.id, data.payload)
 	})
 
 }

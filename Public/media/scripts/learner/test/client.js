@@ -181,6 +181,11 @@ App = React.createClass({
             return _this.setState({
               data_anses: arr
             });
+          case "UPDATE_ANSWER_REMOVE":
+            return socket.emit("UPDATE_ANSWER_REMOVE_USER", {
+              id: _this.state.data_user.id,
+              payload: action.payload
+            });
           default:
             return console.log("свитч не сработал");
         }
@@ -504,27 +509,40 @@ DefQ = React.createClass({
   handleClickIl: function(i, e) {
     var id, value;
     if (e.target.localName === "span" || e.target.localName === "li" || e.target.localName === "label") {
-      id = "Q_" + this.state.num + "_" + i;
-      document.getElementById(id).checked = true;
-      value = +i;
-      this.setState({
-        myans: {
-          type: "defQ",
-          num: this.state.num,
-          val: value
-        }
-      });
-      dispatcher.dispatch({
-        type: "UPDATE_ANSWER",
-        payload: {
-          type: "defQ",
-          no: this.state.num,
-          value: value
-        }
-      });
-      return this.setState({
-        activeItem: value
-      });
+      if (e.altKey && this.state.activeItem === i) {
+        this.setState({
+          activeItem: -1
+        });
+        return dispatcher.dispatch({
+          type: "UPDATE_ANSWER_REMOVE",
+          payload: {
+            type: "defQ",
+            no: this.state.num
+          }
+        });
+      } else {
+        id = "Q_" + this.state.num + "_" + i;
+        document.getElementById(id).checked = true;
+        value = +i;
+        this.setState({
+          myans: {
+            type: "defQ",
+            num: this.state.num,
+            val: value
+          }
+        });
+        dispatcher.dispatch({
+          type: "UPDATE_ANSWER",
+          payload: {
+            type: "defQ",
+            no: this.state.num,
+            value: value
+          }
+        });
+        return this.setState({
+          activeItem: value
+        });
+      }
     }
   },
   render: function() {

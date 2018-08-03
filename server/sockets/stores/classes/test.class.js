@@ -66,4 +66,21 @@ export default (Chat) => class extends Chat {
 			payload: this.data_users
 		})
 	}
+	updateAnswerRemoveUser(id, data){
+		let self = this;
+		this.data_users.map((i, j) => {
+			if(i.id == id){
+				i.data.map((k, l) => {
+					if(k.no == data.no){
+						self.data_users[j].data.splice(l, 1)
+					}
+				})
+			}
+		});
+		dispatcher.dispatch({
+			type: "UPDATE_ANSWER_USER",
+			payload: this.data_users
+		})
+		return this.data_users;
+	}
 };

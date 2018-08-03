@@ -12,8 +12,31 @@ App = React.createClass
 		numErr: -1
 		users: []
 		users_anses: []
+		data_true_anses: []
 		# Chat states
 		chatHello: ""
+	updateScoreUsers: (data)->
+		score = 0
+		arr = @state.users
+		lengthVariantTests = 0
+		@state.users.map (i, j) => 
+			data.map (k, l) =>
+				if i.id == k.id
+					# начинаем проверку
+					k.data.map (q, w)=>
+						@state.data_true_anses[i.variant - 1].data.map (r, t)=>
+							console.log q, r
+							if q.no == r.no
+								if q.value == r.value[0]
+									score++
+
+					lengthVariantTests = @state.data_true_anses[i.variant - 1].data.length
+					arr[j].score = score
+					console.log "score: #{score}, lengthVariantTests: #{lengthVariantTests}"
+					arr[j].points = Math.round(score / lengthVariantTests * 100)
+					score = 0
+		@setState users: arr
+
 	componentWillMount: ->
 		socket.on "init", (data)=>
 			switch data.type
@@ -21,6 +44,11 @@ App = React.createClass
 					@setState users: data.data
 				when "data_users"
 					@setState users_anses: data.data
+					console.log data.data
+					
+				when "data_true_anses"
+					@setState data_true_anses: data.data
+					@updateScoreUsers(@state.users_anses)
 				else
 					console.log "no!"
 
@@ -30,8 +58,6 @@ App = React.createClass
 			@setState users: arr
 		socket.on "DISCONNECT_USER", (data)=>
 			arr = @state.users
-			console.log data
-			console.log arr
 			arr.map (i, j)=>
 				if i.id == data.payload
 					arr.splice j, 1
@@ -48,13 +74,7 @@ App = React.createClass
 
 		socket.on "UPDATE_ANSWER_USER", (data)=>
 			@setState users_anses: data.payload
-
-		ee.on "loadUsers", (data)->
-			if data.status == "load"
-				socket.emit "loadUsers", status: "load"
-		socket.on "loadUsers", (data)->
-			if data.status == "sending"
-				ee.emit "loadUsers", data: data.data, status: "sending"
+			@updateScoreUsers(data.payload)
 		
 		ee.on "deleteUserAndMassage_ee", (data)=>
 			socket.emit "deleteUserAndMassage", data

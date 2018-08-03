@@ -16,10 +16,9 @@ dispatcher.register((action) => {
 
 export default class MainStore extends Test(Chat(User)) {  
 	constructor(){
-		// Chat(User)
+		// Test(Chat(User))
 		//  ^
-		// Смотрим на последний родительский класс и вызываем super данного класса с аргументом конструктора этого родительского класса и т.п.
+		// Смотрим на последний родительский класс и вызываем super данного класса с аргументом конструктора этого родительского класса
 		super();
-		this.updateChatHello("Hello World!");
 	}
 }

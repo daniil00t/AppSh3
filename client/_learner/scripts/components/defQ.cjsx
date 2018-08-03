@@ -12,18 +12,26 @@ DefQ = React.createClass
 		myans: {}
 	handleClickIl: (i, e)->
 		if e.target.localName == "span" or e.target.localName == "li" or e.target.localName == "label"
-			id = "Q_#{@state.num}_#{i}"
-			document.getElementById(id).checked = true
-			value = +i
-			@setState myans: {type: "defQ", num: @state.num, val: value}
-			dispatcher.dispatch
-				type: "UPDATE_ANSWER",
-				payload: 
-					type: "defQ",
-					no: @state.num,
-					value: value
-			# ee.emit "updateAnswer", {type: "defQ", num: @state.num, val: value}
-			@setState activeItem: value
+			if e.altKey and @state.activeItem == i
+				@setState activeItem: -1
+				dispatcher.dispatch
+					type: "UPDATE_ANSWER_REMOVE",
+					payload: 
+						type: "defQ",
+						no: @state.num
+			else
+				id = "Q_#{@state.num}_#{i}"
+				document.getElementById(id).checked = true
+				value = +i
+				@setState myans: {type: "defQ", num: @state.num, val: value}
+				dispatcher.dispatch
+					type: "UPDATE_ANSWER",
+					payload: 
+						type: "defQ",
+						no: @state.num,
+						value: value
+				# ee.emit "updateAnswer", {type: "defQ", num: @state.num, val: value}
+				@setState activeItem: value
 	render: ->
 		<div className="ItemDefQ">
 			<h3 className="question defQuestion">{@state.num+1 + ". " + @props.data.question}</h3>

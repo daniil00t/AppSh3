@@ -96,7 +96,10 @@ App = React.createClass
 					else
 						arr.push action.payload
 					@setState data_anses: arr
-					
+				when "UPDATE_ANSWER_REMOVE"
+					socket.emit "UPDATE_ANSWER_REMOVE_USER", 
+						id: @state.data_user.id
+						payload: action.payload
 				else
 					console.log "свитч не сработал"
 	render: ->

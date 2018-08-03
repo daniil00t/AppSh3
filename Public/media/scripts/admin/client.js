@@ -33,8 +33,41 @@ App = React.createClass({
       numErr: -1,
       users: [],
       users_anses: [],
+      data_true_anses: [],
       chatHello: ""
     };
+  },
+  updateScoreUsers: function(data) {
+    var arr, lengthVariantTests, score;
+    score = 0;
+    arr = this.state.users;
+    lengthVariantTests = 0;
+    this.state.users.map((function(_this) {
+      return function(i, j) {
+        return data.map(function(k, l) {
+          if (i.id === k.id) {
+            k.data.map(function(q, w) {
+              return _this.state.data_true_anses[i.variant - 1].data.map(function(r, t) {
+                console.log(q, r);
+                if (q.no === r.no) {
+                  if (q.value === r.value[0]) {
+                    return score++;
+                  }
+                }
+              });
+            });
+            lengthVariantTests = _this.state.data_true_anses[i.variant - 1].data.length;
+            arr[j].score = score;
+            console.log("score: " + score + ", lengthVariantTests: " + lengthVariantTests);
+            arr[j].points = Math.round(score / lengthVariantTests * 100);
+            return score = 0;
+          }
+        });
+      };
+    })(this));
+    return this.setState({
+      users: arr
+    });
   },
   componentWillMount: function() {
     socket.on("init", (function(_this) {
@@ -45,9 +78,15 @@ App = React.createClass({
               users: data.data
             });
           case "data_users":
-            return _this.setState({
+            _this.setState({
               users_anses: data.data
             });
+            return console.log(data.data);
+          case "data_true_anses":
+            _this.setState({
+              data_true_anses: data.data
+            });
+            return _this.updateScoreUsers(_this.state.users_anses);
           default:
             return console.log("no!");
         }
@@ -67,8 +106,6 @@ App = React.createClass({
       return function(data) {
         var arr;
         arr = _this.state.users;
-        console.log(data);
-        console.log(arr);
         arr.map(function(i, j) {
           if (i.id === data.payload) {
             return arr.splice(j, 1);
@@ -81,10 +118,10 @@ App = React.createClass({
     })(this));
     socket.on("UPDATE_USER", (function(_this) {
       return function(data) {
-        var arr, i, j, k, key, len, ref, value;
+        var arr, i, j, key, len, m, ref, value;
         console.log(data.payload);
         arr = _this.state.users;
-        for (j = k = 0, len = arr.length; k < len; j = ++k) {
+        for (j = m = 0, len = arr.length; m < len; j = ++m) {
           i = arr[j];
           if (i.id === data.payload.id) {
             ref = data.payload.data;
@@ -101,26 +138,12 @@ App = React.createClass({
     })(this));
     socket.on("UPDATE_ANSWER_USER", (function(_this) {
       return function(data) {
-        return _this.setState({
+        _this.setState({
           users_anses: data.payload
         });
+        return _this.updateScoreUsers(data.payload);
       };
     })(this));
-    ee.on("loadUsers", function(data) {
-      if (data.status === "load") {
-        return socket.emit("loadUsers", {
-          status: "load"
-        });
-      }
-    });
-    socket.on("loadUsers", function(data) {
-      if (data.status === "sending") {
-        return ee.emit("loadUsers", {
-          data: data.data,
-          status: "sending"
-        });
-      }
-    });
     ee.on("deleteUserAndMassage_ee", (function(_this) {
       return function(data) {
         return socket.emit("deleteUserAndMassage", data);
@@ -575,7 +598,7 @@ Users_panel = React.createClass({
     }
   },
   renderedLiUser: function(i, j) {
-    var k, key, l, len, listToollipsDone, listToollipsFuture, value;
+    var defLi, k, key, l, len, listToollipsDone, listToollipsFuture, testLi, value;
     listToollipsDone = ["id", "ip", "variant", "testing"];
     listToollipsFuture = [];
     for (key in i) {
@@ -587,7 +610,7 @@ Users_panel = React.createClass({
         }
       }
     }
-    return React.createElement("li", {
+    defLi = React.createElement("li", {
       "className": "animFadeInUp"
     }, React.createElement("div", {
       "className": "infoUser"
@@ -607,27 +630,37 @@ Users_panel = React.createClass({
       "className": "fa fa-times-circle close",
       "onClick": this.handleClickDeleteUser.bind(this, i)
     }));
-  },
-  componentWillMount: function() {
-    ee.emit("loadUsers", {
-      status: "load"
-    });
-    return ee.on("loadUsers", (function(_this) {
-      return function(data) {
-        var arr, i, l, len, ref;
-        arr = [];
-        if (data.status === "sending") {
-          ref = data.data;
-          for (l = 0, len = ref.length; l < len; l++) {
-            i = ref[l];
-            arr.push(i);
-          }
-          return _this.setState({
-            users: arr
-          });
-        }
+    testLi = React.createElement("li", {
+      "className": "animFadeInUp"
+    }, React.createElement("div", {
+      "className": "infoUser"
+    }, React.createElement("table", null, listToollipsFuture.map((function(_this) {
+      return function(r, t) {
+        return React.createElement("tr", null, React.createElement("td", {
+          "className": "names"
+        }, r, ": "), React.createElement("td", null, (typeof i[r] === "boolean" ? (i[r] ? "true" : "false") : i[r])));
       };
-    })(this));
+    })(this)))), ((i.fname != null) && (i.lname != null) ? (i.fname[0].toUpperCase()) + ". " + i.lname : i.name != null ? i.name : i.id), React.createElement("span", {
+      "className": "appUsers"
+    }, i.app), React.createElement("span", {
+      "className": "scoreUser",
+      "style": {
+        backgroundColor: i.testing ? (i.points < 40 ? "#e14040" : (i.points > 40 && i.points < 81 ? "#2196F3" : "#4caf50")) : "#eeeeee"
+      }
+    }, i.points, "%"), React.createElement("i", {
+      "className": "fa fa-info-circle info",
+      "onMouseOver": this.handleHoverOver.bind(this, j),
+      "onMouseOut": this.handleHoverOut.bind(this, j)
+    }), React.createElement("i", {
+      "className": "fa fa-times-circle close",
+      "onClick": this.handleClickDeleteUser.bind(this, i)
+    }));
+    switch (this.state.filtered) {
+      case "test":
+        return testLi;
+      default:
+        return defLi;
+    }
   },
   render: function() {
     return React.createElement("div", {

@@ -36,7 +36,8 @@ Users_panel = React.createClass
 			for k in listToollipsDone
 				if key == k
 					listToollipsFuture.push k
-		<li className="animFadeInUp">
+
+		defLi = <li className="animFadeInUp">
 			<div className="infoUser">
 				<table>
 						{
@@ -49,6 +50,7 @@ Users_panel = React.createClass
 				</table>
 
 			</div>
+
 			{
 				if i.fname? and i.lname?
 					"#{i.fname[0].toUpperCase()}. #{i.lname}"
@@ -62,14 +64,42 @@ Users_panel = React.createClass
 			<i className="fa fa-info-circle info" onMouseOver={@handleHoverOver.bind(@, j)} onMouseOut={@handleHoverOut.bind(@, j)}></i>
 			<i className="fa fa-times-circle close" onClick={@handleClickDeleteUser.bind(@, i)}></i>
 		</li>
-	componentWillMount: ->
-		ee.emit "loadUsers", status: "load"
-		ee.on "loadUsers", (data)=>
-			arr = []
-			if data.status == "sending"
-				for i in data.data
-					arr.push i
-				@setState users: arr
+		testLi = <li className="animFadeInUp">
+			<div className="infoUser">
+				<table>
+						{
+							listToollipsFuture.map (r, t)=>
+								<tr>
+									<td className="names">{r}: </td>
+									<td>{if typeof i[r] == "boolean" then (if i[r] then "true" else "false") else i[r] }</td>
+								</tr>
+						}
+				</table>
+
+			</div>
+
+			{
+				if i.fname? and i.lname?
+					"#{i.fname[0].toUpperCase()}. #{i.lname}"
+				else
+					if i.name?
+						i.name
+					else 
+						i.id
+			}
+			<span className="appUsers">{i.app}</span>
+			<span className="scoreUser" style={backgroundColor: if i.testing then (if i.points < 40 then "#e14040" else (if i.points > 40 and i.points < 81 then "#2196F3" else "#4caf50")) else "#eeeeee"}>{i.points}%</span>
+			<i className="fa fa-info-circle info" onMouseOver={@handleHoverOver.bind(@, j)} onMouseOut={@handleHoverOut.bind(@, j)}></i>
+			<i className="fa fa-times-circle close" onClick={@handleClickDeleteUser.bind(@, i)}></i>
+		</li>
+
+		
+		switch @state.filtered
+			when "test"
+				testLi
+			else
+				defLi
+	
 
 	render: ->
 		
