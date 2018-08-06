@@ -1,3 +1,4 @@
+import dispatcher from "../stores/dispatcher"
 export default function(socket, store){
 	let self = this;
 	let id = socket.id;
@@ -46,5 +47,15 @@ export default function(socket, store){
 			massage: data.massage
 		});
 	});
-
+	dispatcher.register((action) => {
+		switch(action.type){
+			case "CHANGE_CHAT_HELLO": {
+				socket.emit("init_client", {
+					id: id,
+					ip: ip,
+					hello: action.payload
+				});
+			}break;
+		}
+	});
 }

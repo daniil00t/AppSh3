@@ -6,6 +6,8 @@ crypto = require('crypto')
 ee = require "./ee"
 Panel = require "./components/admin_panel"
 
+dispatcher = require "./components/dispatcher"
+
 App = React.createClass
 	displayName: 'App'
 	getInitialState: ->
@@ -38,7 +40,6 @@ App = React.createClass
 		@setState users: arr
 
 	componentWillMount: ->
-
 		socket.on "init", (data)=>
 			switch data.type
 				when "users"
@@ -46,10 +47,15 @@ App = React.createClass
 				when "data_users"
 					@setState users_anses: data.data
 					console.log data.data
-					
 				when "data_true_anses"
 					@setState data_true_anses: data.data
 					@updateScoreUsers(@state.users_anses)
+				# chat
+				when "chat_hello"
+					dispatcher.dispatch
+						type: "INIT_CHAT_HELLO"
+						payload: data.data
+					@setState chatHello: data.data
 				else
 					console.log "no!"
 
@@ -57,6 +63,7 @@ App = React.createClass
 			arr = @state.users
 			arr.push data.payload
 			@setState users: arr
+
 		socket.on "DISCONNECT_USER", (data)=>
 			arr = @state.users
 			arr.map (i, j)=>
@@ -73,17 +80,23 @@ App = React.createClass
 			@setState users: arr
 
 
+
 		socket.on "UPDATE_ANSWER_USER", (data)=>
 			@setState users_anses: data.payload
 			@updateScoreUsers(data.payload)
 		
-		ee.on "deleteUserAndMassage_ee", (data)=>
-			socket.emit "deleteUserAndMassage", data
+		dispatcher.register (action)=>
+			switch action.type
+				when "CHANGE_CHAT_HELLO"
+					@setState chatHello: action.payload
+					socket.emit "_CHANGE", type: action.type, data: action.payload
+				else
+					console.log "problem..."
+
 
 		### _ Chat _ ###
 
-		socket.on "getLoadData@soc", (data)=>
-			@setState chatHello: data.chatHello
+
 
 		ee.on "changeHello@ee", (data)=>
 			socket.emit "changeHelloChat", cnt: data.cnt
@@ -104,7 +117,7 @@ App = React.createClass
 				</div>
 			</div>
 			<div className="container-fluid">
-				<Panel data={ { chat: {chatHello: @state.chatHello}, users: {data: @state.users}} }/>
+				<Panel data={ { chat: {chatHello: @state.chatHello}, users: {data: @state.users} } }/>
 			</div>
 		</div>
 

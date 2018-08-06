@@ -1,6 +1,8 @@
 React = require "react"
 ee = require "../../ee"
 
+dispatcher = require "../dispatcher"
+
 Chat = React.createClass
 	displayName: "ChatPanel"
 	getInitialState: ->
@@ -11,7 +13,9 @@ Chat = React.createClass
 	changeStateChat: (e)->
 		if e.key == "Enter"
 			@setState top_panel_state: !@state.top_panel_state, top_panel_text: e.target.value
-			ee.emit "changeHello@ee", cnt: e.target.value
+			dispatcher.dispatch
+				type: "CHANGE_CHAT_HELLO",
+				payload: e.target.value
 	hideMainCnt: (e)->
 		### !!! Переделать - не нравится, как сделано - Сделать адекватно !!! ###
 		n = e.target.attributes[1].value
@@ -23,7 +27,11 @@ Chat = React.createClass
 			_node.focus()
 			_node.value = _node.placeholder
 	componentWillMount: ->
-		@setState top_panel_text: @props.data.chatHello
+		if @props.data.chatHello != "" then @setState top_panel_text: @props.data.chatHello else 
+			dispatcher.register (action)=>
+				switch action.type
+					when "INIT_CHAT_HELLO"
+						@setState top_panel_text: action.payload
 	render: ->
 		<div className="chatPanel">
 			<h1 className="welcome_chat_panel">

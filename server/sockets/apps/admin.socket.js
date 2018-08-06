@@ -43,4 +43,17 @@ export default function(socket, store, db){
 			}
 		}
 	})
+
+	socket.emit("init", {type: "chat_hello", data: store.getChatHello()})
+
+	socket.on("_CHANGE", (data) => {
+		switch(data.type){
+			case "CHANGE_CHAT_HELLO": {
+				store.updateChatHello(data.data)
+			}break;
+			default: {
+				console.log("problem..")
+			}
+		}
+	})
 }
