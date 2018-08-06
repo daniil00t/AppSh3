@@ -44,6 +44,9 @@ App = React.createClass
 			switch data.type
 				when "users"
 					@setState users: data.data
+					dispatcher.dispatch
+						type: "INIT_LOAD_USER_TO_TESTS_COMPONENT"
+						payload: data.data
 				when "data_users"
 					@setState users_anses: data.data
 					console.log data.data

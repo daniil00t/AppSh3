@@ -54,7 +54,7 @@ Panel = React.createClass
 						switch @state.sidebarvalue
 							when 0 then <Users users={@props.data.users.data}/>
 							when 1 then <Chat data={@props.data.chat}/>
-							when 2 then <Test />
+							when 2 then <Test users={@props.data.users.data}/>
 							when 3 then <DB_panel />
 							when 4 then <Features />
 							else <div>Help!</div>

@@ -76,8 +76,12 @@ App = React.createClass({
       return function(data) {
         switch (data.type) {
           case "users":
-            return _this.setState({
+            _this.setState({
               users: data.data
+            });
+            return dispatcher.dispatch({
+              type: "INIT_LOAD_USER_TO_TESTS_COMPONENT",
+              payload: data.data
             });
           case "data_users":
             _this.setState({
@@ -312,7 +316,9 @@ Panel = React.createClass({
             "data": this.props.data.chat
           });
         case 2:
-          return React.createElement(Test, null);
+          return React.createElement(Test, {
+            "users": this.props.data.users.data
+          });
         case 3:
           return React.createElement(DB_panel, null);
         case 4:
@@ -584,17 +590,42 @@ module.exports = Header;
 
 
 },{"../../ee":11,"react":"react"}],8:[function(require,module,exports){
-var React, Test;
+var React, Test, dispatcher;
 
 React = require("react");
 
+dispatcher = require("../dispatcher");
+
 Test = React.createClass({
   displayName: "Test",
+  getInitialState: function() {
+    return {
+      users: []
+    };
+  },
   drawChart: function() {
     var chart, data;
     data = google.visualization.arrayToDataTable([['Task', 'соотношение справившихся к несправившихся'], ['Справились', 19], ['Провалили', 7]]);
     chart = new google.visualization.PieChart(this.chartContainer);
     return chart.draw(data);
+  },
+  componentWillMount: function() {
+    if (this.props.users.length === 0) {
+      return dispatcher.register((function(_this) {
+        return function(action) {
+          switch (action.type) {
+            case "INIT_LOAD_USER_TO_TESTS_COMPONENT":
+              return _this.setState({
+                users: action.payload
+              });
+          }
+        };
+      })(this));
+    } else {
+      return this.setState({
+        users: this.props.users.data
+      });
+    }
   },
   componentDidMount: function() {
     google.charts.load("current", {
@@ -614,7 +645,7 @@ Test = React.createClass({
         };
       })(this)),
       "className": "item countSuccess_item",
-      "data-title": "Cоотношение справившихся к несправившихся"
+      "data-title": "Cоотношение справившихся к несправимшихся"
     }), React.createElement("div", {
       "className": "item mid_points",
       "data-title": "Общий балл тестирующихся"
@@ -651,7 +682,7 @@ module.exports = Test;
 
 
 
-},{"react":"react"}],9:[function(require,module,exports){
+},{"../dispatcher":10,"react":"react"}],9:[function(require,module,exports){
 var React, Users_panel, ee, options;
 
 React = require("react");

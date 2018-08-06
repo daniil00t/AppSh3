@@ -1,8 +1,12 @@
 React = require "react"
 
+dispatcher = require "../dispatcher"
+
 
 Test = React.createClass
 	displayName: "Test"
+	getInitialState: ->
+		users: []
 	drawChart: ->
 		data = google.visualization.arrayToDataTable([
 			['Task', 'соотношение справившихся к несправившихся'],
@@ -12,6 +16,14 @@ Test = React.createClass
 
 		chart = new google.visualization.PieChart(@chartContainer)
 		chart.draw(data)
+	componentWillMount: ->
+		if @props.users.length == 0
+			dispatcher.register (action)=>
+				switch action.type
+					when "INIT_LOAD_USER_TO_TESTS_COMPONENT"
+						@setState users: action.payload
+		else
+			@setState users: @props.users.data
 	componentDidMount: ->
 		google.charts.load("current", {packages:["corechart"]})
 		google.charts.setOnLoadCallback(@drawChart);
@@ -21,7 +33,7 @@ Test = React.createClass
 			<h2>Статистика</h2><hr/>
 
 			<div className="items row">
-				<div ref={(node) => @chartContainer = React.findDOMNode(node)} className="item countSuccess_item" data-title="Cоотношение справившихся к несправившихся"></div>
+				<div ref={(node) => @chartContainer = React.findDOMNode(node)} className="item countSuccess_item" data-title="Cоотношение справившихся к несправимшихся"></div>
 				<div className="item mid_points" data-title="Общий балл тестирующихся">
 					<p className="mid_points_value">4.15</p>
 				</div>
