@@ -55,6 +55,11 @@ Header = React.createClass
 		_node = React.findDOMNode(node) # returned <input />
 		if _node?
 			_node.blur()
+	# Крайняя мера сохранения данных пользователя с мобильных устройств
+	saveDataUsr_mobile: ->
+		alert @fname.value, @lnmae.value
+		ee.emit "changeNameUsr@ee", fname: @fname.value
+		ee.emit "changeNameUsr@ee", lname: @lnmae.value
 	componentWillMount: ->
 		ee.on "startTest", (data)=>
 			if data.type
@@ -87,7 +92,7 @@ Header = React.createClass
 						</div>
 					</div>
 					<div className="col-md-6 col-lg-6 col-sm-8 main_part_header">
-						<form action="" className="change_dataUsr">
+						<div action="" className="change_dataUsr">
 							<div className="labels">
 								<label for="fname">имя:</label><br />
 								<label for="lname">фамилие:</label>
@@ -96,7 +101,11 @@ Header = React.createClass
 								<input type="text" id="fname" placeholder="Daniil" ref={(node) => @fname = node} onKeyDown={(e) => @changeName e}/>
 								<input type="text" id="lname" placeholder="Shenyagin" ref={(node) => @lname = node} onKeyDown={(e) => @changeName e}/>
 							</div>
-						</form>
+							{
+								if @props.mobile
+									<button onClick={@saveDataUsr_mobile}>Сохранить</button>
+							}
+						</div>
 							<select name="variant" id="selectVariant" onChange={(e) => @handleChangeSelect e} ref={(node) => @selectVar = node}>
 								{
 									for i, j in @props.data

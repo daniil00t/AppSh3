@@ -29,7 +29,7 @@ class MainSock {
 		// sock.watching();
 		let self = this;
 		io.on("connection", (_socket) => {
-			let urlpath = URL.parse(_socket.handshake.headers.referer).path;
+			let urlpath = URL.parse(_socket.handshake.headers.referer).pathname;
 			let app = urlpath.split("/")[urlpath.split("/").length-1];
 			switch(app){
 				case "chat":{

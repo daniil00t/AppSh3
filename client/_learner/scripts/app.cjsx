@@ -23,11 +23,20 @@ App = React.createClass
 		variant: 1
 		start: false
 
+		mobile: false
+
 	endTest: ->
 		# ee.emit "endTest", {type: on}
 		socket.emit "sendDataTest", data: @state.data_anses, data_user: @state.data_user
 		window.location.replace("http://#{window.location.host}/learner")
 	componentWillMount: ->
+		# mobile devices
+		isTouchDevice = !!navigator.userAgent.match(/(iPhone|iPod|iPad|Android|playbook|silk|BlackBerry|BB10|Windows Phone|Tizen|Bada|webOS|IEMobile|Opera Mini)/)
+		if isTouchDevice
+			@setState mobile: true
+			if !confirm "Мы хотим вас предупредить, что наше приложение работает нестабильно на мобильных устройствах. Продолжить?"
+				window.location.replace "http://192.168.100.9:3000/learner"
+		
 		### _ Sockets _ ###
 
 		# Получение данных (клиента) с сервера (DB)
@@ -113,7 +122,7 @@ App = React.createClass
 						<div className="cssload-cube cssload-c3"></div>
 					</div>
 				</div>
-				<Header data={@state.data_test}/>
+				<Header data={@state.data_test} mobile={@state.mobile}/>
 				<div className="container main_cnt">
 					{
 						if @state.data_test.length isnt 0 and @state.start

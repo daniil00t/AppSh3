@@ -41,7 +41,8 @@ App = React.createClass({
       data_user: {},
       preloader: true,
       variant: 1,
-      start: false
+      start: false,
+      mobile: false
     };
   },
   endTest: function() {
@@ -52,6 +53,16 @@ App = React.createClass({
     return window.location.replace("http://" + window.location.host + "/learner");
   },
   componentWillMount: function() {
+    var isTouchDevice;
+    isTouchDevice = !!navigator.userAgent.match(/(iPhone|iPod|iPad|Android|playbook|silk|BlackBerry|BB10|Windows Phone|Tizen|Bada|webOS|IEMobile|Opera Mini)/);
+    if (isTouchDevice) {
+      this.setState({
+        mobile: true
+      });
+      if (!confirm("Мы хотим вас предупредить, что наше приложение работает нестабильно на мобильных устройствах. Продолжить?")) {
+        window.location.replace("http://192.168.100.9:3000/learner");
+      }
+    }
 
     /* _ Sockets _ */
     socket.on("connected", (function(_this) {
@@ -212,7 +223,8 @@ App = React.createClass({
       }), React.createElement("div", {
         "className": "cssload-cube cssload-c3"
       }))), React.createElement(Header, {
-        "data": this.state.data_test
+        "data": this.state.data_test,
+        "mobile": this.state.mobile
       }), React.createElement("div", {
         "className": "container main_cnt"
       }, (this.state.data_test.length !== 0 && this.state.start ? this.state.data_test.map((function(_this) {
@@ -345,6 +357,15 @@ Header = React.createClass({
       return _node.blur();
     }
   },
+  saveDataUsr_mobile: function() {
+    alert(this.fname.value, this.lnmae.value);
+    ee.emit("changeNameUsr@ee", {
+      fname: this.fname.value
+    });
+    return ee.emit("changeNameUsr@ee", {
+      lname: this.lnmae.value
+    });
+  },
   componentWillMount: function() {
     return ee.on("startTest", (function(_this) {
       return function(data) {
@@ -399,7 +420,7 @@ Header = React.createClass({
       "src": "http://localhost:8080/imgFiles/testing_black.png"
     })))), React.createElement("div", {
       "className": "col-md-6 col-lg-6 col-sm-8 main_part_header"
-    }, React.createElement("form", {
+    }, React.createElement("div", {
       "action": "",
       "className": "change_dataUsr"
     }, React.createElement("div", {
@@ -438,7 +459,9 @@ Header = React.createClass({
           return _this.changeName(e);
         };
       })(this))
-    }))), React.createElement("select", {
+    })), (this.props.mobile ? React.createElement("button", {
+      "onClick": this.saveDataUsr_mobile
+    }, "Сохранить") : void 0)), React.createElement("select", {
       "name": "variant",
       "id": "selectVariant",
       "onChange": ((function(_this) {

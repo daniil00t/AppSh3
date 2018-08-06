@@ -320,29 +320,51 @@ body
 							padding-right: 10px
 .test_admin_panel
 	width: 100%
-	.item
-		width: 33%
-		height: 300px
-		background-color: #fff
-		border-radius: 5px
-		overflow: hidden
-		box-shadow: 0 0 15px rgba(0,0,0,.2)
-	.countSuccess_item
-		position: relative
-		&::before
-			content: attr(data-task)
-			position: absolute
-			display: inline-block
-			color: #000
-			top: 10px
-			bottom: 0
-			right: 0
-			left: 0
-			z-index: 10
-			font-size: 16px
-			font-family: MontserratMedium
-			padding: 0 10px
+	.items
+		display: -webkit-flex
+		display: -moz-flex
+		display: -ms-flex
+		display: -o-flex
+		display: flex
+		flex-wrap: wrap
+		justify-content: space-between
+		margin-bottom: 30px
+		.item
+			width: 30%
+			height: 300px
+			background-color: #fff
+			border-radius: 5px
+			overflow: hidden
+			box-shadow: 0 0 15px rgba(0,0,0,.2)
+			position: relative
+			&::before
+				content: attr(data-title)
+				position: absolute
+				display: inline-block
+				color: #000
+				top: 10px
+				bottom: 0
+				right: 0
+				left: 0
+				z-index: 10
+				font-size: 16px
+				font-family: MontserratMedium
+				padding: 0 10px
+		.mid_points
+			display: -webkit-flex
+			display: -moz-flex
+			display: -ms-flex
+			display: -o-flex
+			display: flex
+			align-items: center
+			p.mid_points_value
+				font-family: MontserratBold
+				font-size: 54px
+				text-align: center
+				width: 100%
+				color: #192
 
+			
 /* Test */
 header.main_header_test
 	// border-bottom: 2px solid rgba(0,0,0,.2)
@@ -367,7 +389,7 @@ header.main_header_test
 				padding: 0
 			.main_part_header
 				// background-color: red
-				form.change_dataUsr
+				div.change_dataUsr
 					width: 50%
 					.labels
 						width: 33%

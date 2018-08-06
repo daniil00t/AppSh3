@@ -38,6 +38,7 @@ App = React.createClass
 		@setState users: arr
 
 	componentWillMount: ->
+
 		socket.on "init", (data)=>
 			switch data.type
 				when "users"

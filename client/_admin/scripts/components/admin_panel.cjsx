@@ -23,6 +23,19 @@ Panel = React.createClass
 		sidebarvalue: 0
 	handleClickSetValue: (j)->
 		@setState sidebarvalue: j
+		window.location.hash = ul[j]
+	componentWillMount: ->
+		hash = window.location.hash
+		if(hash)
+			_hash = hash.substr 1, hash.length-1
+			console.log _hash
+			for i, j in ul
+				if i == _hash
+					@setState sidebarvalue: j
+					break
+		else 
+			console.log "def"
+		
 	render: ->
 		<div className="row">
 			<div className="col-md-2 col-lg-2 col-sm-2 col-xs-2 navbarmain">

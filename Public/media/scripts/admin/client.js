@@ -239,9 +239,33 @@ Panel = React.createClass({
     };
   },
   handleClickSetValue: function(j) {
-    return this.setState({
+    this.setState({
       sidebarvalue: j
     });
+    return window.location.hash = ul[j];
+  },
+  componentWillMount: function() {
+    var _hash, hash, i, j, k, len, results;
+    hash = window.location.hash;
+    if (hash) {
+      _hash = hash.substr(1, hash.length - 1);
+      console.log(_hash);
+      results = [];
+      for (j = k = 0, len = ul.length; k < len; j = ++k) {
+        i = ul[j];
+        if (i === _hash) {
+          this.setState({
+            sidebarvalue: j
+          });
+          break;
+        } else {
+          results.push(void 0);
+        }
+      }
+      return results;
+    } else {
+      return console.log("def");
+    }
   },
   render: function() {
     return React.createElement("div", {
@@ -550,18 +574,46 @@ Test = React.createClass({
   },
   render: function() {
     return React.createElement("div", {
-      "className": "items test_admin_panel"
+      "className": "test_admin_panel"
     }, React.createElement("h2", null, "Статистика"), React.createElement("hr", null), React.createElement("div", {
+      "className": "items row"
+    }, React.createElement("div", {
       "ref": ((function(_this) {
         return function(node) {
           return _this.chartContainer = React.findDOMNode(node);
         };
       })(this)),
       "className": "item countSuccess_item",
-      "data-task": "Cоотношение справившихся к несправившихся"
-    }), "\t\t\t# ", React.createElement("div", {
+      "data-title": "Cоотношение справившихся к несправившихся"
+    }), React.createElement("div", {
+      "className": "item mid_points",
+      "data-title": "Общий балл тестирующихся"
+    }, React.createElement("p", {
+      "className": "mid_points_value"
+    }, "4.15")), React.createElement("div", {
+      "className": "item best_tester",
+      "data-title": "Лучший ученик"
+    }, React.createElement("div", {
+      "className": "user"
+    }, React.createElement("div", {
+      "className": "name"
+    }), React.createElement("div", {
+      "className": "points"
+    }), React.createElement("div", {
+      "className": "controlls"
+    }, React.createElement("div", {
+      "className": "info"
+    }), React.createElement("div", {
+      "className": "link"
+    }))))), React.createElement("div", {
+      "className": "items row"
+    }, React.createElement("div", {
       "className": "item"
-    }));
+    }), React.createElement("div", {
+      "className": "item"
+    }), React.createElement("div", {
+      "className": "item"
+    })));
   }
 });
 

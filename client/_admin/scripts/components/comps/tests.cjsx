@@ -17,10 +17,30 @@ Test = React.createClass
 		google.charts.setOnLoadCallback(@drawChart);
 	render: ->
 
-		<div className="items test_admin_panel">
+		<div className="test_admin_panel">
 			<h2>Статистика</h2><hr/>
-			<div ref={(node) => @chartContainer = React.findDOMNode(node)} className="item countSuccess_item" data-task="Cоотношение справившихся к несправившихся"></div>
-			# <div className="item"></div>
+
+			<div className="items row">
+				<div ref={(node) => @chartContainer = React.findDOMNode(node)} className="item countSuccess_item" data-title="Cоотношение справившихся к несправившихся"></div>
+				<div className="item mid_points" data-title="Общий балл тестирующихся">
+					<p className="mid_points_value">4.15</p>
+				</div>
+				<div className="item best_tester" data-title="Лучший ученик">
+					<div className="user">
+						<div className="name"></div>
+						<div className="points"></div>
+						<div className="controlls">
+							<div className="info"></div>
+							<div className="link"></div>
+						</div>
+					</div>
+				</div>
+			</div>
+			<div className="items row">
+				<div className="item"></div>
+				<div className="item"></div>
+				<div className="item"></div>
+			</div>
 		</div>
 
 
