@@ -1,10 +1,10 @@
 React = require "react"
 
-dispatcher = require "../dispatcher"
+dispatcher = require "../../dispatcher"
 
 
-Test = React.createClass
-	displayName: "Test"
+Test_St = React.createClass
+	displayName: "Test_Statistics"
 	getInitialState: ->
 		users: []
 	drawChart: ->
@@ -57,4 +57,4 @@ Test = React.createClass
 
 
 		
-module.exports = Test
+module.exports = Test_St

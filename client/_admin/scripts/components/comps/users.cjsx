@@ -11,12 +11,16 @@ Users_panel = React.createClass
 	getInitialState: ->
 		users: []
 		filtered: "all"
+
+		# Дополнителные переменные
 	handleChangeFiltered: (e)->
 		@setState filtered: e.target.value
 	handleHoverOver: (i)->
+		console.log i
 		document.getElementsByClassName("infoUser")[i].classList.remove "_noactive"
 		document.getElementsByClassName("infoUser")[i].classList.add "_active"
 	handleHoverOut: (i)->
+		console.log i
 		document.getElementsByClassName("infoUser")[i].classList.remove "_active"
 		document.getElementsByClassName("infoUser")[i].classList.add "_noactive"
 	handleClickDeleteUser: (k)->

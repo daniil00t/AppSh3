@@ -93,6 +93,8 @@ App = React.createClass
 				when "CHANGE_CHAT_HELLO"
 					@setState chatHello: action.payload
 					socket.emit "_CHANGE", type: action.type, data: action.payload
+				when "CHANGE_APP_STATE"
+					socket.emit "_CHANGE", type: action.type, app: action.app, payload: action.payload
 				else
 					console.log "problem..."
 

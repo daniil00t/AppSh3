@@ -8,6 +8,7 @@ Chat = React.createClass
 	getInitialState: ->
 		top_panel_state: false	# Состояние скрытости контента
 		top_panel_text: "" 			# Значение chatHello
+		chatState: true
 	changeStateChat_sub: (e)->
 		@setState top_panel_state: !@state.top_panel_state if e.target.nodeName == "SPAN" or e.target.nodeName == "P"
 	changeStateChat: (e)->
@@ -26,6 +27,12 @@ Chat = React.createClass
 		if _node?
 			_node.focus()
 			_node.value = _node.placeholder
+	handleChangeChatState: ->
+		@setState chatState: !@state.chatState
+		dispatcher.dispatch
+			type: "CHANGE_APP_STATE"
+			app: "chat"
+			payload: @state.chatState
 	componentWillMount: ->
 		if @props.data.chatHello != "" then @setState top_panel_text: @props.data.chatHello else 
 			dispatcher.register (action)=>
@@ -56,11 +63,11 @@ Chat = React.createClass
 
 			<div className="block_chat animFadeInUp">
 				<div className="title_block">
-					<h3 className="title_block_text">Изменение приветсвенного окна чата<i onClick={@hideMainCnt} className="fas fa-chevron-down"></i></h3>
+					<h3 className="title_block_text">Изменение состояния чата<i onClick={@hideMainCnt} className="fas fa-chevron-down"></i></h3>
 				</div>
 				<div className="wrp_cnt">
 
-				
+				<button onClick={@handleChangeChatState}>toggleChatState</button>
 				
 				</div>
 			</div>

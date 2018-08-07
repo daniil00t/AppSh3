@@ -4,9 +4,11 @@ import cookieParser from "cookie-parser";
 import bodyParser from "body-parser";
 import nunjucks from "nunjucks";
 
+import dispatcher from "./sockets/stores/dispatcher";
 
 // import data from configs
-import { serverPort } from '../etc/config.json';
+import { serverPort, appData } from '../etc/config.json';
+
 
 import * as db from './utils/DBUtils';
 import * as ct from './utils/cryptHash';
@@ -50,18 +52,45 @@ app.get('/', (req, res) => {
 app.use("/learner", routeLearner);
 
 routeLearner.get("/", (req, res) => {
-	res.send("<a href='/learner/chat'>chat</a><br /><a href='/learner/test'>test</a>");
+	// Здесь будет рендериться шаблон входа для ученика - ~/__projects/web/learnerIndexPage
+	res.render("learner/index.html", { stateApp: {chat: appData.chat.state ? "работает" : "не работает" , test: appData.test.state ? "работает" : "не работает"} });
+});
+
+dispatcher.register((action) => {
+	console.log(action)
+	switch(action.type){
+		case "CHANGE_APP_STATE": {
+			switch(action.app){
+				case "chat": {
+					appData.chat.state = action.payload;
+				};break;
+				case "test": {
+					appData.test.state = action.payload;
+				};break;
+			}
+		}
+	}
 });
 
 routeLearner.get("/chat", (req, res) => {
-	res.render("learner/chat.html", {});
+	if(appData.chat.state){
+		res.render("learner/chat.html", {});
+	}
+	else {
+		res.send("Доступ закрыт")
+	}
 });
 
 routeLearner.get("/test", (req, res) => {
 	// db.listTests().then((data) => {
 	// 	res.send(data);
 	// });
-	res.render("learner/test.html", {});
+	if(appData.test.state){
+		res.render("learner/test.html", {});
+	}
+	else {
+		res.send("Доступ закрыт")
+	}
 });
 
 // Admin routes
@@ -88,7 +117,9 @@ app.post("/admin", (req, res) => {
 });
 
 app.get("/admin", (req, res) => {
-	if(req.cookies.secret != null && req.cookies.secret != undefined){
+	// void(0) == null		 //true
+	// void(0) == udefined //true
+	if(req.cookies.secret != void(0)){
 		try{
 			if("TheBestFriends" == ct.decryptHash(req.cookies.secret, req.cookies.key)){
 				res.render("admin/index.html", {});
@@ -115,31 +146,6 @@ app.get("/logout", (req, res) => {
 	res.clearCookie("key");
 	res.redirect("/adminlogin");
 });
-
-// console.log("init");
-
-// async function ST(){
-// 	setTimeout(()=>{
-// 		console.log("прошло 2 сек");
-// 	}, 2000);
-// }
-// (async () => {
-// 	await ST();
-// })();
-
-// console.log("app");
-
-// app.get("/admin", (req, res) => {
-// 	if(req.cookies.secret != null and req.cookies.secret != undefined){
-// 		db.listUsers().then((data) => {
-// 			if(data.id == ct.decryptLogPass(req.cookies.secret, req.cookies.key))
-// 		});
-// 		if()
-// 	}
-// 	res.sendfile(path.resolve(__dirname, "../Public/pages/admin/login.html"));
-// 	console.log(req.cookies);
-// });
-
 
 
 // error 404

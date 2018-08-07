@@ -51,6 +51,9 @@ export default function(socket, store, db){
 			case "CHANGE_CHAT_HELLO": {
 				store.updateChatHello(data.data)
 			}break;
+			case "CHANGE_APP_STATE": {
+				dispatcher.dispatch(data)
+			}break;
 			default: {
 				console.log("problem..")
 			}

@@ -6,7 +6,6 @@
     "server": "babel-node server/app.js",
     "babel-node": "babel-node --presets=latest",
     "build": "babel src -d dist",
-    "webpack-devserver": "webpack-dev-server --debug --hot --devtool eval-source-map --output-pathinfo --watch --colors --inline --content-base public --port 8090 --host 0.0.0.0",
     "start": "nodemon --exec npm run babel-node -- ./server/app.js"
   },
   "author": {
@@ -19,6 +18,9 @@
       "coffee-reactify"
     ]
   },
+	"nodemonConfig": {
+		"ignore": ["client/*", "Public/*"]
+	},
   "dependencies": {
     "@nivo/pie": "^0.34.0-1",
     "body-parser": "^1.12.3",

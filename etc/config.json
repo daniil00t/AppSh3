@@ -5,5 +5,13 @@
 		"name": "test",
 		"host": "localhost",
 		"port": 27017
+	},
+	"appData": {
+		"chat": {
+			"state": false
+		},
+		"test": {
+			"state": true
+		}
 	}
 }
