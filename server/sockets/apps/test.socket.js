@@ -31,14 +31,30 @@ export default function(socket, store, db){
 	})
 
 	db.listTests().then((data) => {
-		socket.emit("getDataTest", filterTAnses(data));
+		socket.emit("getDataTest", data);
 	})
-	// db.updateTest("5ac8ea66e45b041348128ac5", { data: [
-	// 	{ anses:["213\u003csub\u003e8\u003c/sub\u003e","128\u003csub\u003e10\u003c/sub\u003e + 8\u003csub\u003e10\u003c/sub\u003e + 4\u003csub\u003e10\u003c/sub\u003e","10001100\u003csub\u003e2\u003c/sub\u003e"],trueanses:[2],_id:"5ab13b053ad35c0284233fb2",type:"defQ",num:0,question:"Какое из перечисленных ниже выражений имеет наибольшее значение?",__v:0,score:1},
-	// 	{ anses:["223\u003csub\u003e8\u003c/sub\u003e","138\u003csub\u003e10\u003c/sub\u003e + 5\u003csub\u003e10\u003c/sub\u003e + 4\u003csub\u003e10\u003c/sub\u003e","10111010\u003csub\u003e2\u003c/sub\u003e"],trueanses:[0],_id:"5ab13b053ad35c0284233fb1",type:"defQ",num:1,question:"Какое из перечисленных ниже выражений имеет наибольшее значение?",__v:1,score:1},
-	// 	{ anses:["243\u003csub\u003e8\u003c/sub\u003e","125\u003csub\u003e10\u003c/sub\u003e + 8\u003csub\u003e10\u003c/sub\u003e + 4\u003csub\u003e10\u003c/sub\u003e","10001000\u003csub\u003e2\u003c/sub\u003e"],trueanses:[1],_id:"5ab13b053ad35c0284233fb2",type:"defQ",num:2,question:"Какое из перечисленных ниже выражений имеет наибольшее значение?",__v:2,score:1}
 
-	// ]})
+	// db.removeTest("5b69a8efa4a3ad4678dad881");
+	// db.updateTest("5b69a8e7a4a3ad4678dad880", {
+	// 	variants: [
+	// 		[
+	// 			{
+	// 				type: "defQ",
+	// 				anses: ["213<sub>8</sub>", "128<sub>10</sub> + 8<sub>10</sub> + 4<sub>10</sub>", "10001010<sub>2</sub>"],
+	// 				question: "Какое из перечисленных ниже выражений имеет наибольшее значение?",
+	// 				score: 1,
+	// 				trueanses: [2]
+	// 			},
+	// 			{
+	// 				type: "defQ",
+	// 				anses: ["214<sub>8</sub>", "128<sub>9</sub> + 8<sub>10</sub> + 4<sub>10</sub>", "10001011<sub>2</sub>"],
+	// 				question: "Какое из перечисленных ниже выражений имеет наибольшее значение?",
+	// 				score: 1,
+	// 				trueanses: [0]
+	// 			},
+	// 		]
+	// 	]
+	// })
 
 	socket.on("changeUsrData", (data) => {
 		store.changeUsrData(data);

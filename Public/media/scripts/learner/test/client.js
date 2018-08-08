@@ -204,69 +204,33 @@ App = React.createClass({
     })(this));
   },
   render: function() {
-    if (!this.state.ban) {
-      return React.createElement("div", {
-        "className": "testing"
-      }, React.createElement("div", {
-        "className": "preloader",
-        "style": {
-          display: !this.state.preloader ? "none" : void 0
-        }
-      }, React.createElement("div", {
-        "className": "cssload-thecube"
-      }, React.createElement("div", {
-        "className": "cssload-cube cssload-c1"
-      }), React.createElement("div", {
-        "className": "cssload-cube cssload-c2"
-      }), React.createElement("div", {
-        "className": "cssload-cube cssload-c4"
-      }), React.createElement("div", {
-        "className": "cssload-cube cssload-c3"
-      }))), React.createElement(Header, {
-        "data": this.state.data_test,
-        "mobile": this.state.mobile
-      }), React.createElement("div", {
-        "className": "container main_cnt"
-      }, (this.state.data_test.length !== 0 && this.state.start ? this.state.data_test.map((function(_this) {
-        return function(i, j) {
-          if (_this.state.variant === j + 1 && i.data.length !== 0) {
-            return i.data.map(function(q, w) {
-              switch (q.type) {
-                case "defQ":
-                  return React.createElement("div", null, React.createElement(DefQ, {
-                    "data": q
-                  }), React.createElement("hr", null));
-                case "multQ":
-                  return React.createElement("div", null, React.createElement(MultQ, {
-                    "data": q
-                  }), React.createElement("hr", null));
-                case "joinQ":
-                  return React.createElement("div", null, React.createElement(JoinQ, {
-                    "data": q
-                  }), React.createElement("hr", null));
-                case "inpQ":
-                  return React.createElement("div", null, React.createElement(InpQ, {
-                    "data": q
-                  }));
-                default:
-                  return console.log("elses");
-              }
-            });
-          }
-        };
-      })(this)) : this.state.data_test.length === 0 ? React.createElement("div", null, "К сожалению, данных нет.") : !this.state.start ? React.createElement("div", {
-        "className": "text-center nostart"
-      }, "Нажмите на кнопку старта таймера и давайте начинать!") : void 0), React.createElement("button", {
-        "onClick": this.endTest,
-        "className": "endTest"
-      }, "Завершить"), React.createElement("footer", {
-        "className": "main_footer"
-      }, React.createElement("p", {
-        "className": "text-center"
-      }, "Daniil Shenyagin©2018 - TestingApp - SchoolProjects#3"))));
-    } else {
-      return React.createElement("span", null, "Поздравляю, вы в бане!");
-    }
+    return React.createElement("div", {
+      "className": "testing"
+    }, React.createElement("div", {
+      "className": "preloader",
+      "style": {
+        display: !this.state.preloader ? "none" : void 0
+      }
+    }, React.createElement("div", {
+      "className": "cssload-thecube"
+    }, React.createElement("div", {
+      "className": "cssload-cube cssload-c1"
+    }), React.createElement("div", {
+      "className": "cssload-cube cssload-c2"
+    }), React.createElement("div", {
+      "className": "cssload-cube cssload-c4"
+    }), React.createElement("div", {
+      "className": "cssload-cube cssload-c3"
+    }))), React.createElement("div", {
+      "className": "container main_cnt"
+    }, React.createElement("button", {
+      "onClick": this.endTest,
+      "className": "endTest"
+    }, "Завершить"), React.createElement("footer", {
+      "className": "main_footer"
+    }, React.createElement("p", {
+      "className": "text-center"
+    }, "Daniil Shenyagin©2018 - TestingApp - SchoolProjects#3"))));
   }
 });
 
@@ -476,7 +440,7 @@ Header = React.createClass({
       })(this))
     }, (function() {
       var k, len, ref, results;
-      ref = this.props.data;
+      ref = this.props.data.variants;
       results = [];
       for (j = k = 0, len = ref.length; k < len; j = ++k) {
         i = ref[j];

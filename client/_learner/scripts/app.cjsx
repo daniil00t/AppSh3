@@ -112,48 +112,23 @@ App = React.createClass
 				else
 					console.log "свитч не сработал"
 	render: ->
-		if !@state.ban
-			<div className="testing">
-				<div className="preloader" style={display: if !@state.preloader then "none"}>
-					<div className="cssload-thecube">
-						<div className="cssload-cube cssload-c1"></div>
-						<div className="cssload-cube cssload-c2"></div>
-						<div className="cssload-cube cssload-c4"></div>
-						<div className="cssload-cube cssload-c3"></div>
-					</div>
-				</div>
-				<Header data={@state.data_test} mobile={@state.mobile}/>
-				<div className="container main_cnt">
-					{
-						if @state.data_test.length isnt 0 and @state.start
-							@state.data_test.map (i, j)=>
-								if @state.variant == j + 1 and i.data.length isnt 0
-									i.data.map (q, w)->
-										switch q.type
-											when "defQ"
-												<div><DefQ data={q} /><hr /></div>
-											when "multQ"
-												<div><MultQ data={q} /><hr /></div>
-											when "joinQ"
-												<div><JoinQ data={q} /><hr/></div>
-											when "inpQ"
-												<div><InpQ data={q} /></div>
-											else
-												console.log "elses"
-						else
-							if @state.data_test.length is 0
-								<div>К сожалению, данных нет.</div>
-							else
-								if !@state.start
-									<div className="text-center nostart">Нажмите на кнопку старта таймера и давайте начинать!</div>
-					}
-					<button onClick={@endTest} className="endTest">Завершить</button>
-				<footer className="main_footer">
-					<p className="text-center">Daniil Shenyagin&copy;2018 - TestingApp - SchoolProjects#3</p>
-				</footer>
+		<div className="testing">
+			<div className="preloader" style={display: if !@state.preloader then "none"}>
+				<div className="cssload-thecube">
+					<div className="cssload-cube cssload-c1"></div>
+					<div className="cssload-cube cssload-c2"></div>
+					<div className="cssload-cube cssload-c4"></div>
+					<div className="cssload-cube cssload-c3"></div>
 				</div>
 			</div>
-		else
-			<span>Поздравляю, вы в бане!</span>
+			
+			<div className="container main_cnt">
+				
+				<button onClick={@endTest} className="endTest">Завершить</button>
+			<footer className="main_footer">
+				<p className="text-center">Daniil Shenyagin&copy;2018 - TestingApp - SchoolProjects#3</p>
+			</footer>
+			</div>
+		</div>
 
 module.exports = App

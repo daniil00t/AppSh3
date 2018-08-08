@@ -108,7 +108,7 @@ Header = React.createClass
 						</div>
 							<select name="variant" id="selectVariant" onChange={(e) => @handleChangeSelect e} ref={(node) => @selectVar = node}>
 								{
-									for i, j in @props.data
+									for i, j in @props.data.variants
 										<option value={j + 1}>{j + 1} вариант</option>
 								}
 							</select>

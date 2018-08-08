@@ -33,10 +33,22 @@ export function listUsers(id) {
 	  if err then throw err
 	  console.log doc
 */
+export function addTest(data){
+	Test.create(data, err => {
+		if(err) throw err;
+		console.log("saved -> OK")
+	})
+}
 
 export function updateTest(id, news){
 	Test.findByIdAndUpdate(id, { $set: news }, { new: true }, (err, doc) => {
 		if(err) throw err;
 		console.log(doc);
 	});
+}
+export function removeTest(id){
+	Test.remove({ _id: id }, (err) => {
+		if(err) throw err;
+		console.log(id + " - removed");
+	})
 }

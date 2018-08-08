@@ -366,7 +366,7 @@ Item = React.createClass({
   componentWillMount: function() {},
   render: function() {
     return React.createElement("div", {
-      "className": "block_chat animFadeInUp"
+      "className": "block_test animFadeInUp " + this.props.classItem
     }, React.createElement("div", {
       "className": "title_block"
     }, React.createElement("h3", {
@@ -403,9 +403,11 @@ Test = React.createClass({
     }, React.createElement("h1", {
       "className": "welcome_chat_panel"
     }, "\t\t\t\tУправление тестами"), React.createElement(Block, {
-      "title": "Работа с тестами"
+      "title": "Работа с тестами",
+      "classItem": "testUtils"
     }, React.createElement("div", null, "\t\t\t\t\tBlock#1")), React.createElement(Block, {
-      "title": "Изменение состояния приложения"
+      "title": "Изменение состояния приложения",
+      "classItem": "changeState"
     }, React.createElement("div", null, "\t\t\t\t\tBlock#2")));
   }
 });

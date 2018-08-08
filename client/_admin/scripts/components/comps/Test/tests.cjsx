@@ -12,13 +12,13 @@ Test = React.createClass
 				Управление тестами
 			</h1>
 
-			<Block title="Работа с тестами">
+			<Block title="Работа с тестами" classItem="testUtils">
 				<div>
 					Block#1
 				</div>
 			</Block>
 
-			<Block title="Изменение состояния приложения">
+			<Block title="Изменение состояния приложения" classItem="changeState">
 				<div>
 					Block#2
 				</div>
