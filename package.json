@@ -6,7 +6,7 @@
     "server": "babel-node server/app.js",
     "babel-node": "babel-node --presets=latest",
     "build": "babel src -d dist",
-    "start": "nodemon --exec npm run babel-node -- ./server/app.js"
+    "start": "nodemon --watch ./server --exec npm run babel-node -- ./server/app.js"
   },
   "author": {
     "name": "Daniil Shenyagin",
@@ -18,9 +18,13 @@
       "coffee-reactify"
     ]
   },
-	"nodemonConfig": {
-		"ignore": ["client/*", "Public/*"]
-	},
+  "nodemonConfig": {
+    "ignore": [
+      "client/*",
+      "Public/*",
+      "gulp/*"
+    ]
+  },
   "dependencies": {
     "@nivo/pie": "^0.34.0-1",
     "body-parser": "^1.12.3",

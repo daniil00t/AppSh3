@@ -16831,7 +16831,7 @@ module.exports={
   "_args": [
     [
       "elliptic@6.4.0",
-      "/home/daniil/__projects/nodejs/AppSh3"
+      "E:\\_web\\nodeJsProjects\\Socket_io"
     ]
   ],
   "_development": true,
@@ -16857,7 +16857,7 @@ module.exports={
   ],
   "_resolved": "https://registry.npmjs.org/elliptic/-/elliptic-6.4.0.tgz",
   "_spec": "6.4.0",
-  "_where": "/home/daniil/__projects/nodejs/AppSh3",
+  "_where": "E:\\_web\\nodeJsProjects\\Socket_io",
   "author": {
     "name": "Fedor Indutny",
     "email": "fedor@indutny.com"

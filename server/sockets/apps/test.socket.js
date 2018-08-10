@@ -1,7 +1,9 @@
 const filterTAnses = (arr) => {
 	let _arr = arr;
-	_arr.map((i, j) => {
-		_arr[j].data[0].trueanses = null;
+	_arr.variants.map((i, j) => {
+		i.map((k, l) => {
+			_arr.variants[j][l].trueanses = null
+		})
 	});
 	return _arr;
 };
@@ -31,12 +33,18 @@ export default function(socket, store, db){
 	})
 
 	db.listTests().then((data) => {
-		socket.emit("getDataTest", data);
+		// k - номер активного теста
+		let k = 0;
+		socket.emit("getDataTest", filterTAnses(data[k]));
 	})
 
-	// db.removeTest("5b69a8efa4a3ad4678dad881");
-	// db.updateTest("5b69a8e7a4a3ad4678dad880", {
+	// db.removeTest("5ac8ea66e45b041348128ac5");
+	// db.removeTest("5ac8eaec68352c16604b478a");
+	// db.removeTest("5ac8eafddf7ae7138468b9b5");
+
+	// db.updateTest("5b6afd8070edbd1b10226f1d", {
 	// 	variants: [
+	// 		// variant #1
 	// 		[
 	// 			{
 	// 				type: "defQ",
@@ -51,7 +59,41 @@ export default function(socket, store, db){
 	// 				question: "Какое из перечисленных ниже выражений имеет наибольшее значение?",
 	// 				score: 1,
 	// 				trueanses: [0]
+	// 			}
+	// 		],
+	// 		// variant #2
+	// 		[
+	// 			{
+	// 				type: "defQ",
+	// 				anses: ["2132<sub>8</sub>", "12833<sub>10</sub> + 832<sub>1</sub> + 423<sub>10</sub>", "100111111<sub>3</sub>"],
+	// 				question: "Какое из перечисленных ниже выражений имеет наибольшее значение? А?",
+	// 				score: 1,
+	// 				trueanses: [2]
 	// 			},
+	// 			{
+	// 				type: "defQ",
+	// 				anses: ["214<sub>8</sub>", "128<sub>9</sub> + 8<sub>10</sub> + 4<sub>10</sub>", "10001011<sub>2</sub>"],
+	// 				question: "Какое из перечисленных ниже выражений имеет наибольшее значение?",
+	// 				score: 1,
+	// 				trueanses: [0]
+	// 			}
+	// 		],
+	// 		// variant #3
+	// 		[
+	// 			{
+	// 				type: "defQ",
+	// 				anses: ["213<sub>8</sub>", "128<sub>10</sub> + 8<sub>10</sub> + 4<sub>10</sub>", "10001010<sub>2</sub>"],
+	// 				question: "Даны 4 числа, они записаны с использованием различных систем счисления. Укажите среди этих чисел то, в двоичной записи которого содержится ровно 6 единиц. Если таких чисел несколько, укажите наибольшее из них.",
+	// 				score: 1,
+	// 				trueanses: [2]
+	// 			},
+	// 			{
+	// 				type: "defQ",
+	// 				anses: ["214<sub>8</sub>", "128<sub>9</sub> + 8<sub>10</sub> + 4<sub>10</sub>", "10001011<sub>2</sub>"],
+	// 				question: "Какое из перечисленных ниже выражений имеет наибольшее значение?",
+	// 				score: 1,
+	// 				trueanses: [0]
+	// 			}
 	// 		]
 	// 	]
 	// })

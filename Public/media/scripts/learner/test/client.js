@@ -36,7 +36,7 @@ App = React.createClass({
   displayName: 'App',
   getInitialState: function() {
     return {
-      data_test: [],
+      data_test: {},
       data_anses: [],
       data_user: {},
       preloader: true,
@@ -53,7 +53,7 @@ App = React.createClass({
     return window.location.replace("http://" + window.location.host + "/learner");
   },
   componentWillMount: function() {
-    var isTouchDevice;
+    var data_test_promise, isTouchDevice;
     isTouchDevice = !!navigator.userAgent.match(/(iPhone|iPod|iPad|Android|playbook|silk|BlackBerry|BB10|Windows Phone|Tizen|Bada|webOS|IEMobile|Opera Mini)/);
     if (isTouchDevice) {
       this.setState({
@@ -72,20 +72,26 @@ App = React.createClass({
         });
       };
     })(this));
-    socket.on("getDataTest", (function(_this) {
-      return function(data) {
-        var arr, i, k, len;
-        arr = [];
-        for (k = 0, len = data.length; k < len; k++) {
-          i = data[k];
-          arr.push(i);
-        }
-        _this.setState({
-          data_test: arr
+    data_test_promise = new Promise((function(_this) {
+      return function(res, rej) {
+        return socket.on("getDataTest", function(_data) {
+          return res(_data);
         });
+      };
+    })(this));
+    data_test_promise.then((function(_this) {
+      return function(_data) {
         return _this.setState({
+          data_test: {
+            variants: _data.variants,
+            time: _data.time
+          },
           preloader: false
         });
+      };
+    })(this))["catch"]((function(_this) {
+      return function(err) {
+        return console.error(err);
       };
     })(this));
 
@@ -164,7 +170,7 @@ App = React.createClass({
         return _this.endTest();
       };
     })(this));
-    return dispatcher.register((function(_this) {
+    dispatcher.register((function(_this) {
       return function(action) {
         var arr, i, j, k, len, update;
         switch (action.type) {
@@ -202,6 +208,7 @@ App = React.createClass({
         }
       };
     })(this));
+    return console.log(this.state.data_test);
   },
   render: function() {
     return React.createElement("div", {
@@ -221,9 +228,45 @@ App = React.createClass({
       "className": "cssload-cube cssload-c4"
     }), React.createElement("div", {
       "className": "cssload-cube cssload-c3"
-    }))), React.createElement("div", {
+    }))), (this.state.data_test.variants != null ? React.createElement(Header, {
+      "data": this.state.data_test,
+      "mobile": this.state.mobile
+    }) : void 0), React.createElement("div", {
       "className": "container main_cnt"
-    }, React.createElement("button", {
+    }, (this.state.data_test.variants != null ? this.state.data_test.variants.length !== 0 && this.state.start ? this.state.data_test.variants.map((function(_this) {
+      return function(i, j) {
+        if (_this.state.variant === j + 1 && i.length !== 0) {
+          return i.map(function(q, w) {
+            switch (q.type) {
+              case "defQ":
+                return React.createElement("div", null, React.createElement(DefQ, {
+                  "data": q,
+                  "num": w
+                }), React.createElement("hr", null));
+              case "multQ":
+                return React.createElement("div", null, React.createElement(MultQ, {
+                  "data": q,
+                  "num": w
+                }), React.createElement("hr", null));
+              case "joinQ":
+                return React.createElement("div", null, React.createElement(JoinQ, {
+                  "data": q,
+                  "num": w
+                }), React.createElement("hr", null));
+              case "inpQ":
+                return React.createElement("div", null, React.createElement(InpQ, {
+                  "data": q,
+                  "num": w
+                }));
+              default:
+                return console.log("elses");
+            }
+          });
+        }
+      };
+    })(this)) : this.state.data_test.variants.length === 0 ? React.createElement("div", null, "К сожалению, данных нет.") : !this.state.start ? React.createElement("div", {
+      "className": "text-center nostart"
+    }, "Нажмите на кнопку старта таймера и давайте начинать!") : void 0 : void 0), React.createElement("button", {
       "onClick": this.endTest,
       "className": "endTest"
     }, "Завершить"), React.createElement("footer", {
@@ -266,25 +309,6 @@ Header = React.createClass({
         type: true
       });
     }
-  },
-  componentWillReceiveProps: function() {
-    var minutes, obj, seconds, time_seconds;
-    time_seconds = 0;
-    this.props.data.map((function(_this) {
-      return function(i, j) {
-        if (j === 0) {
-          return time_seconds = i.time;
-        }
-      };
-    })(this));
-    seconds = time_seconds % 60;
-    minutes = Math.floor(time_seconds / 60);
-    obj = {};
-    obj.seconds = seconds;
-    obj.minutes = minutes;
-    return this.setState({
-      time: obj
-    });
   },
   changeName: function(e) {
     var val, value;
@@ -331,6 +355,9 @@ Header = React.createClass({
     });
   },
   componentWillMount: function() {
+    this.setState({
+      time: this.props.data.time
+    });
     return ee.on("startTest", (function(_this) {
       return function(data) {
         var SI, timeall;
@@ -338,10 +365,9 @@ Header = React.createClass({
           _this.setState({
             start: true
           });
-          timeall = _this.state.time.minutes * 60 + _this.state.time.seconds;
+          timeall = _this.state.time;
           console.log(timeall);
           return SI = setInterval((function() {
-            var obj;
             if (timeall === 1) {
               clearInterval(SI);
               return ee.emit("stopTimer", {
@@ -349,11 +375,8 @@ Header = React.createClass({
               });
             } else {
               timeall--;
-              obj = {};
-              obj.seconds = timeall % 60;
-              obj.minutes = Math.floor(timeall / 60);
               return _this.setState({
-                time: obj
+                time: timeall
               });
             }
           }), 1000);
@@ -367,7 +390,9 @@ Header = React.createClass({
     return this.inputFocus(this.fname);
   },
   render: function() {
-    var i, j;
+    var i, j, timer_minutes, timer_seconds;
+    timer_minutes = Math.floor(this.state.time / 60);
+    timer_seconds = this.state.time % 60;
     return React.createElement("header", {
       "className": "main_header_test"
     }, React.createElement("div", {
@@ -375,7 +400,7 @@ Header = React.createClass({
     }, React.createElement("div", {
       "className": "row"
     }, React.createElement("div", {
-      "className": "col-md-3 col-lg-3 col-sm-0 logo"
+      "className": "col-md-3 col-lg-3 col-sm-0 logo logo_test_header"
     }, React.createElement("div", {
       "className": "logo"
     }, React.createElement("a", {
@@ -455,7 +480,7 @@ Header = React.createClass({
       "className": "timer"
     }, React.createElement("span", {
       "className": "time"
-    }, (this.state.time.minutes < 10 ? "0" + this.state.time.minutes : this.state.time.minutes) + ":" + (this.state.time.seconds < 10 ? "0" + this.state.time.seconds : this.state.time.seconds)), React.createElement("div", {
+    }, (timer_minutes < 10 ? "0" + timer_minutes : timer_minutes) + ":" + (timer_seconds < 10 ? "0" + timer_seconds : timer_seconds)), React.createElement("div", {
       "className": "controlls"
     }, React.createElement("i", {
       "className": "fa fa-play",
@@ -484,7 +509,7 @@ DefQ = React.createClass({
   displayName: "DefQ",
   getInitialState: function() {
     return {
-      num: this.props.data.num,
+      num: this.props.num,
       activeItem: -1,
       alphabet: {
         rus: ["а", "б", "в", "г", "д", "е", "ж", "з", "и", "к"],

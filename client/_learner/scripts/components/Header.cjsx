@@ -15,18 +15,6 @@ Header = React.createClass
 		if !@state.start
 			ee.emit "startTestApp", time: @state.time, type: on
 					
-	
-	# просто нужно понять, что тут вычисляется время в минутах и секундах
-	componentWillReceiveProps: ->
-		time_seconds = 0
-		@props.data.map (i, j)=>
-			if j is 0 then time_seconds = i.time
-		seconds = time_seconds % 60
-		minutes = Math.floor time_seconds / 60
-		obj = {}
-		obj.seconds = seconds
-		obj.minutes = minutes
-		@setState time: obj
 
 	# изменение имени и фамилия
 	changeName: (e)->
@@ -61,10 +49,12 @@ Header = React.createClass
 		ee.emit "changeNameUsr@ee", fname: @fname.value
 		ee.emit "changeNameUsr@ee", lname: @lnmae.value
 	componentWillMount: ->
+		@setState time: @props.data.time
+
 		ee.on "startTest", (data)=>
 			if data.type
 				@setState start: on
-				timeall = @state.time.minutes * 60 + @state.time.seconds
+				timeall = @state.time
 				console.log timeall
 				SI = setInterval (=>
 					if timeall is 1
@@ -73,20 +63,19 @@ Header = React.createClass
 						ee.emit "stopTimer", {type: on}
 					else
 						timeall--
-						obj = {}
-						obj.seconds = timeall % 60
-						obj.minutes = Math.floor timeall / 60
-						@setState time: obj
+						@setState time: timeall
 				),1000
 			else
 				alert "Введите свое имя и фамилие!"
 	componentDidMount: ->
 		@inputFocus(@fname)
 	render: ->
+		timer_minutes = Math.floor @state.time / 60
+		timer_seconds = @state.time % 60
 		<header className="main_header_test">
 			<div className="container-fluid">
 				<div className="row">
-					<div className="col-md-3 col-lg-3 col-sm-0 logo">
+					<div className="col-md-3 col-lg-3 col-sm-0 logo logo_test_header">
 						<div className="logo">
 							<a href="/learner/test"><img src="http://localhost:8080/imgFiles/testing_black.png" /></a>
 						</div>
@@ -116,7 +105,7 @@ Header = React.createClass
 					</div>
 					<div className="col-md-3 col-lg-3 col-sm-4 menu-left">
 						<div className="timer">
-							<span className="time">{"#{if @state.time.minutes < 10 then "0" + @state.time.minutes else @state.time.minutes}:#{if @state.time.seconds < 10 then "0" + @state.time.seconds else @state.time.seconds}"}</span>
+							<span className="time">{"#{if timer_minutes < 10 then "0" + timer_minutes else timer_minutes}:#{if timer_seconds < 10 then "0" + timer_seconds else timer_seconds}"}</span>
 							<div className="controlls">
 								<i className="fa fa-play" onClick={@handleStartTest} style={color: if @state.start then "#dadada" else "white"}></i>
 							</div>

@@ -16,7 +16,7 @@ InpQ = require "./components/inpQ"
 App = React.createClass
 	displayName: 'App'
 	getInitialState: ->
-		data_test: []
+		data_test: {}
 		data_anses: []
 		data_user: {}
 		preloader: true
@@ -44,13 +44,18 @@ App = React.createClass
 			@setState data_user: data
 
 		# Получение данных(тестов) с сервера (DB)
-		socket.on "getDataTest", (data)=>
-			arr = []
-			for i in data
-				arr.push i
-			@setState data_test: arr
-			@setState preloader: no
+		data_test_promise = new Promise((res, rej)=>
+			socket.on "getDataTest", (_data)=>
+				res _data
+		)
 
+		data_test_promise.then((_data) => 
+			@setState data_test: {variants: _data.variants, time: _data.time}, preloader: false
+		).catch((err) => 
+			console.error err
+		)
+		
+		
 		### _ EventEmitter_  ###
 
 		# Сохранение данных пользователя: имени и фамилии
@@ -111,6 +116,7 @@ App = React.createClass
 						payload: action.payload
 				else
 					console.log "свитч не сработал"
+		console.log @state.data_test
 	render: ->
 		<div className="testing">
 			<div className="preloader" style={display: if !@state.preloader then "none"}>
@@ -121,9 +127,33 @@ App = React.createClass
 					<div className="cssload-cube cssload-c3"></div>
 				</div>
 			</div>
-			
+			{if @state.data_test.variants? then <Header data={@state.data_test} mobile={@state.mobile}/>}
 			<div className="container main_cnt">
-				
+				{
+					if @state.data_test.variants?
+						if @state.data_test.variants.length isnt 0 and @state.start
+							@state.data_test.variants.map (i, j)=>
+								if @state.variant == j + 1 and i.length isnt 0
+									i.map (q, w)->
+										switch q.type
+											when "defQ"
+												<div><DefQ data={q} num={w}/><hr /></div>
+											when "multQ"
+												<div><MultQ data={q} num={w}/><hr /></div>
+											when "joinQ"
+												<div><JoinQ data={q} num={w}/><hr/></div>
+											when "inpQ"
+												<div><InpQ data={q} num={w}/></div>
+											else
+												console.log "elses"
+						else
+							if @state.data_test.variants.length is 0
+								<div>К сожалению, данных нет.</div>
+							else
+								if !@state.start
+									<div className="text-center nostart">Нажмите на кнопку старта таймера и давайте начинать!</div>
+				}
+
 				<button onClick={@endTest} className="endTest">Завершить</button>
 			<footer className="main_footer">
 				<p className="text-center">Daniil Shenyagin&copy;2018 - TestingApp - SchoolProjects#3</p>

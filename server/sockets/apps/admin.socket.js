@@ -8,24 +8,36 @@ export default function(socket, store, db){
 	  const tests = await getTests()
 	  let trueAnses = []
 
+	  console.log(tests)
+	  // Перебор всех тестов
 	  tests.map((i, j) => {
-			let itemTA = {}
-			itemTA.variant = j;
-			itemTA.data = [];
-			i.data.map((k, l) => {
-				itemTA.data.push({
-					no: l,
-					value: k.trueanses
-				})
-			})
-			trueAnses.push(itemTA)
-		})
+	  	// Перебор вариантов
+	  	let TAvariants = []
+	  	i.variants.map((k, l) => {
+	  		// Перебор заданий
+	  		let TAproblems = []
+	  		k.map((q, w) => {
+	  			TAproblems.push({
+	  				no: w,
+	  				value: q.trueanses,
+	  				type: q.type
+	  			})
+	  		})
+	  		TAvariants.push(TAproblems)
+	  	})
+	  	trueAnses.push({id: i._id, data: TAvariants})
+	  })
 		return trueAnses;
 	}
+
 	// Достаем правильные ответы из БД
-	getTrueAnses().then(data => {
-	  socket.emit("init", {type: "data_true_anses", data: data})
-	});
+	getTrueAnses()
+		.then(data => {
+		  socket.emit("init", {type: "data_true_anses", data: data})
+		})
+		.catch((err) => {
+			console.error(err)
+		});
 
 	socket.emit("init", {type: "users", data: store.getClients()})
 	socket.emit("init", {type: "data_users", data: store.getDataUsers()})

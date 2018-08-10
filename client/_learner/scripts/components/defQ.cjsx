@@ -6,7 +6,7 @@ dispatcher = require "../dispatcher"
 DefQ = React.createClass
 	displayName: "DefQ"
 	getInitialState: ->
-		num: @props.data.num
+		num: @props.num
 		activeItem: -1
 		alphabet: {rus: ["а", "б", "в", "г", "д", "е", "ж", "з", "и", "к"], en: ["a", "b", "c", "d", "e", "f", "g", "h", "i", "j"]}
 		myans: {}

@@ -18,21 +18,20 @@ export function setUpConnection() {
 		throw new Error("Невозможно подключиться к базе данных)");
 	}
 }
-
-export function listTests(id) {
-  return Test.find();
-}
+/*
+	User Model
+*/
 export function listUsers(id) {
   return User.find();
 }
 
 
 /*
-	update: (schema, id, news)->
-		schema.findByIdAndUpdate id, { $set: news}, { new: true }, (err, doc)->
-	  if err then throw err
-	  console.log doc
+	Test Model
 */
+export function listTests(id) {
+  return Test.find();
+}
 export function addTest(data){
 	Test.create(data, err => {
 		if(err) throw err;
