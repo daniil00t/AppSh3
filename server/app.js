@@ -45,7 +45,7 @@ nunjucks.configure("./Public/pages", {
 
 // index
 app.get('/', (req, res) => {
-	res.render("index.html", { date: new Date() });
+	res.render("index.html", { date: new Date(), apps: ['chat', "test", "quest"] });
 });
 
 // main learner routes

@@ -20,7 +20,8 @@ export default function(socket, store, db){
 	  			TAproblems.push({
 	  				no: w,
 	  				value: q.trueanses,
-	  				type: q.type
+	  				type: q.type,
+	  				score: q.score
 	  			})
 	  		})
 	  		TAvariants.push(TAproblems)

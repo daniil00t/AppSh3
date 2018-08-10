@@ -40,28 +40,32 @@ App = React.createClass({
     };
   },
   updateScoreUsers: function(data) {
-    var arr, lengthVariantTests, score;
+    var arr, lengthProblemsTests, score;
     score = 0;
     arr = this.state.users;
-    lengthVariantTests = 0;
+    lengthProblemsTests = 0;
     this.state.users.map((function(_this) {
       return function(i, j) {
         return data.map(function(k, l) {
+          var variant;
           if (i.id === k.id) {
+            variant = i.variant - 1;
+            console.log(variant);
             k.data.map(function(q, w) {
-              return _this.state.data_true_anses[i.variant - 1].data.map(function(r, t) {
+              return _this.state.data_true_anses[0].data[variant].map(function(r, t) {
                 console.log(q, r);
                 if (q.no === r.no) {
                   if (q.value === r.value[0]) {
-                    return score++;
+                    console.log("+1");
+                    return score += r.score;
                   }
                 }
               });
             });
-            lengthVariantTests = _this.state.data_true_anses[i.variant - 1].data.length;
+            lengthProblemsTests = _this.state.data_true_anses[0].data[variant].length;
             arr[j].score = score;
-            console.log("score: " + score + ", lengthVariantTests: " + lengthVariantTests);
-            arr[j].points = Math.round(score / lengthVariantTests * 100);
+            console.log("score: " + score + ", lengthProblemsTests: " + lengthProblemsTests);
+            arr[j].points = Math.round(score / lengthProblemsTests * 100);
             return score = 0;
           }
         });
@@ -16831,7 +16835,7 @@ module.exports={
   "_args": [
     [
       "elliptic@6.4.0",
-      "E:\\_web\\nodeJsProjects\\Socket_io"
+      "/home/daniil/__projects/nodejs/AppSh3"
     ]
   ],
   "_development": true,
@@ -16857,7 +16861,7 @@ module.exports={
   ],
   "_resolved": "https://registry.npmjs.org/elliptic/-/elliptic-6.4.0.tgz",
   "_spec": "6.4.0",
-  "_where": "E:\\_web\\nodeJsProjects\\Socket_io",
+  "_where": "/home/daniil/__projects/nodejs/AppSh3",
   "author": {
     "name": "Fedor Indutny",
     "email": "fedor@indutny.com"

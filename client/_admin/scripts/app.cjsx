@@ -20,22 +20,25 @@ App = React.createClass
 	updateScoreUsers: (data)->
 		score = 0
 		arr = @state.users
-		lengthVariantTests = 0
+		lengthProblemsTests = 0
 		@state.users.map (i, j) => 
 			data.map (k, l) =>
 				if i.id == k.id
+					variant = i.variant - 1
+					console.log variant
 					# начинаем проверку
 					k.data.map (q, w)=>
-						@state.data_true_anses[i.variant - 1].data.map (r, t)=>
+						@state.data_true_anses[0].data[variant].map (r, t)=>
 							console.log q, r
 							if q.no == r.no
 								if q.value == r.value[0]
-									score++
+									console.log "+1"
+									score += r.score
 
-					lengthVariantTests = @state.data_true_anses[i.variant - 1].data.length
+					lengthProblemsTests = @state.data_true_anses[0].data[variant].length
 					arr[j].score = score
-					console.log "score: #{score}, lengthVariantTests: #{lengthVariantTests}"
-					arr[j].points = Math.round(score / lengthVariantTests * 100)
+					console.log "score: #{score}, lengthProblemsTests: #{lengthProblemsTests}"
+					arr[j].points = Math.round(score / lengthProblemsTests * 100)
 					score = 0
 		@setState users: arr
 
