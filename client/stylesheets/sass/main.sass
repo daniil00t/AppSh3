@@ -29,6 +29,7 @@ body textarea:required:valid
 
 html
 	height: 100%
+	width: 100%
 body
 	height: 100%
 	background-color: #e4ebf0
@@ -450,6 +451,210 @@ footer.main_footer
 	p
 		line-height: 40px
 		color: rgb(150, 150, 150)
+
+
+
+
+
+/* 
+	Main page - learner
+	main color - blue
+ */
+.main
+	width: 100%
+	height: 100%
+	background: linear-gradient(#013ca9,#001b48)
+	position: relative
+	overflow: hidden
+	.objects
+		.object
+			position: absolute
+			
+			background-color: rgba(255, 255, 255, .25)
+
+			&.small
+				width: 50px
+				height: 50px
+			&.big
+				width: 150px
+				height: 150px
+			&.b
+				background: transparent
+				border: 3px solid rgba(255, 255, 255, .25)
+	.tringgle
+		border-radius: 0 50px 50px 0
+		// border-radius-left: 25px
+	.round
+		border-radius: 50px
+
+	.line
+		height: 4px
+		position: absolute
+		display: block
+		background-color: rgba(255, 255, 255, .4)
+		
+	.small
+		width: 150px
+		bottom: 10%
+	.big
+		width: 300px
+		bottom: 12%
+	.welcome
+		color: #fff
+		font-family: MontserratBlack
+		font-size: 2.1em
+		text-transform: uppercase
+		padding-left: 100px
+		padding-top: 50px
+		position: relative
+		&::after
+			content: '_'
+			font-family: MontserratBlack
+			font-size: 1.1em
+			bottom: 3px
+			padding-left: 5px
+			position: absolute
+			animation: verticalSlashTick 1.5s linear infinite
+	.wrp-main-indexup
+		position: absolute
+		width: 100%
+		.apps
+			padding: 40px 100px
+			display: -webkit-flex
+			display: -moz-flex
+			display: -ms-flex
+			display: -o-flex
+			display: flex
+			justify-content: space-between
+			.app
+				// display: block
+				background-color: #fff
+				height: 350px
+				width: 30%
+				border-radius: 2px
+				background-color: #fff
+				transition: all .2s ease-in-out
+				box-shadow: 0 0 25px rgba(255, 255, 255,.3)
+				// margin-right: 5%
+				&:last-child
+					margin-right: none
+				position: relative
+				// &:hover
+					// background-color: #593df5
+				&::after
+					position: absolute
+					top: -25px
+					right: -25px
+					display: block
+					background-color: #fff
+					font-family: MontserratBold
+					color: #333
+					width: 50px
+					height: 50px
+					border-radius: 50%
+					font-size: 18px
+					line-height: 50px
+					text-align: center
+					box-shadow: 0 0 20px rgba(0,0,0,.7)
+				.wrp
+					padding: 25px
+					width: 100%
+					
+					.name_app
+						display: block
+						margin: 0 auto
+						h2
+							// text-align: center
+							color: #333
+							font-family: MontserratBold
+							padding-bottom: 0
+							margin-bottom: 0
+							font-size: 1.8em
+							// display: inline-block
+						h4
+							color: rgb(150, 150, 150)
+							font-family: MontserratMedium
+							font-size: 16px
+							text-align: right
+							// display: inline-block
+							// padding-right: 20%
+					.description
+						padding-top: 15px
+						p
+							color: #444
+							font-size: 14px
+							font-family: MontserratRegular
+							letter-spacing: .4px
+					.more
+						background-color: #2700ff
+						color: #fff
+						width: 80%
+						line-height: 40px
+						text-align: center
+						display: inline-block
+						font-family: MontserratBold
+						font-size: 14px
+						text-decoration: none
+						position: absolute
+						border-radius: 1px
+						bottom: 40px
+						right: 0
+						left: 0
+						margin: 0 auto
+						&:hover
+							animation: animaBGCbutton 1.5s ease-in-out
+
+						text-transform: uppercase
+			.chat
+				&::after
+					content: '#1'
+				.name_app
+					width: 130px
+			.testing
+				&::after
+					content: '#2'
+				.name_app
+					width: 170px
+			.web_quest
+				&::after
+					content: '#3'
+				.name_app
+					width: 165px
+@keyframes animaBGCbutton
+	0%
+		background-color: #2700ff
+	33%
+		background-color: #002eec
+	66%
+		background-color: #6600ec
+	100%
+		background-color: #2700ff
+
+@keyframes verticalSlashTick
+	0%
+		content: '_'
+	50%
+		content: ''
+	100%
+		content: '_'
+
+footer
+	height: 130px
+	position: absolute
+	background-color: transparent
+	bottom: 0
+	width: 100%
+	p
+		text-align: center
+		img
+			display: inline-block
+			width: 200px
+	.copy
+		// width: 50%
+		text-align: center
+		font-family: RalewayMedium
+		color: rgb(190, 190, 190)
+
 
 
 @import "media.sass"

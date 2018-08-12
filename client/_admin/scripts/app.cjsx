@@ -15,6 +15,7 @@ App = React.createClass
 		users: []
 		users_anses: []
 		data_true_anses: []
+		data_tests: []
 		# Chat states
 		chatHello: ""
 	updateScoreUsers: (data)->
@@ -45,17 +46,21 @@ App = React.createClass
 	componentWillMount: ->
 		socket.on "init", (data)=>
 			switch data.type
+				# chat
 				when "users"
 					@setState users: data.data
 					dispatcher.dispatch
 						type: "INIT_LOAD_USER_TO_TESTS_COMPONENT"
 						payload: data.data
+				# test
 				when "data_users"
 					@setState users_anses: data.data
 					console.log data.data
 				when "data_true_anses"
 					@setState data_true_anses: data.data
 					@updateScoreUsers(@state.users_anses)
+				when "data_tests"
+					@setState data_tests: data.data
 				# chat
 				when "chat_hello"
 					dispatcher.dispatch
@@ -125,7 +130,7 @@ App = React.createClass
 				</div>
 			</div>
 			<div className="container-fluid">
-				<Panel data={ { chat: {chatHello: @state.chatHello}, users: {data: @state.users} } }/>
+				<Panel data={ { chat: {chatHello: @state.chatHello}, users: {data: @state.users}, tests: if @state.data_tests then @state.data_tests else [] } }/>
 			</div>
 		</div>
 

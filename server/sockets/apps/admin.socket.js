@@ -8,7 +8,6 @@ export default function(socket, store, db){
 	  const tests = await getTests()
 	  let trueAnses = []
 
-	  console.log(tests)
 	  // Перебор всех тестов
 	  tests.map((i, j) => {
 	  	// Перебор вариантов
@@ -39,7 +38,13 @@ export default function(socket, store, db){
 		.catch((err) => {
 			console.error(err)
 		});
-
+	getTests()
+		.then(data => {
+			socket.emit("init", {type: "data_tests", data: data})
+		})
+		.catch(err => {
+			console.error(err);
+		})
 	socket.emit("init", {type: "users", data: store.getClients()})
 	socket.emit("init", {type: "data_users", data: store.getDataUsers()})
 
