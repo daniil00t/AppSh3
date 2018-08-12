@@ -15,6 +15,7 @@ App = React.createClass
 		users: []
 		users_anses: []
 		data_true_anses: []
+		id_test_active: "5b6afd8070edbd1b10226f1d"
 		# Chat states
 		chatHello: ""
 	updateScoreUsers: (data)->
