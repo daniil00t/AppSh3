@@ -42,7 +42,7 @@ export default function(socket, store, db){
 	// db.removeTest("5ac8eaec68352c16604b478a");
 	// db.removeTest("5ac8eafddf7ae7138468b9b5");
 
-	// db.updateTest("5b6afd8070edbd1b10226f1d", {
+	// db.updateTest("5b69a8e7a4a3ad4678dad880", {
 	// 	variants: [
 	// 		// variant #1
 	// 		[

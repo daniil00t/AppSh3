@@ -317,7 +317,6 @@ Header = React.createClass({
       value = e.target.value;
       if (e.target.id === "fname") {
         this.inputFocus(this.lname);
-        this.inputBlur(this.fname);
         console.log("fname: ", value);
         return ee.emit("changeNameUsr@ee", {
           fname: value

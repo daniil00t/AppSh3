@@ -11,5 +11,11 @@
 	{{date}} <br>
   <a href="/learner">learner</a><br>
   <a href="/admin">admin</a>
+
+  
+	{% set cls = cycler("odd", "even") %}
+	{% for row in apps %}
+	  <div class="{{ cls.next() }}">{{ row }}</div>
+	{% endfor %}
 </body>
 </html>

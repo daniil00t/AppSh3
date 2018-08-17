@@ -1,5 +1,6 @@
 @import "bourbon"
 @import "fonts.sass"
+@import "ui.sass"
 
 //Load Libs SASS
 // @import "app/libs/animate/animate.sass"
@@ -29,6 +30,7 @@ body textarea:required:valid
 
 html
 	height: 100%
+	width: 100%
 body
 	height: 100%
 	background-color: #e4ebf0
@@ -363,8 +365,203 @@ body
 				text-align: center
 				width: 100%
 				color: #192
+.testPanel
+	.wrp_cnt
+		.all_tests
+			display: -webkit-flex
+			display: -moz-flex
+			display: -ms-flex
+			display: -o-flex
+			display: flex
+			.testItem
+				background-color: #fff
+				width: 20%
+				height: 200px
+				margin-right: 20px
+				border-radius: 4px
+				box-shadow: 0 0 10px rgba(0,0,0,.3)
+				overflow: hidden
+				transition: all ease-in-out .2s
+				&_header
+					width: 100%
+					height: 35px
+					background-color: #791ad0
+					padding: 0 10px
+					span.subject
+						color: #fff
+						line-height: 35px
+						font-family: MontserratRegular
+					.controls
+						float: right
+						i
+							line-height: 35px
+							color: #e7e7e7
+							cursor: pointer
+							padding: 0 5px
+							transition: all ease-in-out .2s
+							&:hover
+								color: #fff
+				&_main_cnt
+					height: 165px
+					display: -webkit-flex
+					display: -moz-flex
+					display: -ms-flex
+					display: -o-flex
+					display: flex
+					align-items: center
+					position: relative
+					&_name
+						width: 100%
+						text-align: center
+						margin: 0
+						font-family: MontserratBold
+						font-size: 22px
+						color: #333
+					._id
+						color: rgba(0,0,0,.3)
+						position: absolute
+						bottom: 5px
+						right: 10px
+					.time
+						color: rgba(0,0,0,.5)
+						position: absolute
+						top: 10px
+						left: 10px
+						i
+							margin-right: 5px
+					.count_variants
+						position: absolute
+						right: 10px
+						top: 10px
+						color: rgba(0,0,0,.3)
+						i
+							margin-right: 5px
+				&:hover
+					background-color: #e9e9e94d
+					box-shadow: 0px 5px 17px 3px rgba(136, 136, 136, 0.4)
+			.addTest
+				border: 2px dashed #bebebe
+				display: -webkit-flex
+				display: -moz-flex
+				display: -ms-flex
+				display: -o-flex
+				display: flex
+				align-items: center
+				justify-content: center
+				span.plus
+					font-size: 48px
+					color: #bebebe
+					border: 5px solid #791ad0
+					border-radius: 50%
+					padding: 0 20px
+					transition: all ease-in-out .2s
+					&:hover
+						background-color: #791ad0
+						color: #fff
+						cursor: pointer
+	.addTestBlock
+		display: -webkit-flex
+		display: -moz-flex
+		display: -ms-flex
+		display: -o-flex
+		display: flex
+		align-items: center
+		flex-direction: column
+		position: relative
+		._id_forEdit
+			position: absolute
+			color: rgba(0,0,0,.3)
+			right: 10px
+			top: 10px
+		.initDataTest
+			width: 300px
+			input.data_add_test
+				border: none
+				border-bottom: 2px solid #8676e1
+				outline: none
+				width: 300px
+				height: 30px
+				font-family: MontserratRegular
+				margin-bottom: 10px
+				transition: all ease-in-out .3s
+				color: #333
+				&:focus, &:visited
+					border-bottom: 2px solid #791ad0
+				&:placeholder
+					color: rgba(0,0,0,.3)
+					font-family: MontserratRegular
+			select.subject
+				background-color: #fff
+				box-shadow: 0 0 15px rgba(0,0,0,.4)
+				border-radius: 5px
+				color: #333
+				font-family: MontserratRegular
+				margin: 20px 0
+				border: none
+				padding: 6px 7px
+				width: 150px
+				margin-left: 75px
+				outline: none
+		.addVariantBlock
+			// background-color: red
+			width: 100%
+			& > *
+				padding: 20px 25px
+			.addVariantNext
+				width: 25%
+				float: left
+				height: 100%
 
-			
+				.wrp_df
+					display: -webkit-flex
+					display: -moz-flex
+					display: -ms-flex
+					display: -o-flex
+					display: flex
+					flex-direction: column
+					align-items: center
+					justify-content: center
+					height: 100%
+					padding-top: 30px
+					section.choiceVariant
+						margin-bottom: 20px
+					.addVariantButton
+						margin-top: 20px
+			.addProblemNext
+				width: 75%
+				float: right
+				border-left: 2px solid #bebebe
+				.formForNewProblem
+					display: -webkit-flex
+					display: -moz-flex
+					display: -ms-flex
+					display: -o-flex
+					display: flex
+					flex-direction: column
+					align-items: center
+					justify-content: center
+					& > *
+						margin-bottom: 15px
+				input.inputRadioItemToProblem
+					margin-left: 9px
+				input.inputTextItemToProblem
+					margin: 0 15px 
+					height: 25px
+				button.addItemToProblem
+					margin: 0
+					width: 25px
+					height: 25px
+					&::after
+						left: 20px
+						top: 4px
+						width: 100px
+	.saveTest
+		margin-top: 50px
+		width: 200px
+
+
+
+
 /* Test */
 header.main_header_test
 	// border-bottom: 2px solid rgba(0,0,0,.2)
@@ -450,6 +647,270 @@ footer.main_footer
 	p
 		line-height: 40px
 		color: rgb(150, 150, 150)
+
+
+
+
+
+/* 
+	Main page - learner
+	main color - blue
+ */
+.main
+	width: 100%
+	height: 100%
+	background: linear-gradient(#013ca9,#001b48)
+	position: relative
+	overflow: hidden
+	.objects
+		.object
+			position: absolute
+			
+			background-color: rgba(255, 255, 255, .25)
+
+			&.small
+				width: 50px
+				height: 50px
+			&.big
+				width: 150px
+				height: 150px
+			&.b
+				background: transparent
+				border: 3px solid rgba(255, 255, 255, .25)
+	.tringgle
+		border-radius: 0 50px 50px 0
+		// border-radius-left: 25px
+	.round
+		border-radius: 50px
+
+	.line
+		height: 4px
+		position: absolute
+		display: block
+		background-color: rgba(255, 255, 255, .4)
+		
+	.small
+		width: 150px
+		bottom: 10%
+	.big
+		width: 300px
+		bottom: 12%
+	.welcome
+		color: #fff
+		font-family: MontserratBlack
+		font-size: 2.1em
+		text-transform: uppercase
+		padding-left: 100px
+		padding-top: 50px
+		position: relative
+		&::after
+			content: '_'
+			font-family: MontserratBlack
+			font-size: 1.1em
+			bottom: 3px
+			padding-left: 5px
+			position: absolute
+			animation: verticalSlashTick 1.5s linear infinite
+	.wrp-main-indexup
+		position: absolute
+		width: 100%
+		.apps
+			padding: 40px 100px
+			display: -webkit-flex
+			display: -moz-flex
+			display: -ms-flex
+			display: -o-flex
+			display: flex
+			justify-content: space-between
+			.app
+				// display: block
+				background-color: #fff
+				height: 350px
+				width: 30%
+				border-radius: 2px
+				background-color: #fff
+				transition: all .2s ease-in-out
+				box-shadow: 0 0 25px rgba(255, 255, 255,.3)
+				// margin-right: 5%
+				&:last-child
+					margin-right: none
+				position: relative
+				// &:hover
+					// background-color: #593df5
+				&::after
+					position: absolute
+					top: -25px
+					right: -25px
+					display: block
+					background-color: #fff
+					font-family: MontserratBold
+					color: #333
+					width: 50px
+					height: 50px
+					border-radius: 50%
+					font-size: 18px
+					line-height: 50px
+					text-align: center
+					box-shadow: 0 0 20px rgba(0,0,0,.7)
+				.wrp
+					padding: 25px
+					width: 100%
+					
+					.name_app
+						display: block
+						margin: 0 auto
+						h2
+							// text-align: center
+							color: #333
+							font-family: MontserratBold
+							padding-bottom: 0
+							margin-bottom: 0
+							font-size: 1.8em
+							// display: inline-block
+						h4
+							color: rgb(150, 150, 150)
+							font-family: MontserratMedium
+							font-size: 16px
+							text-align: right
+							// display: inline-block
+							// padding-right: 20%
+					.description
+						padding-top: 15px
+						p
+							color: #444
+							font-size: 14px
+							font-family: MontserratRegular
+							letter-spacing: .4px
+					.more
+						background-color: #2700ff
+						color: #fff
+						width: 80%
+						line-height: 40px
+						text-align: center
+						display: inline-block
+						font-family: MontserratBold
+						font-size: 14px
+						text-decoration: none
+						position: absolute
+						border-radius: 1px
+						bottom: 40px
+						right: 0
+						left: 0
+						margin: 0 auto
+						&:hover
+							animation: animaBGCbutton 1.5s ease-in-out
+
+						text-transform: uppercase
+			.chat
+				&::after
+					content: '#1'
+				.name_app
+					width: 130px
+			.testing
+				&::after
+					content: '#2'
+				.name_app
+					width: 170px
+			.web_quest
+				&::after
+					content: '#3'
+				.name_app
+					width: 165px
+@keyframes animaBGCbutton
+	0%
+		background-color: #2700ff
+	33%
+		background-color: #002eec
+	66%
+		background-color: #6600ec
+	100%
+		background-color: #2700ff
+
+@keyframes verticalSlashTick
+	// =/
+	0%
+		content: '_'
+	50%
+		content: ''
+	100%
+		content: '_'
+	// =)
+
+footer.agfa
+	height: 130px
+	position: absolute
+	background-color: transparent
+	bottom: 0
+	width: 100%
+	p
+		text-align: center
+		img
+			display: inline-block
+			width: 200px
+	.copy
+		// width: 50%
+		text-align: center
+		font-family: RalewayMedium
+		color: rgb(190, 190, 190)
+
+// Notification
+.Notification
+	width: 350px
+	height: 150px
+	background-color: #fff
+	position: fixed
+	z-index: 999
+	top: 0
+	left: 0
+	right: 0
+	margin: 0 auto
+	transition: all .3s
+	border-radius: 0 0 3px 3px
+	box-shadow: 0 0 20px 5px rgba(0,0,0,.3)
+	.nf_wrp
+		position: relative
+		padding: 10px
+		width: 100%
+		height: 100%
+		i.close
+			position: absolute
+			right: 10px
+			top: 10px
+			width: 22px
+			height: 22px
+		& > *
+			width: 100%
+			height: 100%
+			button.button_success
+				position: absolute
+				bottom: 10px
+				right: 10px
+				background-color: #791ad0
+				color: #fff
+				border: none
+				padding: 6px 15px
+				transition: all .3s
+				font-family: MontserratBold
+				&:hover
+					background-color: #6c17b9
+			.tag
+				color: #fff
+				font-size: 14px
+				border-radius: 5px
+				background-color: #791ad0
+				font-family: MontserratRegular
+				width: 100px
+				padding: 2px 4px
+				margin-bottom: 5px
+				display: block
+				text-align: center
+		.massage
+			width: 100%
+			.massage_title
+				font-family: MontserratRegular
+				font-size: 18px
+				width: 100%
+				text-align: center
 
 
 @import "media.sass"

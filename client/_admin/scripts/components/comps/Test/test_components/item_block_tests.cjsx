@@ -12,7 +12,7 @@ Item = React.createClass
 
 
 	render: ->
-		<div className={"block_test animFadeInUp #{@props.classItem}"}>
+		<div className={"block_test animFadeInUp #{@props.classItem}"} style={{display: (if @props.display? then (if @props.display then "block" else "none"))}}>
 			<div className="title_block">
 				<h3 className="title_block_text">{@props.title}<i onClick={@changeStateBlock} className="fas fa-chevron-down" data-block="0"></i></h3>
 			</div>

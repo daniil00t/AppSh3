@@ -23,8 +23,8 @@ Header = React.createClass
 			value = e.target.value
 			# Очищаем textarea
 			if e.target.id is "fname"
+				# @inputBlur(@fname)
 				@inputFocus(@lname)
-				@inputBlur(@fname)
 				console.log "fname: ", value
 				ee.emit "changeNameUsr@ee", fname: value
 			else

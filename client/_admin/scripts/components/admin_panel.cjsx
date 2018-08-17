@@ -57,7 +57,7 @@ Panel = React.createClass
 							when 0 then <Users users={@props.data.users.data}/>
 							when 1 then <Chat data={@props.data.chat}/>
 							when 2 then <TestSt users={@props.data.users.data}/>
-							when 3 then <Test users={@props.data.users.data}/>
+							when 3 then <Test users={@props.data.users.data} tests={@props.data.tests}/>
 							when 4 then <DB_panel />
 							when 5 then <Features />
 							else <div>Help!</div>

@@ -7,6 +7,7 @@ ee = require "./ee"
 Panel = require "./components/admin_panel"
 
 dispatcher = require "./components/dispatcher"
+Notification = require "./components/comps/notification"
 
 App = React.createClass
 	displayName: 'App'
@@ -15,45 +16,55 @@ App = React.createClass
 		users: []
 		users_anses: []
 		data_true_anses: []
-		id_test_active: "5b6afd8070edbd1b10226f1d"
+		id_test_active: 0
+		data_tests: []
+
 		# Chat states
 		chatHello: ""
+
+		#etc
+		nf_visible: false
+		nf_all_data: {}
 	updateScoreUsers: (data)->
 		score = 0
 		arr = @state.users
-		lengthVariantTests = 0
+		lengthProblemsTests = 0
 		@state.users.map (i, j) => 
 			data.map (k, l) =>
 				if i.id == k.id
+					variant = i.variant - 1
 					# начинаем проверку
 					k.data.map (q, w)=>
-						@state.data_true_anses[i.variant - 1].data.map (r, t)=>
+						@state.data_true_anses[0].data[variant].map (r, t)=>
 							console.log q, r
 							if q.no == r.no
 								if q.value == r.value[0]
-									score++
+									score += r.score
 
-					lengthVariantTests = @state.data_true_anses[i.variant - 1].data.length
+					lengthProblemsTests = @state.data_true_anses[0].data[variant].length
 					arr[j].score = score
-					console.log "score: #{score}, lengthVariantTests: #{lengthVariantTests}"
-					arr[j].points = Math.round(score / lengthVariantTests * 100)
+					arr[j].points = Math.round(score / lengthProblemsTests * 100)
 					score = 0
 		@setState users: arr
 
 	componentWillMount: ->
 		socket.on "init", (data)=>
 			switch data.type
+				# chat
 				when "users"
 					@setState users: data.data
 					dispatcher.dispatch
 						type: "INIT_LOAD_USER_TO_TESTS_COMPONENT"
 						payload: data.data
+				# test
 				when "data_users"
 					@setState users_anses: data.data
 					console.log data.data
 				when "data_true_anses"
 					@setState data_true_anses: data.data
 					@updateScoreUsers(@state.users_anses)
+				when "data_tests"
+					@setState data_tests: data.data
 				# chat
 				when "chat_hello"
 					dispatcher.dispatch
@@ -96,6 +107,12 @@ App = React.createClass
 					socket.emit "_CHANGE", type: action.type, data: action.payload
 				when "CHANGE_APP_STATE"
 					socket.emit "_CHANGE", type: action.type, app: action.app, payload: action.payload
+				# TEST
+				when "SAVE_TEST"
+					console.log "main_", action
+				# etc
+				when "NOTIFICATION"
+					@setState nf_visible: true, nf_all_data: {data: action.payload.data, type: action.payload.type}
 				else
 					console.log "problem..."
 
@@ -114,6 +131,7 @@ App = React.createClass
 			socket.emit "importDB@soc", type: data.type
 	render: ->
 		<div className="wrp_admin">
+			<Notification data={@state.nf_all_data.data} visible={@state.nf_visible} type={@state.nf_all_data.type}/>
 			<div className="preloader" style={display: if !@state.preloader then "none"}>
 				<div className="cssload-thecube">
 					<div className="cssload-cube cssload-c1"></div>
@@ -123,7 +141,7 @@ App = React.createClass
 				</div>
 			</div>
 			<div className="container-fluid">
-				<Panel data={ { chat: {chatHello: @state.chatHello}, users: {data: @state.users} } }/>
+				<Panel data={ { chat: {chatHello: @state.chatHello}, users: {data: @state.users}, tests: if @state.data_tests then @state.data_tests else [] } }/>
 			</div>
 		</div>
 
