@@ -15,27 +15,37 @@ AddTest = React.createClass
 		focusNow: "nameTest"
 		initData: {subject: "Информатика"}
 		variant: 0
-		tmpProblems: [
-			# {type: "defQ", question: "HI, Who are you?", anses: ["hello", "hi", "world!"], num: 0}
-		]
+		# tmpProblems - массив тестов одного вариатна
+		allProblems: [[]]
 	addAnsToProblems: ->
-		obj = {type: React.findDOMNode(@tmpTypeProblem).value, question: React.findDOMNode(@tmpAskProblem).value, anses: [], num: @state.tmpProblems.length}
-		arr = @state.tmpProblems
-		arr.push obj
-		@setState tmpProblems: arr
+		obj = {type: React.findDOMNode(@tmpTypeProblem).value, question: React.findDOMNode(@tmpAskProblem).value, anses: [], num: @state.allProblems[@state.variant].length, score: 1, trueanses: []}
+		React.findDOMNode(@tmpAskProblem).value = ""
+		arr = @state.allProblems
+		arr[@state.variant].push obj
+		@setState allProblems: arr
 	componentWillMount: ->
 		dispatcher.register (action)=>
 			switch action.type
 				when "ADD_ITEM_PROBLEM"
-					arr = @state.tmpProblems
-					arr.map (i, j)=>
+					arr = @state.allProblems
+					arr[@state.variant].map (i, j)=>
 						if i.num == action.payload.num
-							arr[j].anses.push action.payload.value
-					@setState tmpProblems: arr
+							arr[@state.variant][j].anses.push action.payload.value
+					@setState allProblems: arr
+				when "NEW_TRUE_ANSWER"
+					console.log action
+					_arr = @state.allProblems
+					
+					_arr[@state.variant][action.payload.no].trueanses = [action.payload.value]
+					@setState allProblems: _arr
 	saveTest: ->
 		dispatcher.dispatch
 			type: "SAVE_TEST"
-			payload: @state.tmpProblems
+			payload: {
+				type_test: "add"
+				data: @state.allProblems,
+				initData: @state.initData
+			}
 
 	focusInput: (node)->
 		_node = React.findDOMNode(node) # returned <input />
@@ -70,7 +80,21 @@ AddTest = React.createClass
 				alert "Введите данные корректно!"
 		else
 			alert "Вы ввели не все данные, введите их полнотью и продолжайте"
-
+	handleAddNewVariant: ->
+		arr = @state.allProblems
+		arr.push []
+		value = @state.variant + 1
+		@setState allProblems: arr, variant: value
+	changeVariant: (e)->
+		value = +e.target.value # return num -> 1
+		@setState variant: value
+	initVariant: (node)->
+		_node = React.findDOMNode node
+		if _node?
+			value_node = _node.value
+			value_variant = @state.variant
+			if value_node != value_variant
+				_node.value = value_variant
 	render: ->
 		<div className={"animFadeInDown " + @props.classItem}>
 			<div className="initDataTest">
@@ -99,10 +123,13 @@ AddTest = React.createClass
 				<div className="addVariantNext" style={{display: if @state.addedVariant then "block" else "none"}}>
 
 					<div className="wrp_df">
-						<select className="choiceVariant">
-							<option value="1">1 вариант</option>
+						<select className="choiceVariant" onChange={(e) => @changeVariant e} ref={(node) => @initVariant node}>
+							{
+								@state.allProblems.map (i, j)=>
+									<option value={j}>{j+1} вариант</option>
+							}
 						</select>
-						<button className="addVariantButton defButtonWithText" data-title="addVariant">+</button>
+						<button onClick={@handleAddNewVariant} className="addVariantButton defButtonWithText" data-title="addVariant">+</button>
 					</div>
 				</div>
 
@@ -111,8 +138,9 @@ AddTest = React.createClass
 				<div className="addProblemNext">
 					<div className="allProblems">
 						{
-							if @state.tmpProblems.length != 0
-								@state.tmpProblems.map (i, j) =>
+							# improve
+							if @state.allProblems.length != 0
+								@state.allProblems[@state.variant].map (i, j) =>
 									switch i.type
 										when "defQ"
 											<DefQ data={i} num={j}/>

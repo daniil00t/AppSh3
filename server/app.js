@@ -45,7 +45,7 @@ nunjucks.configure("./Public/pages", {
 
 // index
 app.get('/', (req, res) => {
-	res.render("index.html", { date: new Date(), apps: ['chat', "test", "quest"] });
+	res.render("main/index.html", { date: new Date(), apps: ['chat', "test", "quest"] });
 });
 
 // main learner routes
@@ -77,7 +77,7 @@ routeLearner.get("/chat", (req, res) => {
 		res.render("learner/chat.html", {});
 	}
 	else {
-		res.send("Доступ закрыт")
+		res.render("main/closed.html", {title: "ChatApp - Closed", massage: "Доступ закрыт)"});
 	}
 });
 
@@ -89,7 +89,7 @@ routeLearner.get("/test", (req, res) => {
 		res.render("learner/test.html", {});
 	}
 	else {
-		res.send("Доступ закрыт")
+		res.render("main/closed.html", {title: "TestApp - Closed", massage: "Доступ закрыт)"});
 	}
 });
 

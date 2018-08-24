@@ -84,7 +84,8 @@ App = React.createClass({
         return _this.setState({
           data_test: {
             variants: _data.variants,
-            time: _data.time
+            time: _data.time,
+            subject: _data.subject
           },
           preloader: false
         });
@@ -233,7 +234,18 @@ App = React.createClass({
       "mobile": this.state.mobile
     }) : void 0), React.createElement("div", {
       "className": "container main_cnt"
-    }, (this.state.data_test.variants != null ? this.state.data_test.variants.length !== 0 && this.state.start ? this.state.data_test.variants.map((function(_this) {
+    }, React.createElement("div", {
+      "className": ((function() {
+        switch (this.state.data_test.subject) {
+          case "Информатика":
+            return "main_cnt_top_panel informat";
+          case "Математика":
+            return "main_cnt_top_panel matan";
+          case "История":
+            return "main_cnt_top_panel history";
+        }
+      }).call(this))
+    }, this.state.data_test.subject), (this.state.data_test.variants != null ? this.state.data_test.variants.length !== 0 && this.state.start ? this.state.data_test.variants.map((function(_this) {
       return function(i, j) {
         if (_this.state.variant === j + 1 && i.length !== 0) {
           return i.map(function(q, w) {

@@ -11,7 +11,8 @@
 			"state": false
 		},
 		"test": {
-			"state": true
+			"state": true,
+			"active_test_default": 0
 		}
 	}
 }

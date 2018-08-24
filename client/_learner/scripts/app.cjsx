@@ -52,7 +52,7 @@ App = React.createClass
 		)
 
 		data_test_promise.then((_data) => 
-			@setState data_test: {variants: _data.variants, time: _data.time}, preloader: false
+			@setState data_test: {variants: _data.variants, time: _data.time, subject: _data.subject}, preloader: false
 		).catch((err) => 
 			console.error err
 		)
@@ -131,6 +131,22 @@ App = React.createClass
 			</div>
 			{if @state.data_test.variants? then <Header data={@state.data_test} mobile={@state.mobile}/>}
 			<div className="container main_cnt">
+				<div 
+					className=
+					{
+						switch @state.data_test.subject
+							when "Информатика"
+								"main_cnt_top_panel informat"
+							when "Математика"
+								"main_cnt_top_panel matan"
+							when "История"
+								"main_cnt_top_panel history"
+					}
+				>
+					{
+						@state.data_test.subject
+					}
+				</div>
 				{
 					if @state.data_test.variants?
 						if @state.data_test.variants.length isnt 0 and @state.start

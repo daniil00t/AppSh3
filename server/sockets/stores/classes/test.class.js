@@ -1,9 +1,11 @@
 import dispatcher from "../dispatcher";
 // Подключаем контент из Chat
+import { appData } from '../../../../etc/config.json';
 export default (Chat) => class extends Chat {
 	constructor(){
 		super("Hello")
 		this.data_users = [];
+		this.activeTest = appData.test.active_test_default;
 	}
 	changeUsrData(data){
 		console.log(data.type)
@@ -82,5 +84,12 @@ export default (Chat) => class extends Chat {
 			payload: this.data_users
 		})
 		return this.data_users;
+	}
+	setActiveTest(value){
+		this.activeTest = value;
+		return value;
+	}
+	getActiveTest(){
+		return this.activeTest;
 	}
 };

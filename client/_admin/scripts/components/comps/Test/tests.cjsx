@@ -6,23 +6,24 @@ EditTest = require "./test_components/editTest"
 TestItem = require "./test_components/testItem"
 
 test_dispatcher = require "./test.dispatcher"
-main_dispatcher = require "../../dispatcher"
+main_dispatcher = require "../../../events/dispatchers/main_dispatcher"
 
 Notification = require "../notification"
 
 Test = React.createClass
 	displayName: "Test"
 
-
 	getInitialState: ->
 		users: []
 		tests: []
+		activeTest: 0
 		displayTestBlock: {
 			visible: false,
 			title: "",
 			type: "",
 			payload: []
 		}
+
 	handleAddTest: ->
 		@setState displayTestBlock: {visible: true, title: "Создание нового теста", type: "add"}
 
@@ -42,7 +43,7 @@ Test = React.createClass
 								ph: "password"
 							}
 						}
-
+ 
 					# main_dispatcher.dispatch
 					# 	type: "NOTIFICATION"
 					# 	payload: {
@@ -52,8 +53,15 @@ Test = React.createClass
 					# 		}
 					# 	}
 				when "SAVE_TEST"
+					console.log action
 					main_dispatcher.dispatch action
-
+				when "ACTIVE_TEST"
+					main_dispatcher.dispatch action
+					@setState activeTest: action.payload
+		main_dispatcher.register (action)=>
+			switch action.type
+				when "GET_ACTIVE_TEST"
+					@setState activeTest: action.payload
 		@setState
 			tests: @props.tests
 			users: @props.users
@@ -74,10 +82,12 @@ Test = React.createClass
 					{
 						if @state.tests.length != 0
 							@state.tests.map (i, j)=>
-								<TestItem data={i} num={j}/>
+								<TestItem data={i} num={j} active={if @state.activeTest == j then true else false}/>
 					}
 					<div className="testItem addTest">
-						<span className="plus" onClick={@handleAddTest}>+</span>
+						<div>
+							<span className="plus" onClick={@handleAddTest}>+</span>
+						</div>
 					</div>
 				</div>
 			</Block>

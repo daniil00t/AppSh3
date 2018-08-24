@@ -41,8 +41,8 @@ DefQ = React.createClass
 			}
 		React.findDOMNode(@newItemValue_problem).value = ""
 	componentWillMount: ->
-		if @props.data.trueanses?
-			@setState activeItem: @props.data.trueanses[0]
+		# if @props.data.trueanses?
+		# 	@setState activeItem: @props.data.trueanses[0]
 	render: ->
 		<div className="ItemDefQ">
 			<h3 className="question defQuestion">{@state.num+1 + ". " + @props.data.question}</h3>

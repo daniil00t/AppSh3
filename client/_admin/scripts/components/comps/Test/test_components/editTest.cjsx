@@ -15,16 +15,13 @@ AddTest = React.createClass
 		addedProblem: false
 		initData: {subject: "Информатика"}
 		variant: 0
-		tmpProblems: [
-			# {type: "defQ", question: "HI, Who are you?", anses: ["hello", "hi", "world!"], num: 0}
-		]
-		allProblems: []
+		allProblems: [[]]
 		count_reload_render: 0
 	addAnsToProblems: ->
-		obj = {type: React.findDOMNode(@tmpTypeProblem).value, question: React.findDOMNode(@tmpAskProblem).value, anses: [], num: @state.tmpProblems.length}
-		arr = @state.tmpProblems
-		arr.push obj
-		@setState tmpProblems: arr
+		obj = {type: React.findDOMNode(@tmpTypeProblem).value, question: React.findDOMNode(@tmpAskProblem).value, anses: [], num: @state.allProblems[@state.variant].length, score: 1}
+		arr = @state.allProblems
+		arr[@state.variant].push obj
+		@setState allProblems: arr
 	componentWillMount: ->
 
 		if @state.count_reload_render == 0
@@ -35,50 +32,40 @@ AddTest = React.createClass
 				arrAllProblems.variants.map (i, j)=>
 					i.map (k, l)=>
 						arrAllProblems.variants[j][l].num = l
-				arrProblems = arrAllProblems.variants[@state.variant]
-				@setState data: arrAllProblems, tmpProblems: arrProblems
+			@setState data: arrAllProblems, allProblems: @props.data.variants
 		
 
 		dispatcher.register (action)=>
-			console.log action
 			switch action.type
 				when "ADD_ITEM_PROBLEM"
-					arr = @state.tmpProblems
-					arr.map (i, j)=>
+					arr = @state.allProblems
+					arr[@state.variant].map (i, j)=>
 						if i.num == action.payload.num
-							arr[j].anses.push action.payload.value
-					allArr = @state.allProblems
-					allArr[@state.variant] = arr
-					@setState tmpProblems: arr, allProblems: allArr
+							arr[@state.variant][j].anses.push action.payload.value
+					@setState allProblems: arr
 				when "NEW_TRUE_ANSWER"
-					_arr = @state.tmpProblems
-					_allArr = []
-					if @state.allProblems[@state.variant]?
-						console.log "не создаю новый"
-						_allArr = @state.allProblems
-					else
-						console.log "создаю новый"
-						_allArr[@state.variant] = _arr
+					console.log action
+					_arr = @state.allProblems
 					
-					_arr[action.payload.no].trueanses = [action.payload.value]
-					_allArr[@state.variant][action.payload.no].trueanses = [action.payload.value]
-					console.log tmpProblems: _arr, allProblems: _allArr
-					@setState tmpProblems: _arr, allProblems: _allArr
+					_arr[@state.variant][action.payload.no].trueanses = [action.payload.value]
+					console.log _arr
+					@setState allProblems: _arr
 	saveTest: ->
 		dispatcher.dispatch
 			type: "SAVE_TEST"
 			payload: {
-				allChanches: @state.allProblems,
-				initData: @state.initData
+				type_test: "edit"
+				data: {
+					name: @state.initData.nameTest,
+					subject: @state.initData.subjectTest,
+					time: @state.initData.timeTest,
+					variants: @state.allProblems
+				}
+				id: @props.data._id
 			}
 	componentWillReceiveProps: (newProps)->
-		arrAllProblems = @props.data
-		if arrAllProblems? and arrAllProblems.variants.length > 0
-			arrAllProblems.variants.map (i, j)=>
-				i.map (k, l)=>
-					arrAllProblems.variants[j][l].num = l
-			arrProblems = arrAllProblems.variants[@state.variant]
-			@setState data: arrAllProblems, tmpProblems: arrProblems
+		arrAllProblems = newProps.data
+		@setState data: arrAllProblems, allProblems: newProps.data.variants
 
 	initValue: (node)->
 		_node = React.findDOMNode node
@@ -137,14 +124,11 @@ AddTest = React.createClass
 			alert "Вы ввели не все данные, введите их полнотью и продолжайте"
 	handleChangeVariant: (e, _value)->
 		if _value?
-			arr = @state.data.variants[_value]
 			console.log "_value", _value
-			@setState variant: _value, tmpProblems: arr
+			@setState variant: _value
 		else
 			value = +e.target.value
-			arr = @state.data.variants[value]
-			console.log "value"
-			@setState variant: value, tmpProblems: arr
+			@setState variant: value
 	handleAddNewVariant: ->
 		arr = @state.data
 		arr.variants.push []
@@ -231,13 +215,14 @@ AddTest = React.createClass
 				<div className="addProblemNext">
 					<div className="allProblems">
 						{
-							if @state.tmpProblems.length != 0
-								@state.tmpProblems.map (i, j) =>
-									switch i.type
-										when "defQ"
-											<DefQ data={i} num={j}/>
-										else
-											<div>...</div>
+							if @state.allProblems.length > 0
+								if @state.allProblems[@state.variant].length > 0
+									@state.allProblems[@state.variant].map (i, j) =>
+										switch i.type
+											when "defQ"
+												<DefQ data={i} num={j}/>
+											else
+												<div>...</div>
 							else
 								"Создайте новое задание"
 						}
@@ -259,15 +244,9 @@ AddTest = React.createClass
 			<button onClick={@saveTest} className="defButton saveTest">Сохранить</button>
 		</div>
 	componentDidMount: ->
-
 		if @state.data? and @state.data.name != ""
 			@initValue @nameTestInput
 			@initValue @timeTestInput
 			@initValue @subjectTestInput
-		# dispatcher.register (action)=>
-		# 	switch action.type
-		# 		when "CHANGE_VALUE_SELECT_VARIANT"
-		# 			React.findDOMNode(@choiceVariant).value = ""+action.payload
-		# 			console.dir React.findDOMNode(@choiceVariant)
-		# 			console.log action
+
 module.exports = AddTest

@@ -33,20 +33,21 @@ export default function(socket, store, db){
 	// Достаем правильные ответы из БД
 	getTrueAnses()
 		.then(data => {
-		  socket.emit("init", {type: "data_true_anses", data: data})
+		  socket.emit("INIT", {type: "data_true_anses", data: data})
 		})
 		.catch((err) => {
 			console.error(err)
 		});
 	getTests()
 		.then(data => {
-			socket.emit("init", {type: "data_tests", data: data})
+			socket.emit("INIT", {type: "data_tests", data: data})
 		})
 		.catch(err => {
 			console.error(err);
 		})
-	socket.emit("init", {type: "users", data: store.getClients()})
-	socket.emit("init", {type: "data_users", data: store.getDataUsers()})
+	socket.emit("INIT", {type: "users", data: store.getClients()})
+	socket.emit("INIT", {type: "data_users", data: store.getDataUsers()})
+	socket.emit("INIT", {type: "activeTest", data: store.getActiveTest()})
 
 	dispatcher.register(action => {
 		switch(action.type){
@@ -62,7 +63,7 @@ export default function(socket, store, db){
 		}
 	})
 
-	socket.emit("init", {type: "chat_hello", data: store.getChatHello()})
+	socket.emit("INIT", {type: "chat_hello", data: store.getChatHello()})
 
 	socket.on("_CHANGE", (data) => {
 		switch(data.type){
@@ -76,5 +77,24 @@ export default function(socket, store, db){
 				console.log("problem..")
 			}
 		}
+	})
+
+	socket.on("SAVE_TEST", (data) => {
+		if(data.payload.type_test == "add"){
+			console.log("add...");
+			db.addTest({
+				name: data.payload.initData.nameTest,
+				subject: data.payload.initData.subject,
+				time: data.payload.initData.timeTest,
+				variants: data.payload.data
+			})
+		} else{
+			db.updateTest(data.payload.id, data.payload.data)
+		}
+	});
+
+	socket.on("ACTIVE_TEST", data => {
+		console.log("Change active test")
+		store.setActiveTest(data.payload);
 	})
 }

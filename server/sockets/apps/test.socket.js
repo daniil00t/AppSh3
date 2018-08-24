@@ -34,11 +34,11 @@ export default function(socket, store, db){
 
 	db.listTests().then((data) => {
 		// k - номер активного теста
-		let k = 0;
+		let k = store.getActiveTest();
 		socket.emit("getDataTest", filterTAnses(data[k]));
 	})
 
-	// db.removeTest("5ac8ea66e45b041348128ac5");
+	// db.removeTest("5b80359c1cfd2e10c01fd26f");
 	// db.removeTest("5ac8eaec68352c16604b478a");
 	// db.removeTest("5ac8eafddf7ae7138468b9b5");
 
