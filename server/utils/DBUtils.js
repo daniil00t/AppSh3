@@ -8,11 +8,14 @@ import '../models/user.model';
 const Test = mongoose.model('Test');
 const User = mongoose.model('User');
 
-export function setUpConnection() {
-	mongoose.connect(`mongodb://${config.db.host}:${config.db.port}/${config.db.name}`)
-		.catch((err) => {
-			console.log("Error: " + err.name);
-		});
+export function setUpConnection(f) {
+	mongoose.connect(`mongodb://${config.db.host}:${config.db.port}/${config.db.name}`, (err) => {
+		if (err) throw err;
+		f();
+	})
+		// .catch((err) => {
+		// 	console.log("Error: " + err.name);
+		// });
 
 
 }

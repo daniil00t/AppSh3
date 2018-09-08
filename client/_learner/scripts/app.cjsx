@@ -28,7 +28,7 @@ App = React.createClass
 	endTest: ->
 		# ee.emit "endTest", {type: on}
 		socket.emit "sendDataTest", data: @state.data_anses, data_user: @state.data_user
-		window.location.replace("http://#{window.location.host}/learner")
+		window.location.replace("http://#{window.location.host}/learner/test/result?id=#{@state.data_user.id}")
 		# request send POST 
 		# https://stackoverflow.com/questions/32327858/how-to-send-a-post-request-from-node-js-express
 	componentWillMount: ->

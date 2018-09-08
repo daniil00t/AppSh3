@@ -3,9 +3,12 @@ import dispatcher from "../dispatcher";
 import { appData } from '../../../../etc/config.json';
 export default (Chat) => class extends Chat {
 	constructor(){
+		console.log("go!")
 		super("Hello")
-		this.data_users = [];
-		this.activeTest = appData.test.active_test_default;
+		this.users_to_data = []
+		this.data_users = []
+		this.data_true_anses = []
+		this.activeTest = appData.test.active_test_default
 	}
 	changeUsrData(data){
 		console.log(data.type)
@@ -85,6 +88,78 @@ export default (Chat) => class extends Chat {
 		})
 		return this.data_users;
 	}
+	setTrueAnses(anses){
+		this.data_true_anses = anses;
+	}
+	getTrueAnses(){
+		return this.data_true_anses.length > 0 ? this.data_true_anses.length : []
+	}
+	updateScoreUser(){
+		/*
+		score = 0
+		arr = @state.users
+		lengthProblemsTests = 0
+		@state.users.map (i, j) => 
+			data.map (k, l) =>
+				if i.id == k.id
+					variant = i.variant - 1
+					# начинаем проверку
+					k.data.map (q, w)=>
+						@state.data_true_anses[0].data[variant].map (r, t)=>
+							console.log q, r
+							if q.no == r.no
+								if q.value == r.value[0]
+									score += r.score
+
+					lengthProblemsTests = @state.data_true_anses[0].data[variant].length
+					arr[j].score = score
+					arr[j].points = Math.round(score / lengthProblemsTests * 100)
+					score = 0
+		@setState users: arr
+		*/
+		var score = 0
+		var users = this.getClients()
+		var lengthProblemsTests = 0
+		var data = this.data_users
+		var true_anses = this.getTrueAnses()
+
+		users.map((i, j) => {
+			if(i.app == "test"){
+				data.map((k, l) => {
+					if(i.id == k.id){
+						var variant = i.variant - 1
+						k.data.map((q, w) => {
+							 this.data_true_anses[0].data[variant].map((r, t) => {
+								if(q.no == r.no){
+									if(q.value == r.value[0]){
+										score += r.score
+									}
+								}
+							})
+						})
+						lengthProblemsTests = this.data_true_anses[0].data[variant].length
+						users[j].score = score
+						users[j].points = Math.round(score / lengthProblemsTests * 100)
+						score = 0
+					}
+				})
+			}
+		})
+		this.clients = users
+	}
+	addUserToData(id){
+		let data = this.getClients();
+		data.map((i, j) => {
+			if(i.id == id){
+				this.users_to_data.push(data[j]);
+			}
+		})
+		console.log("add to test: ", this.users_to_data);
+	}
+	getUsersToData(){
+		return this.users_to_data;
+	}
+
 	setActiveTest(value){
 		this.activeTest = value;
 		return value;

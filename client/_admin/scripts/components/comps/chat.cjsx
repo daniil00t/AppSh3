@@ -1,7 +1,8 @@
 React = require "react"
 ee = require "../../ee"
 
-dispatcher = require "../dispatcher"
+main_dispatcher = require "../../events/dispatchers/main_dispatcher"
+
 
 Chat = React.createClass
 	displayName: "ChatPanel"
@@ -14,7 +15,7 @@ Chat = React.createClass
 	changeStateChat: (e)->
 		if e.key == "Enter"
 			@setState top_panel_state: !@state.top_panel_state, top_panel_text: e.target.value
-			dispatcher.dispatch
+			main_dispatcher.dispatch
 				type: "CHANGE_CHAT_HELLO",
 				payload: e.target.value
 	hideMainCnt: (e)->
@@ -29,13 +30,13 @@ Chat = React.createClass
 			_node.value = _node.placeholder
 	handleChangeChatState: ->
 		@setState chatState: !@state.chatState
-		dispatcher.dispatch
+		main_dispatcher.dispatch
 			type: "CHANGE_APP_STATE"
 			app: "chat"
 			payload: @state.chatState
 	componentWillMount: ->
 		if @props.data.chatHello != "" then @setState top_panel_text: @props.data.chatHello else 
-			dispatcher.register (action)=>
+			main_dispatcher.register (action)=>
 				switch action.type
 					when "INIT_CHAT_HELLO"
 						@setState top_panel_text: action.payload

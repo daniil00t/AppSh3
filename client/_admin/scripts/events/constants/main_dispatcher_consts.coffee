@@ -21,6 +21,7 @@ module.exports = keyMirror({
 	
 	# test
 	INIT_LOAD_USER_TO_TESTS_COMPONENT: null,
+	DELETE_TEST: null,
 
 	# work tests
 	SAVE_TEST: true,

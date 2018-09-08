@@ -396,7 +396,7 @@ body
 				display: contents
 				& > div
 					background-color: #fff
-					width: 18%
+					width: 250px
 					height: 200px
 					border-radius: 4px
 					box-shadow: 0 0 10px rgba(0,0,0,.3)
@@ -965,6 +965,47 @@ footer.agfa
 				font-size: 18px
 				width: 100%
 				text-align: center
+
+
+@keyframes forEvent
+	from 
+		opacity: 0
+		-webkit-transform: translate3d(0, 100%, 0)
+		transform: translate3d(0, 100%, 0)
+	7%, 90%
+		opacity: 1
+		-webkit-transform: translate3d(0, 0, 0)
+		transform: translate3d(0, 0, 0)
+	to 
+		opacity: 0
+		-webkit-transform: translate3d(0, 100%, 0)
+		transform: translate3d(0, 100%, 0)
+
+
+.events
+	position: absolute
+	bottom: 50px
+	right: 30px
+	width: 250px
+	height: 50px
+	border-radius: 3px
+	box-shadow: 0 0 20px 5px rgba(0,0,0,.3)
+	color: #fff
+	z-index: 10
+	overflow: hidden
+	opacity: 0
+	-webkit-transform: translate3d(0, 100%, 0)
+	transform: translate3d(0, 100%, 0)
+	& > *
+		width: 100%
+		height: 100%
+		line-height: 50px
+		text-align: center
+		i
+			margin-right: 5px
+	.success
+		background-color: #2f820d
+
 .CMenu
 	width: 200px
 	height: 60px

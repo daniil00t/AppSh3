@@ -97,4 +97,8 @@ export default function(socket, store, db){
 		console.log("Change active test")
 		store.setActiveTest(data.payload);
 	})
+
+	socket.on("DELETE_TEST", data => {
+		db.removeTest(data.payload);
+	})
 }

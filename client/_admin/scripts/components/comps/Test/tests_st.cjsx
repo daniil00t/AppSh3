@@ -1,7 +1,7 @@
 React = require "react"
 
-dispatcher = require "../../dispatcher"
-
+test_dispatcher = require "./test.dispatcher"
+main_dispatcher = require "../../../events/dispatchers/main_dispatcher"
 
 Test_St = React.createClass
 	displayName: "Test_Statistics"
@@ -18,7 +18,7 @@ Test_St = React.createClass
 		chart.draw(data)
 	componentWillMount: ->
 		if @props.users.length == 0
-			dispatcher.register (action)=>
+			main_dispatcher.register (action)=>
 				switch action.type
 					when "INIT_LOAD_USER_TO_TESTS_COMPONENT"
 						@setState users: action.payload

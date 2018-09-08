@@ -104,9 +104,12 @@ export default function(socket, store, db){
 
 	socket.on("UPDATE_ANSWER_USER", (data) => {
 		store.updateAnswerUser(data.id, data.payload)
+		store.updateScoreUser()
+		console.log(store.getClients())
 	})
 	socket.on("UPDATE_ANSWER_REMOVE_USER", (data) => {
 		store.updateAnswerRemoveUser(data.id, data.payload)
+		store.updateScoreUser()
 	})
 
 }

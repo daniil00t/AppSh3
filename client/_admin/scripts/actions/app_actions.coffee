@@ -80,7 +80,8 @@ module.exports = (socket, self)->
 				socket.emit MC.SAVE_TEST, action
 			when MC.ACTIVE_TEST
 				socket.emit MC.ACTIVE_TEST, action
-
+			when MC.DELETE_TEST
+				socket.emit MC.DELETE_TEST, action
 
 			# etc
 			when MC.NOTIFICATION

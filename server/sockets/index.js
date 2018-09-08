@@ -30,7 +30,13 @@ class MainSock {
 		let self = this;
 		io.on("connection", (_socket) => {
 			let urlpath = URL.parse(_socket.handshake.headers.referer).pathname;
-			let app = urlpath.split("/")[urlpath.split("/").length-1];
+			if(urlpath[urlpath.length - 1] == "/"){
+				var app = urlpath.split("/")[urlpath.split("/").length-2];
+			}
+			else{
+				var app = urlpath.split("/")[urlpath.split("/").length-1];
+			}
+			console.log(app);
 			switch(app){
 				case "chat":{
 					
@@ -64,8 +70,12 @@ class MainSock {
 		_socket.on("disconnect", (data) => {
 			let id = _socket.id;
 			console.log(`disconnect user, id: ${id}`)
+			// self.store.addUserToData(id);
 			self.store.deleteClient(id);
 		});
+	}
+	getStore(){
+		return this.store;
 	}
 }
 
@@ -76,4 +86,8 @@ export function initSocket (server, db) {
 
 	const io = socket(server);
 	sock.connect(io, db);
+
+	return sock.getStore()
 }
+
+

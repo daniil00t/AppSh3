@@ -33,7 +33,6 @@ AddTest = React.createClass
 							arr[@state.variant][j].anses.push action.payload.value
 					@setState allProblems: arr
 				when "NEW_TRUE_ANSWER"
-					console.log action
 					_arr = @state.allProblems
 					
 					_arr[@state.variant][action.payload.no].trueanses = [action.payload.value]

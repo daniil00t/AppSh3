@@ -21,8 +21,43 @@ import { initSocket } from "./sockets";
 // learner router
 const routeLearner = express.Router();
 
+const server = app.listen(serverPort, function() {
+	console.log(`Server is up and running on port ${serverPort}`);
+});
+
+// init socket'a
+var store = initSocket(server, db);
+
 // connect to DB (mongoDB)
-db.setUpConnection();
+db.setUpConnection(() => {
+	
+	db.listTests().then(tests => {
+		let trueAnses = []
+
+	  // Перебор всех тестов
+	  tests.map((i, j) => {
+	  	// Перебор вариантов
+	  	let TAvariants = []
+	  	i.variants.map((k, l) => {
+	  		// Перебор заданий
+	  		let TAproblems = []
+	  		k.map((q, w) => {
+	  			TAproblems.push({
+	  				no: w,
+	  				value: q.trueanses,
+	  				type: q.type,
+	  				score: q.score
+	  			})
+	  		})
+	  		TAvariants.push(TAproblems)
+	  	})
+	  	trueAnses.push({id: i._id, data: TAvariants})
+	  })
+		store.setTrueAnses(trueAnses);
+	})
+});
+
+
 
 // use static files
 app.use('/cssFiles', express["static"](path.resolve(__dirname, '../Public/media/stylesheets')));
@@ -93,6 +128,21 @@ routeLearner.get("/test", (req, res) => {
 	}
 });
 
+
+routeLearner.get("/test/result", (req, res) => {
+	let id = req.query.id;
+	let has = false;
+	store.getClients().map((i, j) => {
+		if(i.id == id){
+			has = !has
+			res.render("learner/result.html", {data: i})
+		}
+	})
+	if(!has){
+		res.send("Просмотр результатов данного пользователя невозможен")
+	}
+});
+
 // Admin routes
 app.get("/adminlogin", (req, res) => {
 	res.render("admin/login.html", {});
@@ -154,9 +204,25 @@ app.get("/*", (req, res) => {
 });
 
 
-const server = app.listen(serverPort, function() {
-	console.log(`Server is up and running on port ${serverPort}`);
+
+
+
+
+// ----------------------------------------------------------------------------
+const readline = require('readline');
+
+const rl = readline.createInterface({
+  input: process.stdin,
+  output: process.stdout
 });
 
-// init socket'a
-initSocket(server, db);
+rl.question('Do? ', (answer) => {
+  // TODO: Log the answer in a database
+  switch(answer){
+  	case "getUsers()": console.log(store.getClients() || []);break;
+  	case "help": console.log("helping...");break;
+  	default: console.log("what?")
+  }
+
+  rl.close();
+});

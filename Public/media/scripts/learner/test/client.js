@@ -50,7 +50,7 @@ App = React.createClass({
       data: this.state.data_anses,
       data_user: this.state.data_user
     });
-    return window.location.replace("http://" + window.location.host + "/learner");
+    return window.location.replace("http://" + window.location.host + "/learner/test/result?id=" + this.state.data_user.id);
   },
   componentWillMount: function() {
     var data_test_promise, isTouchDevice;

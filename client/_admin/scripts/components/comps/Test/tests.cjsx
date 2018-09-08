@@ -28,6 +28,16 @@ Test = React.createClass
 		@setState displayTestBlock: {visible: true, title: "Создание нового теста", type: "add"}
 
 	componentWillMount: ->
+		# main_dispatcher.dispatch
+		# 	type: "NOTIFICATION"
+		# 	payload: {
+		# 		type: "event"
+		# 		data: {
+		# 			type: "success"
+		# 			massage: "Success!"
+		# 		}
+		# 	}
+
 		test_dispatcher.register (action)=>
 			switch action.type
 				when "EDIT_TEST"
@@ -36,13 +46,23 @@ Test = React.createClass
 					main_dispatcher.dispatch
 						type: "NOTIFICATION"
 						payload: {
-							type: "prompt"
+							type: "main"
 							data: {
+								type: "prompt"
 								typeInput: "password"
 								title: "Введите пароль админа"
 								ph: "password"
+								discr: {
+									type: "DELETE_TEST"
+									id: action.payload
+								}
 							}
 						}
+					arr = @state.tests
+					arr.map (i, j)=>
+						if i._id == action.payload
+							arr.splice j, 1
+					@setState tests: arr
  
 					# main_dispatcher.dispatch
 					# 	type: "NOTIFICATION"
@@ -53,8 +73,33 @@ Test = React.createClass
 					# 		}
 					# 	}
 				when "SAVE_TEST"
-					console.log action
 					main_dispatcher.dispatch action
+					if action.payload.type_test == "add"
+						arr = @state.tests
+						arr.push action.payload
+						@setState displayTestBlock: {
+							visible: false,
+							title: "",
+							type: "",
+							payload: []
+						}, tests: arr
+					else
+						@setState displayTestBlock: {
+							visible: false,
+							title: "",
+							type: "",
+							payload: []
+						}
+						main_dispatcher.dispatch
+							type: "NOTIFICATION"
+							payload: {
+								type: "event"
+								data: {
+									type: "success"
+									massage: "Success!"
+								}
+							}
+
 				when "ACTIVE_TEST"
 					main_dispatcher.dispatch action
 					@setState activeTest: action.payload

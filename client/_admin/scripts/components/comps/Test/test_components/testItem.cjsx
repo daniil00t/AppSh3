@@ -11,7 +11,7 @@ TestItem = React.createClass
 	handleRemoveTest: ->
 		dispatcher.dispatch
 			type: "REMOVE_TEST"
-			payload: @props.num
+			payload: @props.data._id
 	handleActiveTest: (e)->
 		dispatcher.dispatch
 			type: "ACTIVE_TEST"

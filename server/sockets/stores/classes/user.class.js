@@ -34,7 +34,7 @@ export default class User{
 			payload: {id: id, data: data}
 		})
 		
-		return this.getClients();
+		// return this.getClients();
 	}
 	deleteClient(id){
 		let self = this;
