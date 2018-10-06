@@ -88,7 +88,9 @@ app.use("/learner", routeLearner);
 
 routeLearner.get("/", (req, res) => {
 	// Здесь будет рендериться шаблон входа для ученика - ~/__projects/web/learnerIndexPage
-	res.render("learner/index.html", { stateApp: {chat: appData.chat.state ? "работает" : "не работает" , test: appData.test.state ? "работает" : "не работает"} });
+	console.log(appData.chat.state)
+	res.render("learner/index.html", { stateApp: {chat: appData.chat.state, test: appData.test.state} });
+	// res.sendfile("Public/pages/learner/index.html")
 });
 
 dispatcher.register((action) => {
@@ -223,6 +225,4 @@ rl.question('Do? ', (answer) => {
   	case "help": console.log("helping...");break;
   	default: console.log("what?")
   }
-
-  rl.close();
 });

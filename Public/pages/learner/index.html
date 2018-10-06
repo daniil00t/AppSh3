@@ -1,83 +1,141 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>School Project</title>
-  <link rel="stylesheet" href="/cssFiles/style.css">
-  <link rel="stylesheet" href="/cssFiles/style_sass.css">
-	<link rel="stylesheet" href="/cssFiles/preloader.css">
+	<meta charset="UTF-8">
+	<title>School Project</title>
+	<!-- <link rel="stylesheet" href="/cssFiles/style.css"> -->
+	<link rel="stylesheet" href="/cssFiles/style_sass.css">
+	<!-- <link rel="stylesheet" href="/cssFiles/preloader.css"> -->
+	<!-- <link rel="stylesheet" href="/cssFiles/learner/main.min.css"> -->
 </head>
 <body>
-	<div class="main">
-		
+	<div id="fullpage">
+		<section class="main section" data-anchor="block1">
+			<div class="objects">
+				<div class="quer big object" data-coords="85,10,%"></div>
+				<div class="tringgle big b object" data-coords="80,30,%"></div>
+				<div class="round big object" data-coords="85,50,%"></div>
 
-		<div class="objects">
-			<div class="quer big object" data-coords="85,10,%"></div>
-			<div class="tringgle big b object" data-coords="80,30,%"></div>
-			<div class="round big object" data-coords="85,50,%"></div>
-			
-			<div class="quer small object" data-coords="100,0,px"></div>
-			<div class="round small b object" data-coords="100,55,px"></div>	
-			<div class="tringgle small object" data-coords="100,110,px"></div>
+				<div class="quer small object" data-coords="100,0,px"></div>
+				<div class="round small b object" data-coords="100,55,px"></div>	
+				<div class="tringgle small object" data-coords="100,115,px"></div>
 
-			<div class="quer big object" data-coords="10,50,%"></div>
-			<div class="tringgle big b object" data-coords="6,62,%"></div>
-			
-		</div>
+				<div class="quer big object" data-coords="10,50,%"></div>
+				<div class="tringgle big b object" data-coords="6,62,%"></div>
+
+			</div>
 			<div class="line big"></div>
 			<div class="line small"></div>
-		<div class="wrp-main-indexup">
-			<div class="welcome">
-				Наши приложения
-			</div>
-			<div class="apps">
-				<div class="app chat">
-					<div class="wrp">
-						<div class="name_app">
-							<h2>ChatApp</h2>
-							<h4>^1.1@beta</h4>
-						</div>
+			<div class="wrp-main-indexup">
+				<div class="welcome">
+					Наши приложения
+				</div>
+				<div class="apps">
+					<div class="app chat">
+						<div class="wrp">
+							<div class="name_app">
+								<h2>ChatApp</h2>
+								<h4>^1.1@beta</h4>
+							</div>
 
-						<div class="description">
-							<p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Voluptates ipsa, officia, laborum veritatis ad esse inventore dolorum dolor illum nisi.</p>
+							<div class="description">
+								<p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Voluptates ipsa, officia, laborum veritatis ad esse inventore dolorum dolor illum nisi.</p>
+							</div>
+							{% if stateApp.chat %}
+							<a href="/learner/chat" class="more" style="background-color: #2700ff" title="работает">more</a>
+							{% else %}
+							<a href="/learner/chat" class="more" style="background-color: red" title="не работает">more</a>
+							{% endif %}
 						</div>
-						<a href="/learner/chat" class="more">more</a>
-					</div>
-				</div><div class="app testing">
-					<div class="wrp">
-						<div class="name_app">
-							<h2>TestingApp</h2>
-							<h4>^1.0@beta</h4>
-						</div>
+					</div><div class="app testing">
+						<div class="wrp">
+							<div class="name_app">
+								<h2>TestingApp</h2>
+								<h4>^1.0@beta</h4>
+							</div>
 
-						<div class="description">
-							<p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Voluptates ipsa, officia, laborum veritatis ad esse inventore dolorum dolor illum nisi.</p>
+							<div class="description">
+								<p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Voluptates ipsa, officia, laborum veritatis ad esse inventore dolorum dolor illum nisi.</p>
+							</div>
+							<a href="/learner/test" class="more">more</a>
 						</div>
-						<a href="/learner/test" class="more">more</a>
-					</div>
-				</div><div class="app web_quest">
-					<div class="wrp">
-						<div class="name_app">
-							<h2>WEBQuest</h2>
-							<h4>^0.1</h4>
-						</div>
+					</div><div class="app web_quest">
+						<div class="wrp">
+							<div class="name_app">
+								<h2>WEBQuest</h2>
+								<h4>^0.1</h4>
+							</div>
 
-						<div class="description">
-							<p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Voluptates ipsa, officia, laborum veritatis ad esse inventore dolorum dolor illum nisi.</p>
+							<div class="description">
+								<p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Voluptates ipsa, officia, laborum veritatis ad esse inventore dolorum dolor illum nisi.</p>
+							</div>
+							<a href="/learner/chat" class="more">more</a>
 						</div>
-						<a href="/learner/chat" class="more">more</a>
 					</div>
 				</div>
 			</div>
-		</div>
+
+
+			<footer class="agfa">
+				<p>
+					<img src="imgFiles/apps/logo_main_white.png" alt="">
+				</p>
+				<p class="copy">&copy;Daniil Shenyagin, 2018</p>
+			</footer>
+		</section>
+
+		<section class="section features" data-anchor="block2">
+			block#2
+		</section>
+	</div>
+
+
+
+
+
+
+	<script src="/libsFiles/jquery/jquery.js"></script>
+	<script src="/libsFiles/fullpage/fullPage.js"></script>
+	<script>
+		$(document).ready(function() {
+			$('#fullpage').fullpage({
+				anchors: ['block1', 'block2', 'block3', 'block4'],
+				menu: '#menu',
+				css3: true,
+				scrollingSpeed: 1000
+			});
+		});
+		var w_width = window.innerWidth;
+		var w_height = window.innerHeight;
+		console.log(w_width, w_height);
+		var arr = document.getElementsByClassName("objects")[0].children;
+		for(var i = 0;i < arr.length;i++){
+			var str = arr[i].attributes[1].value;
+
+			if(str.split(",")[2] == "%"){
+				var x = +str.split(",")[0];
+				var y = +str.split(",")[1];
+
+			// procents ->
+			document.getElementsByClassName("object")[i].style.left = (w_width / 100 * x) + "px";
+			document.getElementsByClassName("object")[i].style.top = (w_height / 100 * y) + "px";
+		}
+		else if(str.split(",")[2] == "px"){
+			var x = +str.split(",")[0];
+			var y = +str.split(",")[1];
+
+			document.getElementsByClassName("object")[i].style.left = x + "px";
+			document.getElementsByClassName("object")[i].style.top = y + "px";
+		}
+
+		// console.log(i, (w_width / 100 * x) + "px");
+		// console.log(i, (w_height / 100 * y) + "px");
+		// console.log(50 / w_width);
+		// console.log(50 /w_height);
 
 		
-	<footer>
-		<p>
-			<img src="img/apps/logo_main_white.png" alt="">
-		</p>
-		<p class="copy">&copy;Daniil Shenyagin, 2018</p>
-	</footer>
-	</div>
+
+	}
+</script>
 </body>
 </html>
