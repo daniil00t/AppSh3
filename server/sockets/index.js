@@ -12,6 +12,7 @@ import MainStore from "./stores/store";
 */
 import chat from "./apps/chat.socket";
 import test from "./apps/test.socket";
+import quest from "./apps/quest.socket";
 import admin from "./apps/admin.socket";
 
 /*
@@ -48,6 +49,12 @@ class MainSock {
 
 					// socket ONs' ChatApp
 					test(_socket, self.store, db);
+					self.disconnect(_socket);
+				}break;
+				case "quest": {
+
+					// socket ONs' ChatApp
+					quest(_socket, self.store, db);
 					self.disconnect(_socket);
 				}break;
 				case "admin": {

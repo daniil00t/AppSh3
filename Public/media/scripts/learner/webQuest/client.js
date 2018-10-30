@@ -9,158 +9,8 @@ React.render(React.createElement(App, null), document.getElementById('app'));
 
 
 
-},{"./app":3,"react":"react"}],2:[function(require,module,exports){
-var MC, main_dispatcher, nothing;
-
-main_dispatcher = require("../events/dispatchers/main_dispatcher");
-
-MC = Object.assign(require("../events/constants/main_socket_consts"), require("../events/constants/main_dispatcher_consts"));
-
-nothing = function() {
-  return 
-	let a = 10;
-	delete a;
-	;
-};
-
-module.exports = function(socket, self) {
-  socket.on(MC.INIT, (function(_this) {
-    return function(data) {
-      switch (data.type) {
-        case "users":
-          self.setState({
-            users: data.data
-          });
-          return main_dispatcher.dispatch({
-            type: MC.INIT_LOAD_USER_TO_TESTS_COMPONENT,
-            payload: data.data
-          });
-        case "data_users":
-          self.setState({
-            users_anses: data.data
-          });
-          return console.log(data.data);
-        case "data_true_anses":
-          self.setState({
-            data_true_anses: data.data
-          });
-          return self.updateScoreUsers(self.state.users_anses);
-        case "data_tests":
-          return self.setState({
-            data_tests: data.data
-          });
-        case "activeTest":
-          return main_dispatcher.dispatch({
-            type: "GET_ACTIVE_TEST",
-            payload: data.data
-          });
-        case "chat_hello":
-          main_dispatcher.dispatch({
-            type: MC.INIT_CHAT_HELLO,
-            payload: data.data
-          });
-          return self.setState({
-            chatHello: data.data
-          });
-        default:
-          return nothing();
-      }
-    };
-  })(this));
-  socket.on(MC.CONNECT_USER, (function(_this) {
-    return function(data) {
-      var arr;
-      arr = self.state.users;
-      arr.push(data.payload);
-      return self.setState({
-        users: arr
-      });
-    };
-  })(this));
-  socket.on(MC.DISCONNECT_USER, (function(_this) {
-    return function(data) {
-      var arr;
-      arr = self.state.users;
-      arr.map(function(i, j) {
-        if (i.id === data.payload) {
-          return arr.splice(j, 1);
-        }
-      });
-      return self.setState({
-        users: arr
-      });
-    };
-  })(this));
-  socket.on(MC.UPDATE_USER, (function(_this) {
-    return function(data) {
-      var arr, i, j, k, key, len, ref, value;
-      console.log(data.payload);
-      arr = self.state.users;
-      for (j = k = 0, len = arr.length; k < len; j = ++k) {
-        i = arr[j];
-        if (i.id === data.payload.id) {
-          ref = data.payload.data;
-          for (key in ref) {
-            value = ref[key];
-            arr[j][key] = value;
-          }
-        }
-      }
-      return self.setState({
-        users: arr
-      });
-    };
-  })(this));
-  socket.on(MC.UPDATE_ANSWER_USER, (function(_this) {
-    return function(data) {
-      self.setState({
-        users_anses: data.payload
-      });
-      return self.updateScoreUsers(data.payload);
-    };
-  })(this));
-  return main_dispatcher.register((function(_this) {
-    return function(action) {
-      switch (action.type) {
-        case MC.CHANGE_CHAT_HELLO:
-          self.setState({
-            chatHello: action.payload
-          });
-          return socket.emit("_CHANGE", {
-            type: action.type,
-            data: action.payload
-          });
-        case MC.CHANGE_APP_STATE:
-          return socket.emit("_CHANGE", {
-            type: action.type,
-            app: action.app,
-            payload: action.payload
-          });
-        case MC.SAVE_TEST:
-          return socket.emit(MC.SAVE_TEST, action);
-        case MC.ACTIVE_TEST:
-          return socket.emit(MC.ACTIVE_TEST, action);
-        case MC.DELETE_TEST:
-          return socket.emit(MC.DELETE_TEST, action);
-        case MC.NOTIFICATION:
-          return self.setState({
-            nf_visible: true,
-            nf_all_data: {
-              data: action.payload.data,
-              type: action.payload.type
-            }
-          });
-        default:
-          return nothing();
-      }
-    };
-  })(this));
-};
-
-
-
-},{"../events/constants/main_dispatcher_consts":20,"../events/constants/main_socket_consts":21,"../events/dispatchers/main_dispatcher":22}],3:[function(require,module,exports){
-var App, MSC, Notification, Panel, React, URL, crypto, dispatcher, ee, io, main_actions, socket;
+},{"./app":2,"react":"react"}],2:[function(require,module,exports){
+var App, React, URL, crypto, io, socket;
 
 React = require('react');
 
@@ -172,127 +22,22 @@ URL = require("url");
 
 crypto = require('crypto');
 
-ee = require("./ee");
-
-Panel = require("./components/admin_panel");
-
-
-/*
-	Events
- */
-
-MSC = require("./events/constants/main_socket_consts");
-
-dispatcher = require("./events/dispatchers/main_dispatcher");
-
-main_actions = require("./actions/app_actions");
-
-Notification = require("./components/comps/notification");
-
 App = React.createClass({
   displayName: 'App',
   getInitialState: function() {
     return {
-      numErr: -1,
-      users: [],
-      users_anses: [],
-      data_true_anses: [],
-      id_test_active: 0,
-      data_tests: [],
-      chatHello: "",
-      nf_visible: false,
-      nf_all_data: {}
+      users_data: {}
     };
   },
-  updateScoreUsers: function(data) {
-    var arr, lengthProblemsTests, score;
-    score = 0;
-    arr = this.state.users;
-    lengthProblemsTests = 0;
-    this.state.users.map((function(_this) {
-      return function(i, j) {
-        return data.map(function(k, l) {
-          var variant;
-          if (i.id === k.id) {
-            variant = i.variant - 1;
-            k.data.map(function(q, w) {
-              return _this.state.data_true_anses[0].data[variant].map(function(r, t) {
-                console.log(q, r);
-                if (q.no === r.no) {
-                  if (q.value === r.value[0]) {
-                    return score += r.score;
-                  }
-                }
-              });
-            });
-            lengthProblemsTests = _this.state.data_true_anses[0].data[variant].length;
-            arr[j].score = score;
-            arr[j].points = Math.round(score / lengthProblemsTests * 100);
-            return score = 0;
-          }
-        });
-      };
-    })(this));
-    return this.setState({
-      users: arr
-    });
-  },
   componentWillMount: function() {
-    main_actions(socket, this);
-
-    /* _ Chat _ */
-    ee.on("changeHello@ee", (function(_this) {
-      return function(data) {
-        return socket.emit("changeHelloChat", {
-          cnt: data.cnt
-        });
-      };
-    })(this));
-
-    /* _ DB _ */
-    return ee.on("importDB@ee", (function(_this) {
-      return function(data) {
-        return socket.emit("importDB@soc", {
-          type: data.type
-        });
-      };
-    })(this));
+    return console.log("init webquest");
   },
   render: function() {
     return React.createElement("div", {
-      "className": "wrp_admin"
-    }, React.createElement(Notification, {
-      "data": this.state.nf_all_data.data,
-      "visible": this.state.nf_visible,
-      "type": this.state.nf_all_data.type
-    }), React.createElement("div", {
-      "className": "preloader",
-      "style": {
-        display: !this.state.preloader ? "none" : void 0
-      }
-    }, React.createElement("div", {
-      "className": "cssload-thecube"
-    }, React.createElement("div", {
-      "className": "cssload-cube cssload-c1"
-    }), React.createElement("div", {
-      "className": "cssload-cube cssload-c2"
-    }), React.createElement("div", {
-      "className": "cssload-cube cssload-c4"
-    }), React.createElement("div", {
-      "className": "cssload-cube cssload-c3"
-    }))), React.createElement("div", {
-      "className": "container-fluid"
-    }, React.createElement(Panel, {
-      "data": {
-        chat: {
-          chatHello: this.state.chatHello
-        },
-        users: {
-          data: this.state.users
-        },
-        tests: this.state.data_tests ? this.state.data_tests : []
-      }
-    })));
+      "className": "pain_area"
+    }, React.createElement("h1", {
+      "className": "text-center"
+    }, "Hello world!"));
   }
 });
 
@@ -300,2060 +45,7 @@ module.exports = App;
 
 
 
-},{"./actions/app_actions":2,"./components/admin_panel":4,"./components/comps/notification":17,"./ee":19,"./events/constants/main_socket_consts":21,"./events/dispatchers/main_dispatcher":22,"crypto":89,"react":"react","socket.io-client":198,"url":228}],4:[function(require,module,exports){
-var Chat, DB_panel, Features, Header_panel, Panel, React, Test, TestSt, Users, ul;
-
-React = require("react");
-
-Users = require("./comps/users");
-
-Chat = require("./comps/chat");
-
-TestSt = require("./comps/Test/tests_st");
-
-Test = require("./comps/Test/tests");
-
-DB_panel = require("./comps/db");
-
-Features = require("./comps/feature");
-
-Header_panel = require("./comps/header_panel");
-
-ul = ["Users", "Chat", "Tests_statistics", "Tests", "DB", "Features"];
-
-Panel = React.createClass({
-  displayName: "Panel",
-  getInitialState: function() {
-    return {
-      sidebarvalue: 0
-    };
-  },
-  handleClickSetValue: function(j) {
-    this.setState({
-      sidebarvalue: j
-    });
-    return window.location.hash = ul[j];
-  },
-  componentWillMount: function() {
-    var _hash, hash, i, j, k, len, results;
-    hash = window.location.hash;
-    if (hash) {
-      _hash = hash.substr(1, hash.length - 1);
-      console.log(_hash);
-      results = [];
-      for (j = k = 0, len = ul.length; k < len; j = ++k) {
-        i = ul[j];
-        if (i === _hash) {
-          this.setState({
-            sidebarvalue: j
-          });
-          break;
-        } else {
-          results.push(void 0);
-        }
-      }
-      return results;
-    } else {
-      return console.log("def");
-    }
-  },
-  render: function() {
-    return React.createElement("div", {
-      "className": "row"
-    }, React.createElement("div", {
-      "className": "col-md-2 col-lg-2 col-sm-2 col-xs-2 navbarmain"
-    }, React.createElement("div", {
-      "className": "brand"
-    }, React.createElement("h1", null, "Admin Panel")), React.createElement("ul", {
-      "className": "navbar"
-    }, ul.map((function(_this) {
-      return function(i, j) {
-        return React.createElement("li", {
-          "onClick": _this.handleClickSetValue.bind(_this, j),
-          "className": (_this.state.sidebarvalue === j ? "active" : "noactive")
-        }, i);
-      };
-    })(this)))), React.createElement("div", {
-      "className": "col-md-10 col-lg-10 col-sm-10 col-xs-10 mainArea"
-    }, React.createElement(Header_panel, null), React.createElement("div", {
-      "className": "wrp"
-    }, ((function() {
-      switch (this.state.sidebarvalue) {
-        case 0:
-          return React.createElement(Users, {
-            "users": this.props.data.users.data
-          });
-        case 1:
-          return React.createElement(Chat, {
-            "data": this.props.data.chat
-          });
-        case 2:
-          return React.createElement(TestSt, {
-            "users": this.props.data.users.data
-          });
-        case 3:
-          return React.createElement(Test, {
-            "users": this.props.data.users.data,
-            "tests": this.props.data.tests
-          });
-        case 4:
-          return React.createElement(DB_panel, null);
-        case 5:
-          return React.createElement(Features, null);
-        default:
-          return React.createElement("div", null, "Help!");
-      }
-    }).call(this)))));
-  }
-});
-
-module.exports = Panel;
-
-
-
-},{"./comps/Test/tests":11,"./comps/Test/tests_st":12,"./comps/chat":13,"./comps/db":14,"./comps/feature":15,"./comps/header_panel":16,"./comps/users":18,"react":"react"}],5:[function(require,module,exports){
-var flux;
-
-flux = require("flux");
-
-module.exports = new flux.Dispatcher();
-
-
-
-},{"flux":133}],6:[function(require,module,exports){
-var AddTest, DefQ, React, dispatcher;
-
-React = require("react");
-
-dispatcher = require("../test.dispatcher");
-
-DefQ = require("./defQ");
-
-AddTest = React.createClass({
-  displayName: "AddTest",
-  getInitialState: function() {
-    return {
-      addedVariant: false,
-      addedProblem: false,
-      focusNow: "nameTest",
-      initData: {
-        subject: "Информатика"
-      },
-      variant: 0,
-      allProblems: [[]]
-    };
-  },
-  addAnsToProblems: function() {
-    var arr, obj;
-    obj = {
-      type: React.findDOMNode(this.tmpTypeProblem).value,
-      question: React.findDOMNode(this.tmpAskProblem).value,
-      anses: [],
-      num: this.state.allProblems[this.state.variant].length,
-      score: 1,
-      trueanses: []
-    };
-    React.findDOMNode(this.tmpAskProblem).value = "";
-    arr = this.state.allProblems;
-    arr[this.state.variant].push(obj);
-    return this.setState({
-      allProblems: arr
-    });
-  },
-  componentWillMount: function() {
-    return dispatcher.register((function(_this) {
-      return function(action) {
-        var _arr, arr;
-        switch (action.type) {
-          case "ADD_ITEM_PROBLEM":
-            arr = _this.state.allProblems;
-            arr[_this.state.variant].map(function(i, j) {
-              if (i.num === action.payload.num) {
-                return arr[_this.state.variant][j].anses.push(action.payload.value);
-              }
-            });
-            return _this.setState({
-              allProblems: arr
-            });
-          case "NEW_TRUE_ANSWER":
-            _arr = _this.state.allProblems;
-            _arr[_this.state.variant][action.payload.no].trueanses = [action.payload.value];
-            return _this.setState({
-              allProblems: _arr
-            });
-        }
-      };
-    })(this));
-  },
-  saveTest: function() {
-    return dispatcher.dispatch({
-      type: "SAVE_TEST",
-      payload: {
-        type_test: "add",
-        data: this.state.allProblems,
-        initData: this.state.initData
-      }
-    });
-  },
-  focusInput: function(node) {
-    var _node;
-    _node = React.findDOMNode(node);
-    if (_node != null) {
-      return _node.focus();
-    }
-  },
-  changeInitData: function(e) {
-    var key, obj, type, value;
-    key = e.key;
-    obj = this.state.initData;
-    type = e.target.name;
-    value = e.target.value;
-    if (key === "Enter") {
-      switch (type) {
-        case "nameTest":
-          obj[type] = value;
-          this.setState({
-            initData: obj
-          });
-          return this.setState({
-            focusNow: "timeTest"
-          });
-        case "timeTest":
-          obj[type] = +value;
-          this.setState({
-            initData: obj
-          });
-          return this.setState({
-            focusNow: "subjectTest"
-          });
-      }
-    }
-  },
-  changeSubject: function(e) {
-    var obj, type, value;
-    value = e.target.value;
-    type = e.target.name;
-    obj = this.state.initData;
-    obj[type] = value;
-    return this.setState({
-      initData: obj
-    });
-  },
-  handleAddVariant: function() {
-    if (Object.keys(this.state.initData).length >= 3) {
-      if (this.state.initData.nameTest.length > 5 && (this.state.initData.timeTest > 60 && this.state.initData.timeTest < 14400)) {
-        return this.setState({
-          addedVariant: true
-        });
-      } else {
-        return alert("Введите данные корректно!");
-      }
-    } else {
-      return alert("Вы ввели не все данные, введите их полнотью и продолжайте");
-    }
-  },
-  handleAddNewVariant: function() {
-    var arr, value;
-    arr = this.state.allProblems;
-    arr.push([]);
-    value = this.state.variant + 1;
-    return this.setState({
-      allProblems: arr,
-      variant: value
-    });
-  },
-  changeVariant: function(e) {
-    var value;
-    value = +e.target.value;
-    return this.setState({
-      variant: value
-    });
-  },
-  initVariant: function(node) {
-    var _node, value_node, value_variant;
-    _node = React.findDOMNode(node);
-    if (_node != null) {
-      value_node = _node.value;
-      value_variant = this.state.variant;
-      if (value_node !== value_variant) {
-        return _node.value = value_variant;
-      }
-    }
-  },
-  render: function() {
-    return React.createElement("div", {
-      "className": "animFadeInDown " + this.props.classItem
-    }, React.createElement("div", {
-      "className": "initDataTest"
-    }, React.createElement("input", {
-      "type": "text",
-      "onKeyDown": ((function(_this) {
-        return function(e) {
-          return _this.changeInitData(e);
-        };
-      })(this)),
-      "ref": ((function(_this) {
-        return function(node) {
-          if (_this.state.focusNow === "nameTest") {
-            return _this.focusInput(node);
-          }
-        };
-      })(this)),
-      "className": "data_add_test",
-      "id": "nameTest",
-      "name": "nameTest",
-      "placeholder": "Name Test"
-    }), React.createElement("br", null), React.createElement("input", {
-      "type": "number",
-      "onKeyDown": ((function(_this) {
-        return function(e) {
-          return _this.changeInitData(e);
-        };
-      })(this)),
-      "ref": ((function(_this) {
-        return function(node) {
-          if (_this.state.focusNow === "timeTest") {
-            return _this.focusInput(node);
-          }
-        };
-      })(this)),
-      "className": "data_add_test",
-      "id": "timeTest",
-      "name": "timeTest",
-      "placeholder": "Time Test"
-    }), React.createElement("br", null), React.createElement("select", {
-      "name": "subject",
-      "onChange": ((function(_this) {
-        return function(e) {
-          return _this.changeSubject(e);
-        };
-      })(this)),
-      "className": "subject",
-      "ref": ((function(_this) {
-        return function(node) {
-          if (_this.state.focusNow === "subjectTest") {
-            return _this.focusInput(node);
-          }
-        };
-      })(this))
-    }, React.createElement("option", {
-      "value": "Информатика"
-    }, "Информатика"), React.createElement("option", {
-      "value": "История"
-    }, "История"), React.createElement("option", {
-      "value": "Математика"
-    }, "Математика"))), React.createElement("hr", null), React.createElement("button", {
-      "className": "addVariantButton defButton",
-      "onClick": this.handleAddVariant,
-      "style": {
-        display: this.state.addedVariant ? "none" : "block"
-      }
-    }, "addVariant"), React.createElement("div", {
-      "className": "addVariantBlock",
-      "style": {
-        display: this.state.addedVariant ? "block" : "none"
-      }
-    }, React.createElement("div", {
-      "className": "addVariantNext",
-      "style": {
-        display: this.state.addedVariant ? "block" : "none"
-      }
-    }, React.createElement("div", {
-      "className": "wrp_df"
-    }, React.createElement("select", {
-      "className": "choiceVariant",
-      "onChange": ((function(_this) {
-        return function(e) {
-          return _this.changeVariant(e);
-        };
-      })(this)),
-      "ref": ((function(_this) {
-        return function(node) {
-          return _this.initVariant(node);
-        };
-      })(this))
-    }, this.state.allProblems.map((function(_this) {
-      return function(i, j) {
-        return React.createElement("option", {
-          "value": j
-        }, j + 1, " вариант");
-      };
-    })(this))), React.createElement("button", {
-      "onClick": this.handleAddNewVariant,
-      "className": "addVariantButton defButtonWithText",
-      "data-title": "addVariant"
-    }, "+"))), React.createElement("div", {
-      "className": "addProblemNext"
-    }, React.createElement("div", {
-      "className": "allProblems"
-    }, (this.state.allProblems.length !== 0 ? this.state.allProblems[this.state.variant].map((function(_this) {
-      return function(i, j) {
-        switch (i.type) {
-          case "defQ":
-            return React.createElement(DefQ, {
-              "data": i,
-              "num": j
-            });
-          default:
-            return React.createElement("div", null, "...");
-        }
-      };
-    })(this)) : "Создайте новое задание")), React.createElement("div", {
-      "className": "formForNewProblem"
-    }, React.createElement("select", {
-      "className": "choiceTypeProblem",
-      "ref": ((function(_this) {
-        return function(node) {
-          return _this.tmpTypeProblem = node;
-        };
-      })(this))
-    }, React.createElement("option", {
-      "value": "defQ"
-    }, "defQ"), React.createElement("option", {
-      "value": "InpQ"
-    }, "InpQ"), React.createElement("option", {
-      "value": "joinQ"
-    }, "joinQ"), React.createElement("option", {
-      "value": "multiQ"
-    }, "multiQ")), React.createElement("input", {
-      "type": "text",
-      "placeholder": "Ask...",
-      "ref": ((function(_this) {
-        return function(node) {
-          return _this.tmpAskProblem = node;
-        };
-      })(this))
-    }), React.createElement("button", {
-      "className": "addProblemButton defButton",
-      "onClick": this.addAnsToProblems
-    }, "addProblem")))), React.createElement("button", {
-      "onClick": this.saveTest,
-      "className": "defButton saveTest"
-    }, "Создать"));
-  }
-});
-
-module.exports = AddTest;
-
-
-
-},{"../test.dispatcher":5,"./defQ":7,"react":"react"}],7:[function(require,module,exports){
-var DefQ, React, dispatcher;
-
-React = require("react");
-
-dispatcher = require("../test.dispatcher");
-
-DefQ = React.createClass({
-  displayName: "DefQ",
-  getInitialState: function() {
-    return {
-      num: this.props.num,
-      activeItem: -1,
-      alphabet: {
-        rus: ["а", "б", "в", "г", "д", "е", "ж", "з", "и", "к"],
-        en: ["a", "b", "c", "d", "e", "f", "g", "h", "i", "j"]
-      },
-      myans: {}
-    };
-  },
-  handleClickIl: function(i, e) {
-    var id, value;
-    if (e.target.localName === "span" || e.target.localName === "li" || e.target.localName === "label") {
-      if (e.altKey && this.state.activeItem === i) {
-        this.setState({
-          activeItem: -1
-        });
-        return dispatcher.dispatch({
-          type: "UPDATE_ANSWER_REMOVE",
-          payload: {
-            type: "defQ",
-            no: this.state.num
-          }
-        });
-      } else {
-        id = "Q_" + this.state.num + "_" + i;
-        document.getElementById(id).checked = true;
-        value = +i;
-        this.setState({
-          myans: {
-            type: "defQ",
-            num: this.state.num,
-            val: value
-          }
-        });
-        dispatcher.dispatch({
-          type: "NEW_TRUE_ANSWER",
-          payload: {
-            type: "defQ",
-            no: this.state.num,
-            value: value
-          }
-        });
-        return this.setState({
-          activeItem: value
-        });
-      }
-    }
-  },
-  handleAddItem: function() {
-    dispatcher.dispatch({
-      type: "ADD_ITEM_PROBLEM",
-      payload: {
-        value: React.findDOMNode(this.newItemValue_problem).value,
-        num: this.state.num
-      }
-    });
-    return React.findDOMNode(this.newItemValue_problem).value = "";
-  },
-  componentWillMount: function() {
-    if (this.props.data.trueanses != null) {
-      return this.setState({
-        activeItem: this.props.data.trueanses[0]
-      });
-    }
-  },
-  componentWillReceiveProps: function(np) {
-    if (np.data.trueanses != null) {
-      return this.setState({
-        activeItem: np.data.trueanses[0]
-      });
-    }
-  },
-  render: function() {
-    return React.createElement("div", {
-      "className": "ItemDefQ"
-    }, React.createElement("h3", {
-      "className": "question defQuestion"
-    }, this.state.num + 1 + ". " + this.props.data.question), React.createElement("ul", {
-      "className": "ulanses defulanses"
-    }, this.props.data.anses.map((function(_this) {
-      return function(i, j) {
-        return React.createElement("li", {
-          "onClick": (function(e) {
-            return _this.handleClickIl.bind(_this, j)(e);
-          }),
-          "key": j,
-          "style": (j === _this.state.activeItem ? {
-            backgroundColor: "#3670F7",
-            color: "#fff",
-            boxShadow: "0 0 15px rgba(0,0,0,0.6)"
-          } : void 0)
-        }, React.createElement("label", null, React.createElement("input", {
-          "type": "radio",
-          "name": "Q_" + _this.state.num,
-          "id": "Q_" + _this.state.num + "_" + j,
-          "disabled": "disabled",
-          "value": j,
-          "dangerouslySetInnerHTML": {
-            __html: (_this.state.alphabet.rus[j].toUpperCase()) + ". " + i
-          }
-        })));
-      };
-    })(this)), React.createElement("input", {
-      "type": "radio",
-      "disabled": "disabled",
-      "className": "inputRadioItemToProblem"
-    }), React.createElement("input", {
-      "type": "text",
-      "className": "inputTextItemToProblem",
-      "ref": ((function(_this) {
-        return function(node) {
-          return _this.newItemValue_problem = node;
-        };
-      })(this))
-    }), React.createElement("button", {
-      "className": "defButtonWithText addItemToProblem",
-      "data-title": "add Item",
-      "onClick": this.handleAddItem
-    }, "+")));
-  }
-});
-
-module.exports = DefQ;
-
-
-
-},{"../test.dispatcher":5,"react":"react"}],8:[function(require,module,exports){
-var AddTest, DefQ, React, dispatcher;
-
-React = require("react");
-
-dispatcher = require("../test.dispatcher");
-
-DefQ = require("./defQ");
-
-AddTest = React.createClass({
-  displayName: "AddTest",
-  getInitialState: function() {
-    return {
-      data: {},
-      addedVariant: false,
-      addedProblem: false,
-      initData: {
-        subject: "Информатика"
-      },
-      variant: 0,
-      allProblems: [[]],
-      count_reload_render: 0
-    };
-  },
-  addAnsToProblems: function() {
-    var arr, obj;
-    obj = {
-      type: React.findDOMNode(this.tmpTypeProblem).value,
-      question: React.findDOMNode(this.tmpAskProblem).value,
-      anses: [],
-      num: this.state.allProblems[this.state.variant].length,
-      score: 1
-    };
-    arr = this.state.allProblems;
-    arr[this.state.variant].push(obj);
-    return this.setState({
-      allProblems: arr
-    });
-  },
-  componentWillMount: function() {
-    var arrAllProblems;
-    if (this.state.count_reload_render === 0) {
-      this.setState({
-        initData: {
-          nameTest: this.props.data.name,
-          timeTest: this.props.data.time,
-          subjectTest: this.props.data.subject
-        }
-      });
-      arrAllProblems = this.props.data;
-      if ((arrAllProblems != null) && arrAllProblems.variants.length > 0) {
-        arrAllProblems.variants.map((function(_this) {
-          return function(i, j) {
-            return i.map(function(k, l) {
-              return arrAllProblems.variants[j][l].num = l;
-            });
-          };
-        })(this));
-      }
-      this.setState({
-        data: arrAllProblems,
-        allProblems: this.props.data.variants
-      });
-    }
-    return dispatcher.register((function(_this) {
-      return function(action) {
-        var _arr, arr;
-        switch (action.type) {
-          case "ADD_ITEM_PROBLEM":
-            arr = _this.state.allProblems;
-            arr[_this.state.variant].map(function(i, j) {
-              if (i.num === action.payload.num) {
-                return arr[_this.state.variant][j].anses.push(action.payload.value);
-              }
-            });
-            return _this.setState({
-              allProblems: arr
-            });
-          case "NEW_TRUE_ANSWER":
-            _arr = _this.state.allProblems;
-            _arr[_this.state.variant][action.payload.no].trueanses = [action.payload.value];
-            return _this.setState({
-              allProblems: _arr
-            });
-        }
-      };
-    })(this));
-  },
-  saveTest: function() {
-    return dispatcher.dispatch({
-      type: "SAVE_TEST",
-      payload: {
-        type_test: "edit",
-        data: {
-          name: this.state.initData.nameTest,
-          subject: this.state.initData.subjectTest,
-          time: this.state.initData.timeTest,
-          variants: this.state.allProblems
-        },
-        id: this.props.data._id
-      }
-    });
-  },
-  componentWillReceiveProps: function(newProps) {
-    var arrAllProblems;
-    arrAllProblems = newProps.data;
-    return this.setState({
-      data: arrAllProblems,
-      allProblems: newProps.data.variants
-    });
-  },
-  initValue: function(node) {
-    var _node;
-    _node = React.findDOMNode(node);
-    if ((_node != null) && (this.state.data != null)) {
-      switch (_node.name) {
-        case "nameTest":
-          return _node.value = this.state.data.name;
-        case "timeTest":
-          return _node.value = this.state.data.time;
-        case "subjectTest":
-          return _node.value = this.state.data.subject;
-      }
-    }
-  },
-  changeInitData: function(e) {
-    var key, obj, objMAINData, type, value;
-    key = e.key;
-    obj = this.state.initData;
-    type = e.target.name;
-    value = e.target.value;
-    if (key === "Enter") {
-      switch (type) {
-        case "nameTest":
-          obj[type] = value;
-          objMAINData = this.state.data;
-          objMAINData.name = value;
-          return this.setState({
-            initData: obj,
-            data: objMAINData
-          });
-        case "timeTest":
-          value = +value;
-          if (value < 14400 && value > 0) {
-            obj[type] = value;
-            objMAINData = this.state.data;
-            objMAINData.time = value;
-            return this.setState({
-              initData: obj,
-              data: objMAINData
-            });
-          } else {
-            alert("time has the next data: time > 0 and time < 14400");
-            value = this.props.data.time;
-            obj[type] = value;
-            objMAINData = this.state.data;
-            objMAINData.time = value;
-            return this.setState({
-              initData: obj,
-              data: objMAINData
-            });
-          }
-      }
-    }
-  },
-  changeSubject: function(e) {
-    var obj, objMAINData, type, value;
-    value = e.target.value;
-    type = e.target.name;
-    obj = this.state.initData;
-    obj[type] = value;
-    objMAINData = this.state.data;
-    objMAINData.subject = value;
-    return this.setState({
-      initData: obj,
-      data: objMAINData
-    });
-  },
-  handleAddVariant: function() {
-    if (Object.keys(this.state.initData).length >= 3) {
-      if (this.state.initData.nameTest.length > 5 && (this.state.initData.timeTest > 60 && this.state.initData.timeTest < 14400)) {
-        return this.setState({
-          addedVariant: true
-        });
-      } else {
-        return alert("Введите данные корректно!");
-      }
-    } else {
-      return alert("Вы ввели не все данные, введите их полнотью и продолжайте");
-    }
-  },
-  handleChangeVariant: function(e, _value) {
-    var value;
-    if (_value != null) {
-      console.log("_value", _value);
-      return this.setState({
-        variant: _value
-      });
-    } else {
-      value = +e.target.value;
-      return this.setState({
-        variant: value
-      });
-    }
-  },
-  handleAddNewVariant: function() {
-    var _value, arr;
-    arr = this.state.data;
-    arr.variants.push([]);
-    _value = arr.variants.length - 1;
-    this.setState({
-      data: arr,
-      variant: _value
-    });
-    dispatcher.dispatch({
-      type: "CHANGE_VALUE_SELECT_VARIANT",
-      payload: _value
-    });
-    return this.handleChangeVariant(null, _value);
-  },
-  initVariant: function(node) {
-    var _node, value_node, value_variant;
-    _node = React.findDOMNode(node);
-    if (_node != null) {
-      value_node = _node.value;
-      value_variant = this.state.variant;
-      if (value_node !== value_variant) {
-        return _node.value = value_variant;
-      }
-    }
-  },
-  render: function() {
-    this.state.count_reload_render++;
-    return React.createElement("div", {
-      "className": "animFadeInDown " + this.props.classItem
-    }, React.createElement("span", {
-      "className": "_id_forEdit"
-    }, ((this.state.data != null) && this.state.data.length !== 0 ? this.state.data._id : void 0)), React.createElement("div", {
-      "className": "initDataTest"
-    }, React.createElement("input", {
-      "type": "text",
-      "onKeyDown": ((function(_this) {
-        return function(e) {
-          return _this.changeInitData(e);
-        };
-      })(this)),
-      "ref": ((function(_this) {
-        return function(node) {
-          _this.initValue(node);
-          return _this.nameTestInput = node;
-        };
-      })(this)),
-      "className": "data_add_test",
-      "id": "nameTest",
-      "name": "nameTest",
-      "placeholder": "Name Test"
-    }), React.createElement("br", null), React.createElement("input", {
-      "type": "number",
-      "onKeyDown": ((function(_this) {
-        return function(e) {
-          return _this.changeInitData(e);
-        };
-      })(this)),
-      "ref": ((function(_this) {
-        return function(node) {
-          _this.initValue(node);
-          return _this.timeTestInput = node;
-        };
-      })(this)),
-      "className": "data_add_test",
-      "id": "timeTest",
-      "name": "timeTest",
-      "placeholder": "Time Test"
-    }), React.createElement("br", null), React.createElement("select", {
-      "name": "subjectTest",
-      "onChange": ((function(_this) {
-        return function(e) {
-          return _this.changeSubject(e);
-        };
-      })(this)),
-      "className": "subject",
-      "ref": ((function(_this) {
-        return function(node) {
-          _this.initValue(node);
-          return _this.subjectTestInput = node;
-        };
-      })(this))
-    }, React.createElement("option", {
-      "value": "Информатика"
-    }, "Информатика"), React.createElement("option", {
-      "value": "История"
-    }, "История"), React.createElement("option", {
-      "value": "Математика"
-    }, "Математика"))), React.createElement("hr", null), React.createElement("div", {
-      "className": "addVariantBlock"
-    }, React.createElement("div", {
-      "className": "addVariantNext"
-    }, React.createElement("div", {
-      "className": "wrp_df"
-    }, React.createElement("select", {
-      "className": "choiceVariant",
-      "onChange": ((function(_this) {
-        return function(e) {
-          return _this.handleChangeVariant(e);
-        };
-      })(this)),
-      "ref": ((function(_this) {
-        return function(node) {
-          return _this.initVariant(node);
-        };
-      })(this))
-    }, ((this.state.data != null) && this.state.data.variants.length > 0 ? this.state.data.variants.map((function(_this) {
-      return function(i, j) {
-        return React.createElement("option", {
-          "value": j
-        }, j + 1, " вариант");
-      };
-    })(this)) : void 0)), React.createElement("button", {
-      "onClick": this.handleAddNewVariant,
-      "className": "addVariantButton defButtonWithText",
-      "data-title": "addVariant"
-    }, "+"))), React.createElement("div", {
-      "className": "addProblemNext"
-    }, React.createElement("div", {
-      "className": "allProblems"
-    }, (this.state.allProblems.length > 0 ? this.state.allProblems[this.state.variant].length > 0 ? this.state.allProblems[this.state.variant].map((function(_this) {
-      return function(i, j) {
-        switch (i.type) {
-          case "defQ":
-            return React.createElement(DefQ, {
-              "data": i,
-              "num": j
-            });
-          default:
-            return React.createElement("div", null, "...");
-        }
-      };
-    })(this)) : void 0 : "Создайте новое задание")), React.createElement("div", {
-      "className": "formForNewProblem"
-    }, React.createElement("select", {
-      "className": "choiceTypeProblem",
-      "ref": ((function(_this) {
-        return function(node) {
-          return _this.tmpTypeProblem = node;
-        };
-      })(this))
-    }, React.createElement("option", {
-      "value": "defQ"
-    }, "defQ"), React.createElement("option", {
-      "value": "InpQ"
-    }, "InpQ"), React.createElement("option", {
-      "value": "joinQ"
-    }, "joinQ"), React.createElement("option", {
-      "value": "multiQ"
-    }, "multiQ")), React.createElement("input", {
-      "type": "text",
-      "placeholder": "Ask...",
-      "ref": ((function(_this) {
-        return function(node) {
-          return _this.tmpAskProblem = node;
-        };
-      })(this))
-    }), React.createElement("button", {
-      "className": "addProblemButton defButton",
-      "onClick": this.addAnsToProblems
-    }, "addProblem")))), React.createElement("button", {
-      "onClick": this.saveTest,
-      "className": "defButton saveTest"
-    }, "Сохранить"));
-  },
-  componentDidMount: function() {
-    if ((this.state.data != null) && this.state.data.name !== "") {
-      this.initValue(this.nameTestInput);
-      this.initValue(this.timeTestInput);
-      return this.initValue(this.subjectTestInput);
-    }
-  }
-});
-
-module.exports = AddTest;
-
-
-
-},{"../test.dispatcher":5,"./defQ":7,"react":"react"}],9:[function(require,module,exports){
-var Item, React;
-
-React = require("react");
-
-Item = React.createClass({
-  displayName: "ItemBlock",
-  getInitialState: function() {
-    return {
-      stateBlock: true
-    };
-  },
-  changeStateBlock: function() {
-    return this.setState({
-      stateBlock: !this.state.stateBlock
-    });
-  },
-  componentWillMount: function() {},
-  render: function() {
-    return React.createElement("div", {
-      "className": "block_test animFadeInUp " + this.props.classItem,
-      "style": {
-        display: (this.props.display != null ? (this.props.display ? "block" : "none") : void 0)
-      }
-    }, React.createElement("div", {
-      "className": "title_block"
-    }, React.createElement("h3", {
-      "className": "title_block_text"
-    }, this.props.title, React.createElement("i", {
-      "onClick": this.changeStateBlock,
-      "className": "fas fa-chevron-down",
-      "data-block": "0"
-    }))), React.createElement("div", {
-      "className": "wrp_cnt",
-      "style": {
-        display: this.state.stateBlock ? "block" : "none"
-      }
-    }, this.props.children));
-  }
-});
-
-module.exports = Item;
-
-
-
-},{"react":"react"}],10:[function(require,module,exports){
-var React, TestItem, dispatcher;
-
-React = require("react");
-
-dispatcher = require("../test.dispatcher");
-
-TestItem = React.createClass({
-  displayName: "TestItem",
-  handleEditTest: function() {
-    return dispatcher.dispatch({
-      type: "EDIT_TEST",
-      payload: this.props.num
-    });
-  },
-  handleRemoveTest: function() {
-    return dispatcher.dispatch({
-      type: "REMOVE_TEST",
-      payload: this.props.data._id
-    });
-  },
-  handleActiveTest: function(e) {
-    return dispatcher.dispatch({
-      type: "ACTIVE_TEST",
-      payload: this.props.num
-    });
-  },
-  render: function() {
-    return React.createElement("div", {
-      "className": "testItem " + (this.props.active ? "active" : "noactive")
-    }, React.createElement("div", null, React.createElement("div", {
-      "className": ((function() {
-        switch (this.props.data.subject) {
-          case "Информатика":
-            return "testItem_header informat";
-          case "Математика":
-            return "testItem_header matan";
-          case "История":
-            return "testItem_header history";
-        }
-      }).call(this))
-    }, React.createElement("span", {
-      "className": "subject"
-    }, this.props.data.subject), React.createElement("div", {
-      "className": "controls"
-    }, React.createElement("i", {
-      "className": "fas fa-pen",
-      "onClick": this.handleEditTest
-    }), React.createElement("i", {
-      "className": "fas fa-times-circle",
-      "onClick": this.handleRemoveTest
-    }))), React.createElement("div", {
-      "className": "testItem_main_cnt"
-    }, React.createElement("span", {
-      "className": "time",
-      "title": "Время на выполнения теста в секундах"
-    }, React.createElement("i", {
-      "className": "far fa-clock"
-    }), this.props.data.time, " сек."), React.createElement("span", {
-      "className": "count_variants",
-      "title": "Количество вариантов"
-    }, React.createElement("i", {
-      "className": "fas fa-list-ul"
-    }), this.props.data.variants.length), React.createElement("p", {
-      "className": "testItem_main_cnt_name",
-      "onClick": ((function(_this) {
-        return function(e) {
-          return _this.handleActiveTest(e);
-        };
-      })(this)),
-      "title": "Активировать данный тест"
-    }, this.props.data.name), React.createElement("span", {
-      "className": "_id",
-      "title": "test_id"
-    }, this.props.data._id))));
-  }
-});
-
-module.exports = TestItem;
-
-
-
-},{"../test.dispatcher":5,"react":"react"}],11:[function(require,module,exports){
-var AddTest, Block, EditTest, Notification, React, Test, TestItem, main_dispatcher, test_dispatcher;
-
-React = require("react");
-
-Block = require("./test_components/item_block_tests");
-
-AddTest = require("./test_components/addTest");
-
-EditTest = require("./test_components/editTest");
-
-TestItem = require("./test_components/testItem");
-
-test_dispatcher = require("./test.dispatcher");
-
-main_dispatcher = require("../../../events/dispatchers/main_dispatcher");
-
-Notification = require("../notification");
-
-Test = React.createClass({
-  displayName: "Test",
-  getInitialState: function() {
-    return {
-      users: [],
-      tests: [],
-      activeTest: 0,
-      displayTestBlock: {
-        visible: false,
-        title: "",
-        type: "",
-        payload: []
-      }
-    };
-  },
-  handleAddTest: function() {
-    return this.setState({
-      displayTestBlock: {
-        visible: true,
-        title: "Создание нового теста",
-        type: "add"
-      }
-    });
-  },
-  componentWillMount: function() {
-    test_dispatcher.register((function(_this) {
-      return function(action) {
-        var arr;
-        switch (action.type) {
-          case "EDIT_TEST":
-            return _this.setState({
-              displayTestBlock: {
-                visible: true,
-                title: "Редактирование теста",
-                type: "edit",
-                data: _this.state.tests[action.payload]
-              }
-            });
-          case "REMOVE_TEST":
-            main_dispatcher.dispatch({
-              type: "NOTIFICATION",
-              payload: {
-                type: "main",
-                data: {
-                  type: "prompt",
-                  typeInput: "password",
-                  title: "Введите пароль админа",
-                  ph: "password",
-                  discr: {
-                    type: "DELETE_TEST",
-                    id: action.payload
-                  }
-                }
-              }
-            });
-            arr = _this.state.tests;
-            arr.map(function(i, j) {
-              if (i._id === action.payload) {
-                return arr.splice(j, 1);
-              }
-            });
-            return _this.setState({
-              tests: arr
-            });
-          case "SAVE_TEST":
-            main_dispatcher.dispatch(action);
-            if (action.payload.type_test === "add") {
-              arr = _this.state.tests;
-              arr.push(action.payload);
-              return _this.setState({
-                displayTestBlock: {
-                  visible: false,
-                  title: "",
-                  type: "",
-                  payload: []
-                },
-                tests: arr
-              });
-            } else {
-              _this.setState({
-                displayTestBlock: {
-                  visible: false,
-                  title: "",
-                  type: "",
-                  payload: []
-                }
-              });
-              return main_dispatcher.dispatch({
-                type: "NOTIFICATION",
-                payload: {
-                  type: "event",
-                  data: {
-                    type: "success",
-                    massage: "Success!"
-                  }
-                }
-              });
-            }
-            break;
-          case "ACTIVE_TEST":
-            main_dispatcher.dispatch(action);
-            return _this.setState({
-              activeTest: action.payload
-            });
-        }
-      };
-    })(this));
-    main_dispatcher.register((function(_this) {
-      return function(action) {
-        switch (action.type) {
-          case "GET_ACTIVE_TEST":
-            return _this.setState({
-              activeTest: action.payload
-            });
-        }
-      };
-    })(this));
-    return this.setState({
-      tests: this.props.tests,
-      users: this.props.users
-    });
-  },
-  componentWillReceiveProps: function(newProps) {
-    return this.setState({
-      tests: newProps.tests,
-      users: newProps.users
-    });
-  },
-  render: function() {
-    return React.createElement("div", {
-      "className": "testPanel"
-    }, React.createElement("h1", {
-      "className": "welcome_chat_panel"
-    }, "\t\t\t\tУправление тестами"), React.createElement(Block, {
-      "title": "Тесты",
-      "classItem": "testUtils"
-    }, React.createElement("div", {
-      "className": "all_tests"
-    }, (this.state.tests.length !== 0 ? this.state.tests.map((function(_this) {
-      return function(i, j) {
-        return React.createElement(TestItem, {
-          "data": i,
-          "num": j,
-          "active": (_this.state.activeTest === j ? true : false)
-        });
-      };
-    })(this)) : void 0), React.createElement("div", {
-      "className": "testItem addTest"
-    }, React.createElement("div", null, React.createElement("span", {
-      "className": "plus",
-      "onClick": this.handleAddTest
-    }, "+"))))), React.createElement(Block, {
-      "title": this.state.displayTestBlock.title,
-      "classItem": "AddTest",
-      "display": this.state.displayTestBlock.visible
-    }, ((function() {
-      switch (this.state.displayTestBlock.type) {
-        case "add":
-          return React.createElement(AddTest, {
-            "classItem": "addTestBlock"
-          });
-        case "edit":
-          return React.createElement(EditTest, {
-            "classItem": "addTestBlock",
-            "data": this.state.displayTestBlock.data
-          });
-      }
-    }).call(this))), React.createElement(Block, {
-      "title": "Изменение состояния приложения",
-      "classItem": "changeState"
-    }, React.createElement("div", null, "\t\t\t\t\tBlock#2")));
-  }
-});
-
-module.exports = Test;
-
-
-
-},{"../../../events/dispatchers/main_dispatcher":22,"../notification":17,"./test.dispatcher":5,"./test_components/addTest":6,"./test_components/editTest":8,"./test_components/item_block_tests":9,"./test_components/testItem":10,"react":"react"}],12:[function(require,module,exports){
-var React, Test_St, main_dispatcher, test_dispatcher;
-
-React = require("react");
-
-test_dispatcher = require("./test.dispatcher");
-
-main_dispatcher = require("../../../events/dispatchers/main_dispatcher");
-
-Test_St = React.createClass({
-  displayName: "Test_Statistics",
-  getInitialState: function() {
-    return {
-      users: []
-    };
-  },
-  drawChart: function() {
-    var chart, data;
-    data = google.visualization.arrayToDataTable([['Task', 'соотношение справившихся к несправившихся'], ['Справились', 19], ['Провалили', 7]]);
-    chart = new google.visualization.PieChart(this.chartContainer);
-    return chart.draw(data);
-  },
-  componentWillMount: function() {
-    if (this.props.users.length === 0) {
-      return main_dispatcher.register((function(_this) {
-        return function(action) {
-          switch (action.type) {
-            case "INIT_LOAD_USER_TO_TESTS_COMPONENT":
-              return _this.setState({
-                users: action.payload
-              });
-          }
-        };
-      })(this));
-    } else {
-      return this.setState({
-        users: this.props.users.data
-      });
-    }
-  },
-  componentDidMount: function() {
-    google.charts.load("current", {
-      packages: ["corechart"]
-    });
-    return google.charts.setOnLoadCallback(this.drawChart);
-  },
-  render: function() {
-    return React.createElement("div", {
-      "className": "test_admin_panel"
-    }, React.createElement("h2", null, "Статистика"), React.createElement("hr", null), React.createElement("div", {
-      "className": "items row"
-    }, React.createElement("div", {
-      "ref": ((function(_this) {
-        return function(node) {
-          return _this.chartContainer = React.findDOMNode(node);
-        };
-      })(this)),
-      "className": "item countSuccess_item",
-      "data-title": "Cоотношение справившихся к несправимшихся"
-    }), React.createElement("div", {
-      "className": "item mid_points",
-      "data-title": "Общий балл тестирующихся"
-    }, React.createElement("p", {
-      "className": "mid_points_value"
-    }, "4.15")), React.createElement("div", {
-      "className": "item best_tester",
-      "data-title": "Лучший ученик"
-    }, React.createElement("div", {
-      "className": "user"
-    }, React.createElement("div", {
-      "className": "name"
-    }), React.createElement("div", {
-      "className": "points"
-    }), React.createElement("div", {
-      "className": "controlls"
-    }, React.createElement("div", {
-      "className": "info"
-    }), React.createElement("div", {
-      "className": "link"
-    }))))), React.createElement("div", {
-      "className": "items row"
-    }, React.createElement("div", {
-      "className": "item"
-    }), React.createElement("div", {
-      "className": "item"
-    }), React.createElement("div", {
-      "className": "item"
-    })));
-  }
-});
-
-module.exports = Test_St;
-
-
-
-},{"../../../events/dispatchers/main_dispatcher":22,"./test.dispatcher":5,"react":"react"}],13:[function(require,module,exports){
-var Chat, React, ee, main_dispatcher;
-
-React = require("react");
-
-ee = require("../../ee");
-
-main_dispatcher = require("../../events/dispatchers/main_dispatcher");
-
-Chat = React.createClass({
-  displayName: "ChatPanel",
-  getInitialState: function() {
-    return {
-      top_panel_state: false,
-      top_panel_text: "",
-      chatState: true
-    };
-  },
-  changeStateChat_sub: function(e) {
-    if (e.target.nodeName === "SPAN" || e.target.nodeName === "P") {
-      return this.setState({
-        top_panel_state: !this.state.top_panel_state
-      });
-    }
-  },
-  changeStateChat: function(e) {
-    if (e.key === "Enter") {
-      this.setState({
-        top_panel_state: !this.state.top_panel_state,
-        top_panel_text: e.target.value
-      });
-      return main_dispatcher.dispatch({
-        type: "CHANGE_CHAT_HELLO",
-        payload: e.target.value
-      });
-    }
-  },
-  hideMainCnt: function(e) {
-
-    /* !!! Переделать - не нравится, как сделано - Сделать адекватно !!! */
-    var n;
-    n = e.target.attributes[1].value;
-    return $("#wrp_cnt" + n).toggle("active");
-
-    /* !!! */
-  },
-  focusInput: function(node) {
-    var _node;
-    _node = React.findDOMNode(node);
-    if (_node != null) {
-      _node.focus();
-      return _node.value = _node.placeholder;
-    }
-  },
-  handleChangeChatState: function() {
-    this.setState({
-      chatState: !this.state.chatState
-    });
-    return main_dispatcher.dispatch({
-      type: "CHANGE_APP_STATE",
-      app: "chat",
-      payload: this.state.chatState
-    });
-  },
-  componentWillMount: function() {
-    if (this.props.data.chatHello !== "") {
-      return this.setState({
-        top_panel_text: this.props.data.chatHello
-      });
-    } else {
-      return main_dispatcher.register((function(_this) {
-        return function(action) {
-          switch (action.type) {
-            case "INIT_CHAT_HELLO":
-              return _this.setState({
-                top_panel_text: action.payload
-              });
-          }
-        };
-      })(this));
-    }
-  },
-  render: function() {
-    return React.createElement("div", {
-      "className": "chatPanel"
-    }, React.createElement("h1", {
-      "className": "welcome_chat_panel"
-    }, "\t\t\t\tУправление чатом"), React.createElement("div", {
-      "className": "block_chat animFadeInUp"
-    }, React.createElement("div", {
-      "className": "title_block"
-    }, React.createElement("h3", {
-      "className": "title_block_text"
-    }, "Изменение приветсвенного окна чата", React.createElement("i", {
-      "onClick": ((function(_this) {
-        return function(e) {
-          return _this.hideMainCnt(e);
-        };
-      })(this)),
-      "className": "fas fa-chevron-down",
-      "data-block": "0"
-    }))), React.createElement("div", {
-      "className": "wrp_cnt",
-      "id": "wrp_cnt0"
-    }, React.createElement("div", {
-      "className": "fixed_top_panel"
-    }, React.createElement("p", {
-      "className": "text-center",
-      "id": "changeStateChat",
-      "onClick": ((function(_this) {
-        return function(e) {
-          return _this.changeStateChat_sub(e);
-        };
-      })(this))
-    }, (!this.state.top_panel_state ? React.createElement("span", {
-      "id": "changeStateChatText"
-    }, this.state.top_panel_text) : React.createElement("input", {
-      "onKeyDown": ((function(_this) {
-        return function(e) {
-          return _this.changeStateChat(e);
-        };
-      })(this)),
-      "placeholder": this.state.top_panel_text,
-      "ref": ((function(_this) {
-        return function(node) {
-          return _this.focusInput(node);
-        };
-      })(this))
-    })))))), React.createElement("div", {
-      "className": "block_chat animFadeInUp"
-    }, React.createElement("div", {
-      "className": "title_block"
-    }, React.createElement("h3", {
-      "className": "title_block_text"
-    }, "Изменение состояния чата", React.createElement("i", {
-      "onClick": this.hideMainCnt,
-      "className": "fas fa-chevron-down"
-    }))), React.createElement("div", {
-      "className": "wrp_cnt"
-    }, React.createElement("button", {
-      "onClick": this.handleChangeChatState
-    }, "toggleChatState"))));
-  }
-});
-
-module.exports = Chat;
-
-
-
-},{"../../ee":19,"../../events/dispatchers/main_dispatcher":22,"react":"react"}],14:[function(require,module,exports){
-var DB, React, ee;
-
-React = require("react");
-
-ee = require("../../ee");
-
-DB = React.createClass({
-  displayName: "Users",
-  hideMainCnt: function(e) {
-
-    /* !!! Переделать - не нравится, как сделано - Сделать адекватно !!! */
-    var n;
-    n = e.target.attributes[1].value;
-    return $("#wrp_cnt" + n).toggle("active");
-
-    /* !!! */
-  },
-  importDB: function() {
-    return ee.emit("importDB@ee", {
-      type: document.getElementById("sel_db").value
-    });
-  },
-  render: function() {
-    return React.createElement("div", {
-      "className": "dbPanel"
-    }, React.createElement("h1", {
-      "className": "welcome_db_panel"
-    }, "\t\t\t\tУправление базой данных"), React.createElement("div", {
-      "className": "block_db animFadeInUp"
-    }, React.createElement("div", {
-      "className": "title_block"
-    }, React.createElement("h3", {
-      "className": "title_block_text"
-    }, "Импорт баз данных", React.createElement("i", {
-      "onClick": ((function(_this) {
-        return function(e) {
-          return _this.hideMainCnt(e);
-        };
-      })(this)),
-      "className": "fas fa-chevron-down",
-      "data-block": "0"
-    }))), React.createElement("div", {
-      "className": "wrp_cnt",
-      "id": "wrp_cnt0"
-    }, React.createElement("select", {
-      "name": "db",
-      "id": "sel_db"
-    }, React.createElement("option", {
-      "value": "users"
-    }, "users"), React.createElement("option", {
-      "value": "tests"
-    }, "tests")), React.createElement("button", {
-      "className": "import",
-      "onClick": this.importDB
-    }, "Импортировать"))));
-  }
-});
-
-module.exports = DB;
-
-
-
-},{"../../ee":19,"react":"react"}],15:[function(require,module,exports){
-var Features, React;
-
-React = require("react");
-
-Features = React.createClass({
-  displayName: "Users",
-  render: function() {
-    return React.createElement("div", null, "\t\t\tFeatures");
-  }
-});
-
-module.exports = Features;
-
-
-
-},{"react":"react"}],16:[function(require,module,exports){
-var Header, React, ee;
-
-React = require("react");
-
-ee = require("../../ee");
-
-Header = React.createClass({
-  displayName: "Header",
-  handleClickLogout: function() {
-    return ee.emit("logoutAdmin", {
-      type: true
-    });
-  },
-  handleClickSettings: function() {
-    return alert("В разработке... Ждите или лучше напишите разработчику");
-  },
-  render: function() {
-    return React.createElement("div", {
-      "className": "Header_panel"
-    }, React.createElement("div", {
-      "className": "fr"
-    }, React.createElement("ul", null, React.createElement("li", {
-      "className": "settings",
-      "onClick": this.handleClickSettings
-    }, React.createElement("i", {
-      "className": "fa fa-cogs"
-    }), "Настройки"), React.createElement("li", {
-      "className": "logout"
-    }, React.createElement("i", {
-      "className": "fa fa-sign-out-alt"
-    }), React.createElement("a", {
-      "href": "/logout",
-      "style": {
-        color: "white"
-      }
-    }, "Выйти")))));
-  }
-});
-
-module.exports = Header;
-
-
-
-},{"../../ee":19,"react":"react"}],17:[function(require,module,exports){
-var MDC, Notification, React, main_dispatcher;
-
-React = require("react");
-
-main_dispatcher = require("../../events/dispatchers/main_dispatcher");
-
-MDC = require("../../events/constants/main_dispatcher_consts");
-
-Notification = React.createClass({
-  displayName: "Notification",
-  getInitialState: function() {
-    return {
-      visible: false,
-      count_reload_render: 0
-    };
-  },
-  componentWillReceiveProps: function(newProps) {
-    return this.setState({
-      visible: newProps.visible
-    });
-  },
-  handleClose: function() {
-    return this.setState({
-      visible: false
-    });
-  },
-  handleEnterPrompt: function() {
-    if (React.findDOMNode(this.promptInput).value === "headder") {
-      main_dispatcher.dispatch({
-        type: MDC.DELETE_TEST,
-        payload: this.props.data.discr.id
-      });
-      return this.setState({
-        visible: false
-      });
-    }
-  },
-  handleChangeConfirm: function(success) {
-    if (success) {
-      return console.log("confirm - yes");
-    } else {
-      return console.log("confirm - no");
-    }
-  },
-  handleEvent: function(n) {
-    if (n === this.state.count_reload_render) {
-      return setTimeout(((function(_this) {
-        return function() {
-          return _this.setState({
-            visible: false
-          });
-        };
-      })(this)), 3000);
-    }
-  },
-  render: function() {
-    this.state.count_reload_render++;
-    if (this.props.data != null) {
-      switch (this.props.type) {
-        case "main":
-          return React.createElement("div", {
-            "className": "Notification animFadeInDown",
-            "style": {
-              opacity: (this.state.visible ? "1" : "0"),
-              display: (this.state.visible ? "block" : "none")
-            }
-          }, React.createElement("div", {
-            "className": "nf_wrp"
-          }, React.createElement("i", {
-            "className": "fas fa-times-circle close",
-            "onClick": this.handleClose
-          }), ((function() {
-            switch (this.props.data.type) {
-              case "massage":
-                return React.createElement("div", {
-                  "className": "massage"
-                }, React.createElement("span", {
-                  "className": "tag"
-                }, "massage"), React.createElement("br", null), React.createElement("p", {
-                  "className": "massage_title"
-                }, this.props.data.massage), React.createElement("button", {
-                  "className": "button_success",
-                  "onClick": this.handleClose
-                }, "Ok"));
-              case "prompt":
-                return React.createElement("div", {
-                  "className": "prompt"
-                }, React.createElement("span", {
-                  "className": "tag"
-                }, "prompt"), React.createElement("br", null), React.createElement("span", {
-                  "className": "prompt_title"
-                }, this.props.data.title), React.createElement("input", {
-                  "type": this.props.data.typeInput,
-                  "placeholder": (this.props.data.ph != null ? this.props.data.ph : void 0),
-                  "ref": ((function(_this) {
-                    return function(node) {
-                      return _this.promptInput = node;
-                    };
-                  })(this))
-                }), React.createElement("button", {
-                  "className": "button_success",
-                  "onClick": this.handleEnterPrompt
-                }, "Enter"));
-              case "confirm":
-                return React.createElement("div", {
-                  "className": "prompt"
-                }, React.createElement("span", {
-                  "className": "prompt_title"
-                }, this.props.data.question), React.createElement("button", {
-                  "className": "button_success",
-                  "onClick": this.handleChangeConfirm(false)
-                }, "Cancel"), React.createElement("button", {
-                  "className": "button_success",
-                  "onClick": this.handleChangeConfirm(true)
-                }, "Ok"));
-            }
-          }).call(this))));
-        case "event":
-          this.handleEvent(this.state.count_reload_render);
-          return React.createElement("div", {
-            "className": "events",
-            "style": (this.state.visible ? {
-              opacity: "1",
-              animation: "forEvent ease-in-out 3s"
-            } : {
-              opacity: "0",
-              display: "none"
-            })
-          }, ((function() {
-            switch (this.props.data.type) {
-              case "success":
-                return React.createElement("div", {
-                  "className": "success"
-                }, React.createElement("i", {
-                  "className": "fas fa-check"
-                }), React.createElement("span", {
-                  "className": "event_title"
-                }, this.props.data.massage));
-              default:
-                return React.createElement("div", {
-                  "className": "event_etc"
-                });
-            }
-          }).call(this)));
-        default:
-          return React.createElement("div", null);
-      }
-    } else {
-      return React.createElement("div", null);
-    }
-  }
-});
-
-module.exports = Notification;
-
-
-
-},{"../../events/constants/main_dispatcher_consts":20,"../../events/dispatchers/main_dispatcher":22,"react":"react"}],18:[function(require,module,exports){
-var React, Users_panel, ee, options;
-
-React = require("react");
-
-ee = require("../../ee");
-
-options = ["all", "test", "chat"];
-
-Users_panel = React.createClass({
-  displayName: "Users",
-  getInitialState: function() {
-    return {
-      users: [],
-      filtered: "all"
-    };
-  },
-  handleChangeFiltered: function(e) {
-    return this.setState({
-      filtered: e.target.value
-    });
-  },
-  handleHoverOver: function(i) {
-    console.log(i);
-    document.getElementsByClassName("infoUser")[i].classList.remove("_noactive");
-    return document.getElementsByClassName("infoUser")[i].classList.add("_active");
-  },
-  handleHoverOut: function(i) {
-    console.log(i);
-    document.getElementsByClassName("infoUser")[i].classList.remove("_active");
-    return document.getElementsByClassName("infoUser")[i].classList.add("_noactive");
-  },
-  handleClickDeleteUser: function(k) {
-    var arr, i, j, l, len, mas;
-    console.log(k);
-    mas = prompt("Massage: ");
-    if (mas != null) {
-      ee.emit("deleteUserAndMassage_ee", {
-        ip: k.ip,
-        id: k.id,
-        massage: mas.length === 0 ? "sorry, but you are deleting" : mas
-      });
-      arr = this.state.users;
-      for (j = l = 0, len = arr.length; l < len; j = ++l) {
-        i = arr[j];
-        if (i.id === k.id) {
-          arr.splice(j, 1);
-        }
-      }
-      return this.setState({
-        users: arr
-      });
-    }
-  },
-  renderedLiUser: function(i, j) {
-    var defLi, k, key, l, len, listToollipsDone, listToollipsFuture, testLi, value;
-    listToollipsDone = ["id", "ip", "variant", "testing"];
-    listToollipsFuture = [];
-    for (key in i) {
-      value = i[key];
-      for (l = 0, len = listToollipsDone.length; l < len; l++) {
-        k = listToollipsDone[l];
-        if (key === k) {
-          listToollipsFuture.push(k);
-        }
-      }
-    }
-    defLi = React.createElement("li", {
-      "className": "animFadeInUp"
-    }, React.createElement("div", {
-      "className": "infoUser"
-    }, React.createElement("table", null, listToollipsFuture.map((function(_this) {
-      return function(r, t) {
-        return React.createElement("tr", null, React.createElement("td", {
-          "className": "names"
-        }, r, ": "), React.createElement("td", null, (typeof i[r] === "boolean" ? (i[r] ? "true" : "false") : i[r])));
-      };
-    })(this)))), ((i.fname != null) && (i.lname != null) ? (i.fname[0].toUpperCase()) + ". " + i.lname : i.name != null ? i.name : i.id), React.createElement("span", {
-      "className": "appUsers"
-    }, i.app), React.createElement("i", {
-      "className": "fa fa-info-circle info",
-      "onMouseOver": this.handleHoverOver.bind(this, j),
-      "onMouseOut": this.handleHoverOut.bind(this, j)
-    }), React.createElement("i", {
-      "className": "fa fa-times-circle close",
-      "onClick": this.handleClickDeleteUser.bind(this, i)
-    }));
-    testLi = React.createElement("li", {
-      "className": "animFadeInUp"
-    }, React.createElement("div", {
-      "className": "infoUser"
-    }, React.createElement("table", null, listToollipsFuture.map((function(_this) {
-      return function(r, t) {
-        return React.createElement("tr", null, React.createElement("td", {
-          "className": "names"
-        }, r, ": "), React.createElement("td", null, (typeof i[r] === "boolean" ? (i[r] ? "true" : "false") : i[r])));
-      };
-    })(this)))), ((i.fname != null) && (i.lname != null) ? (i.fname[0].toUpperCase()) + ". " + i.lname : i.name != null ? i.name : i.id), React.createElement("span", {
-      "className": "appUsers"
-    }, i.app), React.createElement("span", {
-      "className": "scoreUser",
-      "style": {
-        backgroundColor: i.testing ? (i.points < 40 ? "#e14040" : (i.points > 40 && i.points < 81 ? "#2196F3" : "#4caf50")) : "#eeeeee"
-      }
-    }, i.points, "%"), React.createElement("i", {
-      "className": "fa fa-info-circle info",
-      "onMouseOver": this.handleHoverOver.bind(this, j),
-      "onMouseOut": this.handleHoverOut.bind(this, j)
-    }), React.createElement("i", {
-      "className": "fa fa-times-circle close",
-      "onClick": this.handleClickDeleteUser.bind(this, i)
-    }));
-    switch (this.state.filtered) {
-      case "test":
-        return testLi;
-      default:
-        return defLi;
-    }
-  },
-  render: function() {
-    return React.createElement("div", {
-      "className": "users-settings"
-    }, React.createElement("h1", null, "Users Online"), React.createElement("select", {
-      "className": "changeApp",
-      "onChange": ((function(_this) {
-        return function(e) {
-          return _this.handleChangeFiltered(e);
-        };
-      })(this))
-    }, options.map((function(_this) {
-      return function(i, j) {
-        return React.createElement("option", {
-          "value": i
-        }, i);
-      };
-    })(this))), React.createElement("ul", {
-      "className": "onlineusers"
-    }, ((function() {
-      if (this.props.users.length > 0) {
-        switch (this.state.filtered) {
-          case "all":
-            return this.props.users.map((function(_this) {
-              return function(i, j) {
-                return _this.renderedLiUser(i, j);
-              };
-            })(this));
-          case "test":
-            return this.props.users.map((function(_this) {
-              return function(i, j) {
-                if (i.app === "test") {
-                  return _this.renderedLiUser(i, j);
-                }
-              };
-            })(this));
-          case "chat":
-            return this.props.users.map((function(_this) {
-              return function(i, j) {
-                if (i.app === "chat") {
-                  return _this.renderedLiUser(i, j);
-                }
-              };
-            })(this));
-        }
-      } else {
-        return React.createElement("span", null, "Что-то пусто тут! Даже никто не заходит на мои странички!");
-      }
-    }).call(this))));
-  }
-});
-
-module.exports = Users_panel;
-
-
-
-},{"../../ee":19,"react":"react"}],19:[function(require,module,exports){
-var EventEmitter, ee;
-
-EventEmitter = require("events").EventEmitter;
-
-ee = new EventEmitter;
-
-module.exports = ee;
-
-
-
-},{"events":74}],20:[function(require,module,exports){
-var keyMirror;
-
-keyMirror = require("keymirror");
-
-
-/*
-	Здесь хранятся все константы, использованные в main_dispatcher'e
-	...
-	dispatcher.register (action)=>
-		switch action.type
-			when __type__
-				...some_code
-	__type__
- */
-
-module.exports = keyMirror({
-  CHANGE_APP_STATE: null,
-  INIT_CHAT_HELLO: null,
-  CHANGE_CHAT_HELLO: null,
-  INIT_LOAD_USER_TO_TESTS_COMPONENT: null,
-  DELETE_TEST: null,
-  SAVE_TEST: true,
-  ACTIVE_TEST: true,
-  NOTIFICATION: null
-});
-
-
-
-},{"keymirror":158}],21:[function(require,module,exports){
-var keyMirror;
-
-keyMirror = require("keymirror");
-
-
-/*
-	Здесь хранятся все константы, использованные в main_dispatcher'e
-	...
-	socket.on __type__, (data)=>
-			...some_code
-	__type__
- */
-
-module.exports = keyMirror({
-  INIT: null,
-  CONNECT_USER: null,
-  DISCONNECT_USER: null,
-  UPDATE_USER: null,
-  UPDATE_ANSWER_USER: null
-});
-
-
-
-},{"keymirror":158}],22:[function(require,module,exports){
-var flux;
-
-flux = require("flux");
-
-module.exports = new flux.Dispatcher();
-
-
-
-},{"flux":133}],23:[function(require,module,exports){
+},{"crypto":69,"react":"react","socket.io-client":174,"url":204}],3:[function(require,module,exports){
 module.exports = after
 
 function after(count, callback, err_cb) {
@@ -2383,7 +75,7 @@ function after(count, callback, err_cb) {
 
 function noop() {}
 
-},{}],24:[function(require,module,exports){
+},{}],4:[function(require,module,exports){
 /**
  * An abstraction for slicing an arraybuffer even when
  * ArrayBuffer.prototype.slice is not supported
@@ -2414,7 +106,7 @@ module.exports = function(arraybuffer, start, end) {
   return result.buffer;
 };
 
-},{}],25:[function(require,module,exports){
+},{}],5:[function(require,module,exports){
 var asn1 = exports;
 
 asn1.bignum = require('bn.js');
@@ -2425,7 +117,7 @@ asn1.constants = require('./asn1/constants');
 asn1.decoders = require('./asn1/decoders');
 asn1.encoders = require('./asn1/encoders');
 
-},{"./asn1/api":26,"./asn1/base":28,"./asn1/constants":32,"./asn1/decoders":34,"./asn1/encoders":37,"bn.js":43}],26:[function(require,module,exports){
+},{"./asn1/api":6,"./asn1/base":8,"./asn1/constants":12,"./asn1/decoders":14,"./asn1/encoders":17,"bn.js":23}],6:[function(require,module,exports){
 var asn1 = require('../asn1');
 var inherits = require('inherits');
 
@@ -2488,7 +180,7 @@ Entity.prototype.encode = function encode(data, enc, /* internal */ reporter) {
   return this._getEncoder(enc).encode(data, reporter);
 };
 
-},{"../asn1":25,"inherits":154,"vm":229}],27:[function(require,module,exports){
+},{"../asn1":5,"inherits":131,"vm":205}],7:[function(require,module,exports){
 var inherits = require('inherits');
 var Reporter = require('../base').Reporter;
 var Buffer = require('buffer').Buffer;
@@ -2606,7 +298,7 @@ EncoderBuffer.prototype.join = function join(out, offset) {
   return out;
 };
 
-},{"../base":28,"buffer":78,"inherits":154}],28:[function(require,module,exports){
+},{"../base":8,"buffer":58,"inherits":131}],8:[function(require,module,exports){
 var base = exports;
 
 base.Reporter = require('./reporter').Reporter;
@@ -2614,7 +306,7 @@ base.DecoderBuffer = require('./buffer').DecoderBuffer;
 base.EncoderBuffer = require('./buffer').EncoderBuffer;
 base.Node = require('./node');
 
-},{"./buffer":27,"./node":29,"./reporter":30}],29:[function(require,module,exports){
+},{"./buffer":7,"./node":9,"./reporter":10}],9:[function(require,module,exports){
 var Reporter = require('../base').Reporter;
 var EncoderBuffer = require('../base').EncoderBuffer;
 var DecoderBuffer = require('../base').DecoderBuffer;
@@ -3250,7 +942,7 @@ Node.prototype._isPrintstr = function isPrintstr(str) {
   return /^[A-Za-z0-9 '\(\)\+,\-\.\/:=\?]*$/.test(str);
 };
 
-},{"../base":28,"minimalistic-assert":161}],30:[function(require,module,exports){
+},{"../base":8,"minimalistic-assert":137}],10:[function(require,module,exports){
 var inherits = require('inherits');
 
 function Reporter(options) {
@@ -3373,7 +1065,7 @@ ReporterError.prototype.rethrow = function rethrow(msg) {
   return this;
 };
 
-},{"inherits":154}],31:[function(require,module,exports){
+},{"inherits":131}],11:[function(require,module,exports){
 var constants = require('../constants');
 
 exports.tagClass = {
@@ -3417,7 +1109,7 @@ exports.tag = {
 };
 exports.tagByName = constants._reverse(exports.tag);
 
-},{"../constants":32}],32:[function(require,module,exports){
+},{"../constants":12}],12:[function(require,module,exports){
 var constants = exports;
 
 // Helper
@@ -3438,7 +1130,7 @@ constants._reverse = function reverse(map) {
 
 constants.der = require('./der');
 
-},{"./der":31}],33:[function(require,module,exports){
+},{"./der":11}],13:[function(require,module,exports){
 var inherits = require('inherits');
 
 var asn1 = require('../../asn1');
@@ -3764,13 +1456,13 @@ function derDecodeLen(buf, primitive, fail) {
   return len;
 }
 
-},{"../../asn1":25,"inherits":154}],34:[function(require,module,exports){
+},{"../../asn1":5,"inherits":131}],14:[function(require,module,exports){
 var decoders = exports;
 
 decoders.der = require('./der');
 decoders.pem = require('./pem');
 
-},{"./der":33,"./pem":35}],35:[function(require,module,exports){
+},{"./der":13,"./pem":15}],15:[function(require,module,exports){
 var inherits = require('inherits');
 var Buffer = require('buffer').Buffer;
 
@@ -3821,7 +1513,7 @@ PEMDecoder.prototype.decode = function decode(data, options) {
   return DERDecoder.prototype.decode.call(this, input, options);
 };
 
-},{"./der":33,"buffer":78,"inherits":154}],36:[function(require,module,exports){
+},{"./der":13,"buffer":58,"inherits":131}],16:[function(require,module,exports){
 var inherits = require('inherits');
 var Buffer = require('buffer').Buffer;
 
@@ -4118,13 +1810,13 @@ function encodeTag(tag, primitive, cls, reporter) {
   return res;
 }
 
-},{"../../asn1":25,"buffer":78,"inherits":154}],37:[function(require,module,exports){
+},{"../../asn1":5,"buffer":58,"inherits":131}],17:[function(require,module,exports){
 var encoders = exports;
 
 encoders.der = require('./der');
 encoders.pem = require('./pem');
 
-},{"./der":36,"./pem":38}],38:[function(require,module,exports){
+},{"./der":16,"./pem":18}],18:[function(require,module,exports){
 var inherits = require('inherits');
 
 var DEREncoder = require('./der');
@@ -4147,7 +1839,7 @@ PEMEncoder.prototype.encode = function encode(data, options) {
   return out.join('\n');
 };
 
-},{"./der":36,"inherits":154}],39:[function(require,module,exports){
+},{"./der":16,"inherits":131}],19:[function(require,module,exports){
 
 /**
  * Expose `Backoff`.
@@ -4234,7 +1926,7 @@ Backoff.prototype.setJitter = function(jitter){
 };
 
 
-},{}],40:[function(require,module,exports){
+},{}],20:[function(require,module,exports){
 /*
  * base64-arraybuffer
  * https://github.com/niklasvh/base64-arraybuffer
@@ -4303,7 +1995,7 @@ Backoff.prototype.setJitter = function(jitter){
   };
 })();
 
-},{}],41:[function(require,module,exports){
+},{}],21:[function(require,module,exports){
 var lookup = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
 
 ;(function (exports) {
@@ -4429,7 +2121,7 @@ var lookup = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
 	exports.fromByteArray = uint8ToBase64
 }(typeof exports === 'undefined' ? (this.base64js = {}) : exports))
 
-},{}],42:[function(require,module,exports){
+},{}],22:[function(require,module,exports){
 (function (global){
 /**
  * Create a blob builder even when vendor prefixes exist
@@ -4529,7 +2221,7 @@ module.exports = (function() {
 })();
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],43:[function(require,module,exports){
+},{}],23:[function(require,module,exports){
 (function (module, exports) {
   'use strict';
 
@@ -7958,7 +5650,7 @@ module.exports = (function() {
   };
 })(typeof module === 'undefined' || module, this);
 
-},{"buffer":45}],44:[function(require,module,exports){
+},{"buffer":25}],24:[function(require,module,exports){
 var r;
 
 module.exports = function rand(len) {
@@ -8025,9 +5717,9 @@ if (typeof self === 'object') {
   }
 }
 
-},{"crypto":45}],45:[function(require,module,exports){
+},{"crypto":25}],25:[function(require,module,exports){
 
-},{}],46:[function(require,module,exports){
+},{}],26:[function(require,module,exports){
 // based on the aes implimentation in triple sec
 // https://github.com/keybase/triplesec
 // which is in turn based on the one from crypto-js
@@ -8257,7 +5949,7 @@ AES.prototype.scrub = function () {
 
 module.exports.AES = AES
 
-},{"safe-buffer":189}],47:[function(require,module,exports){
+},{"safe-buffer":165}],27:[function(require,module,exports){
 var aes = require('./aes')
 var Buffer = require('safe-buffer').Buffer
 var Transform = require('cipher-base')
@@ -8376,7 +6068,7 @@ StreamCipher.prototype.setAAD = function setAAD (buf) {
 
 module.exports = StreamCipher
 
-},{"./aes":46,"./ghash":51,"./incr32":52,"buffer-xor":77,"cipher-base":79,"inherits":154,"safe-buffer":189}],48:[function(require,module,exports){
+},{"./aes":26,"./ghash":31,"./incr32":32,"buffer-xor":57,"cipher-base":59,"inherits":131,"safe-buffer":165}],28:[function(require,module,exports){
 var ciphers = require('./encrypter')
 var deciphers = require('./decrypter')
 var modes = require('./modes/list.json')
@@ -8391,7 +6083,7 @@ exports.createDecipher = exports.Decipher = deciphers.createDecipher
 exports.createDecipheriv = exports.Decipheriv = deciphers.createDecipheriv
 exports.listCiphers = exports.getCiphers = getCiphers
 
-},{"./decrypter":49,"./encrypter":50,"./modes/list.json":60}],49:[function(require,module,exports){
+},{"./decrypter":29,"./encrypter":30,"./modes/list.json":40}],29:[function(require,module,exports){
 var AuthCipher = require('./authCipher')
 var Buffer = require('safe-buffer').Buffer
 var MODES = require('./modes')
@@ -8517,7 +6209,7 @@ function createDecipher (suite, password) {
 exports.createDecipher = createDecipher
 exports.createDecipheriv = createDecipheriv
 
-},{"./aes":46,"./authCipher":47,"./modes":59,"./streamCipher":62,"cipher-base":79,"evp_bytestokey":131,"inherits":154,"safe-buffer":189}],50:[function(require,module,exports){
+},{"./aes":26,"./authCipher":27,"./modes":39,"./streamCipher":42,"cipher-base":59,"evp_bytestokey":111,"inherits":131,"safe-buffer":165}],30:[function(require,module,exports){
 var MODES = require('./modes')
 var AuthCipher = require('./authCipher')
 var Buffer = require('safe-buffer').Buffer
@@ -8633,7 +6325,7 @@ function createCipher (suite, password) {
 exports.createCipheriv = createCipheriv
 exports.createCipher = createCipher
 
-},{"./aes":46,"./authCipher":47,"./modes":59,"./streamCipher":62,"cipher-base":79,"evp_bytestokey":131,"inherits":154,"safe-buffer":189}],51:[function(require,module,exports){
+},{"./aes":26,"./authCipher":27,"./modes":39,"./streamCipher":42,"cipher-base":59,"evp_bytestokey":111,"inherits":131,"safe-buffer":165}],31:[function(require,module,exports){
 var Buffer = require('safe-buffer').Buffer
 var ZEROES = Buffer.alloc(16, 0)
 
@@ -8724,7 +6416,7 @@ GHASH.prototype.final = function (abl, bl) {
 
 module.exports = GHASH
 
-},{"safe-buffer":189}],52:[function(require,module,exports){
+},{"safe-buffer":165}],32:[function(require,module,exports){
 function incr32 (iv) {
   var len = iv.length
   var item
@@ -8741,7 +6433,7 @@ function incr32 (iv) {
 }
 module.exports = incr32
 
-},{}],53:[function(require,module,exports){
+},{}],33:[function(require,module,exports){
 var xor = require('buffer-xor')
 
 exports.encrypt = function (self, block) {
@@ -8760,7 +6452,7 @@ exports.decrypt = function (self, block) {
   return xor(out, pad)
 }
 
-},{"buffer-xor":77}],54:[function(require,module,exports){
+},{"buffer-xor":57}],34:[function(require,module,exports){
 var Buffer = require('safe-buffer').Buffer
 var xor = require('buffer-xor')
 
@@ -8795,7 +6487,7 @@ exports.encrypt = function (self, data, decrypt) {
   return out
 }
 
-},{"buffer-xor":77,"safe-buffer":189}],55:[function(require,module,exports){
+},{"buffer-xor":57,"safe-buffer":165}],35:[function(require,module,exports){
 var Buffer = require('safe-buffer').Buffer
 
 function encryptByte (self, byteParam, decrypt) {
@@ -8839,7 +6531,7 @@ exports.encrypt = function (self, chunk, decrypt) {
   return out
 }
 
-},{"safe-buffer":189}],56:[function(require,module,exports){
+},{"safe-buffer":165}],36:[function(require,module,exports){
 var Buffer = require('safe-buffer').Buffer
 
 function encryptByte (self, byteParam, decrypt) {
@@ -8866,7 +6558,7 @@ exports.encrypt = function (self, chunk, decrypt) {
   return out
 }
 
-},{"safe-buffer":189}],57:[function(require,module,exports){
+},{"safe-buffer":165}],37:[function(require,module,exports){
 var xor = require('buffer-xor')
 var Buffer = require('safe-buffer').Buffer
 var incr32 = require('../incr32')
@@ -8898,7 +6590,7 @@ exports.encrypt = function (self, chunk) {
   return xor(chunk, pad)
 }
 
-},{"../incr32":52,"buffer-xor":77,"safe-buffer":189}],58:[function(require,module,exports){
+},{"../incr32":32,"buffer-xor":57,"safe-buffer":165}],38:[function(require,module,exports){
 exports.encrypt = function (self, block) {
   return self._cipher.encryptBlock(block)
 }
@@ -8907,7 +6599,7 @@ exports.decrypt = function (self, block) {
   return self._cipher.decryptBlock(block)
 }
 
-},{}],59:[function(require,module,exports){
+},{}],39:[function(require,module,exports){
 var modeModules = {
   ECB: require('./ecb'),
   CBC: require('./cbc'),
@@ -8927,7 +6619,7 @@ for (var key in modes) {
 
 module.exports = modes
 
-},{"./cbc":53,"./cfb":54,"./cfb1":55,"./cfb8":56,"./ctr":57,"./ecb":58,"./list.json":60,"./ofb":61}],60:[function(require,module,exports){
+},{"./cbc":33,"./cfb":34,"./cfb1":35,"./cfb8":36,"./ctr":37,"./ecb":38,"./list.json":40,"./ofb":41}],40:[function(require,module,exports){
 module.exports={
   "aes-128-ecb": {
     "cipher": "AES",
@@ -9120,7 +6812,7 @@ module.exports={
   }
 }
 
-},{}],61:[function(require,module,exports){
+},{}],41:[function(require,module,exports){
 (function (Buffer){
 var xor = require('buffer-xor')
 
@@ -9140,7 +6832,7 @@ exports.encrypt = function (self, chunk) {
 }
 
 }).call(this,require("buffer").Buffer)
-},{"buffer":78,"buffer-xor":77}],62:[function(require,module,exports){
+},{"buffer":58,"buffer-xor":57}],42:[function(require,module,exports){
 var aes = require('./aes')
 var Buffer = require('safe-buffer').Buffer
 var Transform = require('cipher-base')
@@ -9169,7 +6861,7 @@ StreamCipher.prototype._final = function () {
 
 module.exports = StreamCipher
 
-},{"./aes":46,"cipher-base":79,"inherits":154,"safe-buffer":189}],63:[function(require,module,exports){
+},{"./aes":26,"cipher-base":59,"inherits":131,"safe-buffer":165}],43:[function(require,module,exports){
 var DES = require('browserify-des')
 var aes = require('browserify-aes/browser')
 var aesModes = require('browserify-aes/modes')
@@ -9238,7 +6930,7 @@ exports.createDecipher = exports.Decipher = createDecipher
 exports.createDecipheriv = exports.Decipheriv = createDecipheriv
 exports.listCiphers = exports.getCiphers = getCiphers
 
-},{"browserify-aes/browser":48,"browserify-aes/modes":59,"browserify-des":64,"browserify-des/modes":65,"evp_bytestokey":131}],64:[function(require,module,exports){
+},{"browserify-aes/browser":28,"browserify-aes/modes":39,"browserify-des":44,"browserify-des/modes":45,"evp_bytestokey":111}],44:[function(require,module,exports){
 var CipherBase = require('cipher-base')
 var des = require('des.js')
 var inherits = require('inherits')
@@ -9290,7 +6982,7 @@ DES.prototype._final = function () {
   return Buffer.from(this._des.final())
 }
 
-},{"cipher-base":79,"des.js":90,"inherits":154,"safe-buffer":66}],65:[function(require,module,exports){
+},{"cipher-base":59,"des.js":70,"inherits":131,"safe-buffer":46}],45:[function(require,module,exports){
 exports['des-ecb'] = {
   key: 8,
   iv: 0
@@ -9316,7 +7008,7 @@ exports['des-ede'] = {
   iv: 0
 }
 
-},{}],66:[function(require,module,exports){
+},{}],46:[function(require,module,exports){
 /* eslint-disable node/no-deprecated-api */
 var buffer = require('buffer')
 var Buffer = buffer.Buffer
@@ -9380,7 +7072,7 @@ SafeBuffer.allocUnsafeSlow = function (size) {
   return buffer.SlowBuffer(size)
 }
 
-},{"buffer":78}],67:[function(require,module,exports){
+},{"buffer":58}],47:[function(require,module,exports){
 (function (Buffer){
 var bn = require('bn.js');
 var randomBytes = require('randombytes');
@@ -9424,10 +7116,10 @@ function getr(priv) {
 }
 
 }).call(this,require("buffer").Buffer)
-},{"bn.js":43,"buffer":78,"randombytes":186}],68:[function(require,module,exports){
+},{"bn.js":23,"buffer":58,"randombytes":162}],48:[function(require,module,exports){
 module.exports = require('./browser/algorithms.json')
 
-},{"./browser/algorithms.json":69}],69:[function(require,module,exports){
+},{"./browser/algorithms.json":49}],49:[function(require,module,exports){
 module.exports={
   "sha224WithRSAEncryption": {
     "sign": "rsa",
@@ -9581,7 +7273,7 @@ module.exports={
   }
 }
 
-},{}],70:[function(require,module,exports){
+},{}],50:[function(require,module,exports){
 module.exports={
   "1.3.132.0.10": "secp256k1",
   "1.3.132.0.33": "p224",
@@ -9591,7 +7283,7 @@ module.exports={
   "1.3.132.0.35": "p521"
 }
 
-},{}],71:[function(require,module,exports){
+},{}],51:[function(require,module,exports){
 (function (Buffer){
 var createHash = require('create-hash')
 var stream = require('stream')
@@ -9686,7 +7378,7 @@ module.exports = {
 }
 
 }).call(this,require("buffer").Buffer)
-},{"./algorithms.json":69,"./sign":72,"./verify":73,"buffer":78,"create-hash":85,"inherits":154,"stream":214}],72:[function(require,module,exports){
+},{"./algorithms.json":49,"./sign":52,"./verify":53,"buffer":58,"create-hash":65,"inherits":131,"stream":190}],52:[function(require,module,exports){
 (function (Buffer){
 // much of this based on https://github.com/indutny/self-signed/blob/gh-pages/lib/rsa.js
 var createHmac = require('create-hmac')
@@ -9835,7 +7527,7 @@ module.exports.getKey = getKey
 module.exports.makeKey = makeKey
 
 }).call(this,require("buffer").Buffer)
-},{"./curves.json":70,"bn.js":43,"browserify-rsa":67,"buffer":78,"create-hmac":87,"elliptic":100,"parse-asn1":167}],73:[function(require,module,exports){
+},{"./curves.json":50,"bn.js":23,"browserify-rsa":47,"buffer":58,"create-hmac":67,"elliptic":80,"parse-asn1":143}],53:[function(require,module,exports){
 (function (Buffer){
 // much of this based on https://github.com/indutny/self-signed/blob/gh-pages/lib/rsa.js
 var BN = require('bn.js')
@@ -9922,7 +7614,7 @@ function checkValue (b, q) {
 module.exports = verify
 
 }).call(this,require("buffer").Buffer)
-},{"./curves.json":70,"bn.js":43,"buffer":78,"elliptic":100,"parse-asn1":167}],74:[function(require,module,exports){
+},{"./curves.json":50,"bn.js":23,"buffer":58,"elliptic":80,"parse-asn1":143}],54:[function(require,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -10225,7 +7917,7 @@ function isUndefined(arg) {
   return arg === void 0;
 }
 
-},{}],75:[function(require,module,exports){
+},{}],55:[function(require,module,exports){
 (function (global){
 /*! http://mths.be/punycode v1.2.4 by @mathias */
 ;(function(root) {
@@ -10736,7 +8428,7 @@ function isUndefined(arg) {
 }(this));
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],76:[function(require,module,exports){
+},{}],56:[function(require,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -10959,7 +8651,7 @@ function base64DetectIncompleteChar(buffer) {
   this.charLength = this.charReceived ? 3 : 0;
 }
 
-},{"buffer":78}],77:[function(require,module,exports){
+},{"buffer":58}],57:[function(require,module,exports){
 (function (Buffer){
 module.exports = function xor (a, b) {
   var length = Math.min(a.length, b.length)
@@ -10973,7 +8665,7 @@ module.exports = function xor (a, b) {
 }
 
 }).call(this,require("buffer").Buffer)
-},{"buffer":78}],78:[function(require,module,exports){
+},{"buffer":58}],58:[function(require,module,exports){
 (function (global){
 /*!
  * The buffer module from node.js, for the browser.
@@ -12525,7 +10217,7 @@ function blitBuffer (src, dst, offset, length) {
 }
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"base64-js":41,"ieee754":152,"isarray":156}],79:[function(require,module,exports){
+},{"base64-js":21,"ieee754":129,"isarray":133}],59:[function(require,module,exports){
 var Buffer = require('safe-buffer').Buffer
 var Transform = require('stream').Transform
 var StringDecoder = require('string_decoder').StringDecoder
@@ -12626,7 +10318,7 @@ CipherBase.prototype._toString = function (value, enc, fin) {
 
 module.exports = CipherBase
 
-},{"inherits":154,"safe-buffer":189,"stream":214,"string_decoder":76}],80:[function(require,module,exports){
+},{"inherits":131,"safe-buffer":165,"stream":190,"string_decoder":56}],60:[function(require,module,exports){
 /**
  * Slice reference.
  */
@@ -12651,7 +10343,7 @@ module.exports = function(obj, fn){
   }
 };
 
-},{}],81:[function(require,module,exports){
+},{}],61:[function(require,module,exports){
 
 /**
  * Expose `Emitter`.
@@ -12816,7 +10508,7 @@ Emitter.prototype.hasListeners = function(event){
   return !! this.listeners(event).length;
 };
 
-},{}],82:[function(require,module,exports){
+},{}],62:[function(require,module,exports){
 
 module.exports = function(a, b){
   var fn = function(){};
@@ -12824,7 +10516,7 @@ module.exports = function(a, b){
   a.prototype = new fn;
   a.prototype.constructor = a;
 };
-},{}],83:[function(require,module,exports){
+},{}],63:[function(require,module,exports){
 (function (Buffer){
 // Copyright Joyent, Inc. and other Node contributors.
 //
@@ -12935,7 +10627,7 @@ function objectToString(o) {
 }
 
 }).call(this,{"isBuffer":require("../../is-buffer/index.js")})
-},{"../../is-buffer/index.js":155}],84:[function(require,module,exports){
+},{"../../is-buffer/index.js":132}],64:[function(require,module,exports){
 (function (Buffer){
 var elliptic = require('elliptic')
 var BN = require('bn.js')
@@ -13063,7 +10755,7 @@ function formatReturnValue (bn, enc, len) {
 }
 
 }).call(this,require("buffer").Buffer)
-},{"bn.js":43,"buffer":78,"elliptic":100}],85:[function(require,module,exports){
+},{"bn.js":23,"buffer":58,"elliptic":80}],65:[function(require,module,exports){
 'use strict'
 var inherits = require('inherits')
 var MD5 = require('md5.js')
@@ -13095,14 +10787,14 @@ module.exports = function createHash (alg) {
   return new Hash(sha(alg))
 }
 
-},{"cipher-base":79,"inherits":154,"md5.js":159,"ripemd160":188,"sha.js":191}],86:[function(require,module,exports){
+},{"cipher-base":59,"inherits":131,"md5.js":135,"ripemd160":164,"sha.js":167}],66:[function(require,module,exports){
 var MD5 = require('md5.js')
 
 module.exports = function (buffer) {
   return new MD5().update(buffer).digest()
 }
 
-},{"md5.js":159}],87:[function(require,module,exports){
+},{"md5.js":135}],67:[function(require,module,exports){
 'use strict'
 var inherits = require('inherits')
 var Legacy = require('./legacy')
@@ -13166,7 +10858,7 @@ module.exports = function createHmac (alg, key) {
   return new Hmac(alg, key)
 }
 
-},{"./legacy":88,"cipher-base":79,"create-hash/md5":86,"inherits":154,"ripemd160":188,"safe-buffer":189,"sha.js":191}],88:[function(require,module,exports){
+},{"./legacy":68,"cipher-base":59,"create-hash/md5":66,"inherits":131,"ripemd160":164,"safe-buffer":165,"sha.js":167}],68:[function(require,module,exports){
 'use strict'
 var inherits = require('inherits')
 var Buffer = require('safe-buffer').Buffer
@@ -13214,7 +10906,7 @@ Hmac.prototype._final = function () {
 }
 module.exports = Hmac
 
-},{"cipher-base":79,"inherits":154,"safe-buffer":189}],89:[function(require,module,exports){
+},{"cipher-base":59,"inherits":131,"safe-buffer":165}],69:[function(require,module,exports){
 'use strict'
 
 exports.randomBytes = exports.rng = exports.pseudoRandomBytes = exports.prng = require('randombytes')
@@ -13313,7 +11005,7 @@ exports.constants = {
   'POINT_CONVERSION_HYBRID': 6
 }
 
-},{"browserify-cipher":63,"browserify-sign":71,"browserify-sign/algos":68,"create-ecdh":84,"create-hash":85,"create-hmac":87,"diffie-hellman":96,"pbkdf2":171,"public-encrypt":177,"randombytes":186,"randomfill":187}],90:[function(require,module,exports){
+},{"browserify-cipher":43,"browserify-sign":51,"browserify-sign/algos":48,"create-ecdh":64,"create-hash":65,"create-hmac":67,"diffie-hellman":76,"pbkdf2":147,"public-encrypt":153,"randombytes":162,"randomfill":163}],70:[function(require,module,exports){
 'use strict';
 
 exports.utils = require('./des/utils');
@@ -13322,7 +11014,7 @@ exports.DES = require('./des/des');
 exports.CBC = require('./des/cbc');
 exports.EDE = require('./des/ede');
 
-},{"./des/cbc":91,"./des/cipher":92,"./des/des":93,"./des/ede":94,"./des/utils":95}],91:[function(require,module,exports){
+},{"./des/cbc":71,"./des/cipher":72,"./des/des":73,"./des/ede":74,"./des/utils":75}],71:[function(require,module,exports){
 'use strict';
 
 var assert = require('minimalistic-assert');
@@ -13389,7 +11081,7 @@ proto._update = function _update(inp, inOff, out, outOff) {
   }
 };
 
-},{"inherits":154,"minimalistic-assert":161}],92:[function(require,module,exports){
+},{"inherits":131,"minimalistic-assert":137}],72:[function(require,module,exports){
 'use strict';
 
 var assert = require('minimalistic-assert');
@@ -13532,7 +11224,7 @@ Cipher.prototype._finalDecrypt = function _finalDecrypt() {
   return this._unpad(out);
 };
 
-},{"minimalistic-assert":161}],93:[function(require,module,exports){
+},{"minimalistic-assert":137}],73:[function(require,module,exports){
 'use strict';
 
 var assert = require('minimalistic-assert');
@@ -13677,7 +11369,7 @@ DES.prototype._decrypt = function _decrypt(state, lStart, rStart, out, off) {
   utils.rip(l, r, out, off);
 };
 
-},{"../des":90,"inherits":154,"minimalistic-assert":161}],94:[function(require,module,exports){
+},{"../des":70,"inherits":131,"minimalistic-assert":137}],74:[function(require,module,exports){
 'use strict';
 
 var assert = require('minimalistic-assert');
@@ -13734,7 +11426,7 @@ EDE.prototype._update = function _update(inp, inOff, out, outOff) {
 EDE.prototype._pad = DES.prototype._pad;
 EDE.prototype._unpad = DES.prototype._unpad;
 
-},{"../des":90,"inherits":154,"minimalistic-assert":161}],95:[function(require,module,exports){
+},{"../des":70,"inherits":131,"minimalistic-assert":137}],75:[function(require,module,exports){
 'use strict';
 
 exports.readUInt32BE = function readUInt32BE(bytes, off) {
@@ -13992,7 +11684,7 @@ exports.padSplit = function padSplit(num, size, group) {
   return out.join(' ');
 };
 
-},{}],96:[function(require,module,exports){
+},{}],76:[function(require,module,exports){
 (function (Buffer){
 var generatePrime = require('./lib/generatePrime')
 var primes = require('./lib/primes.json')
@@ -14038,7 +11730,7 @@ exports.DiffieHellmanGroup = exports.createDiffieHellmanGroup = exports.getDiffi
 exports.createDiffieHellman = exports.DiffieHellman = createDiffieHellman
 
 }).call(this,require("buffer").Buffer)
-},{"./lib/dh":97,"./lib/generatePrime":98,"./lib/primes.json":99,"buffer":78}],97:[function(require,module,exports){
+},{"./lib/dh":77,"./lib/generatePrime":78,"./lib/primes.json":79,"buffer":58}],77:[function(require,module,exports){
 (function (Buffer){
 var BN = require('bn.js');
 var MillerRabin = require('miller-rabin');
@@ -14206,7 +11898,7 @@ function formatReturnValue(bn, enc) {
 }
 
 }).call(this,require("buffer").Buffer)
-},{"./generatePrime":98,"bn.js":43,"buffer":78,"miller-rabin":160,"randombytes":186}],98:[function(require,module,exports){
+},{"./generatePrime":78,"bn.js":23,"buffer":58,"miller-rabin":136,"randombytes":162}],78:[function(require,module,exports){
 var randomBytes = require('randombytes');
 module.exports = findPrime;
 findPrime.simpleSieve = simpleSieve;
@@ -14313,7 +12005,7 @@ function findPrime(bits, gen) {
 
 }
 
-},{"bn.js":43,"miller-rabin":160,"randombytes":186}],99:[function(require,module,exports){
+},{"bn.js":23,"miller-rabin":136,"randombytes":162}],79:[function(require,module,exports){
 module.exports={
     "modp1": {
         "gen": "02",
@@ -14348,7 +12040,7 @@ module.exports={
         "prime": "ffffffffffffffffc90fdaa22168c234c4c6628b80dc1cd129024e088a67cc74020bbea63b139b22514a08798e3404ddef9519b3cd3a431b302b0a6df25f14374fe1356d6d51c245e485b576625e7ec6f44c42e9a637ed6b0bff5cb6f406b7edee386bfb5a899fa5ae9f24117c4b1fe649286651ece45b3dc2007cb8a163bf0598da48361c55d39a69163fa8fd24cf5f83655d23dca3ad961c62f356208552bb9ed529077096966d670c354e4abc9804f1746c08ca18217c32905e462e36ce3be39e772c180e86039b2783a2ec07a28fb5c55df06f4c52c9de2bcbf6955817183995497cea956ae515d2261898fa051015728e5a8aaac42dad33170d04507a33a85521abdf1cba64ecfb850458dbef0a8aea71575d060c7db3970f85a6e1e4c7abf5ae8cdb0933d71e8c94e04a25619dcee3d2261ad2ee6bf12ffa06d98a0864d87602733ec86a64521f2b18177b200cbbe117577a615d6c770988c0bad946e208e24fa074e5ab3143db5bfce0fd108e4b82d120a92108011a723c12a787e6d788719a10bdba5b2699c327186af4e23c1a946834b6150bda2583e9ca2ad44ce8dbbbc2db04de8ef92e8efc141fbecaa6287c59474e6bc05d99b2964fa090c3a2233ba186515be7ed1f612970cee2d7afb81bdd762170481cd0069127d5b05aa993b4ea988d8fddc186ffb7dc90a6c08f4df435c93402849236c3fab4d27c7026c1d4dcb2602646dec9751e763dba37bdf8ff9406ad9e530ee5db382f413001aeb06a53ed9027d831179727b0865a8918da3edbebcf9b14ed44ce6cbaced4bb1bdb7f1447e6cc254b332051512bd7af426fb8f401378cd2bf5983ca01c64b92ecf032ea15d1721d03f482d7ce6e74fef6d55e702f46980c82b5a84031900b1c9e59e7c97fbec7e8f323a97a7e36cc88be0f1d45b7ff585ac54bd407b22b4154aacc8f6d7ebf48e1d814cc5ed20f8037e0a79715eef29be32806a1d58bb7c5da76f550aa3d8a1fbff0eb19ccb1a313d55cda56c9ec2ef29632387fe8d76e3c0468043e8f663f4860ee12bf2d5b0b7474d6e694f91e6dbe115974a3926f12fee5e438777cb6a932df8cd8bec4d073b931ba3bc832b68d9dd300741fa7bf8afc47ed2576f6936ba424663aab639c5ae4f5683423b4742bf1c978238f16cbe39d652de3fdb8befc848ad922222e04a4037c0713eb57a81a23f0c73473fc646cea306b4bcbc8862f8385ddfa9d4b7fa2c087e879683303ed5bdd3a062b3cf5b3a278a66d2a13f83f44f82ddf310ee074ab6a364597e899a0255dc164f31cc50846851df9ab48195ded7ea1b1d510bd7ee74d73faf36bc31ecfa268359046f4eb879f924009438b481c6cd7889a002ed5ee382bc9190da6fc026e479558e4475677e9aa9e3050e2765694dfc81f56e880b96e7160c980dd98edd3dfffffffffffffffff"
     }
 }
-},{}],100:[function(require,module,exports){
+},{}],80:[function(require,module,exports){
 'use strict';
 
 var elliptic = exports;
@@ -14363,7 +12055,7 @@ elliptic.curves = require('./elliptic/curves');
 elliptic.ec = require('./elliptic/ec');
 elliptic.eddsa = require('./elliptic/eddsa');
 
-},{"../package.json":115,"./elliptic/curve":103,"./elliptic/curves":106,"./elliptic/ec":107,"./elliptic/eddsa":110,"./elliptic/utils":114,"brorand":44}],101:[function(require,module,exports){
+},{"../package.json":95,"./elliptic/curve":83,"./elliptic/curves":86,"./elliptic/ec":87,"./elliptic/eddsa":90,"./elliptic/utils":94,"brorand":24}],81:[function(require,module,exports){
 'use strict';
 
 var BN = require('bn.js');
@@ -14740,7 +12432,7 @@ BasePoint.prototype.dblp = function dblp(k) {
   return r;
 };
 
-},{"../../elliptic":100,"bn.js":43}],102:[function(require,module,exports){
+},{"../../elliptic":80,"bn.js":23}],82:[function(require,module,exports){
 'use strict';
 
 var curve = require('../curve');
@@ -15175,7 +12867,7 @@ Point.prototype.eqXToP = function eqXToP(x) {
 Point.prototype.toP = Point.prototype.normalize;
 Point.prototype.mixedAdd = Point.prototype.add;
 
-},{"../../elliptic":100,"../curve":103,"bn.js":43,"inherits":154}],103:[function(require,module,exports){
+},{"../../elliptic":80,"../curve":83,"bn.js":23,"inherits":131}],83:[function(require,module,exports){
 'use strict';
 
 var curve = exports;
@@ -15185,7 +12877,7 @@ curve.short = require('./short');
 curve.mont = require('./mont');
 curve.edwards = require('./edwards');
 
-},{"./base":101,"./edwards":102,"./mont":104,"./short":105}],104:[function(require,module,exports){
+},{"./base":81,"./edwards":82,"./mont":84,"./short":85}],84:[function(require,module,exports){
 'use strict';
 
 var curve = require('../curve');
@@ -15367,7 +13059,7 @@ Point.prototype.getX = function getX() {
   return this.x.fromRed();
 };
 
-},{"../../elliptic":100,"../curve":103,"bn.js":43,"inherits":154}],105:[function(require,module,exports){
+},{"../../elliptic":80,"../curve":83,"bn.js":23,"inherits":131}],85:[function(require,module,exports){
 'use strict';
 
 var curve = require('../curve');
@@ -16307,7 +13999,7 @@ JPoint.prototype.isInfinity = function isInfinity() {
   return this.z.cmpn(0) === 0;
 };
 
-},{"../../elliptic":100,"../curve":103,"bn.js":43,"inherits":154}],106:[function(require,module,exports){
+},{"../../elliptic":80,"../curve":83,"bn.js":23,"inherits":131}],86:[function(require,module,exports){
 'use strict';
 
 var curves = exports;
@@ -16514,7 +14206,7 @@ defineCurve('secp256k1', {
   ]
 });
 
-},{"../elliptic":100,"./precomputed/secp256k1":113,"hash.js":139}],107:[function(require,module,exports){
+},{"../elliptic":80,"./precomputed/secp256k1":93,"hash.js":116}],87:[function(require,module,exports){
 'use strict';
 
 var BN = require('bn.js');
@@ -16756,7 +14448,7 @@ EC.prototype.getKeyRecoveryParam = function(e, signature, Q, enc) {
   throw new Error('Unable to find valid recovery factor');
 };
 
-},{"../../elliptic":100,"./key":108,"./signature":109,"bn.js":43,"hmac-drbg":151}],108:[function(require,module,exports){
+},{"../../elliptic":80,"./key":88,"./signature":89,"bn.js":23,"hmac-drbg":128}],88:[function(require,module,exports){
 'use strict';
 
 var BN = require('bn.js');
@@ -16877,7 +14569,7 @@ KeyPair.prototype.inspect = function inspect() {
          ' pub: ' + (this.pub && this.pub.inspect()) + ' >';
 };
 
-},{"../../elliptic":100,"bn.js":43}],109:[function(require,module,exports){
+},{"../../elliptic":80,"bn.js":23}],89:[function(require,module,exports){
 'use strict';
 
 var BN = require('bn.js');
@@ -17014,7 +14706,7 @@ Signature.prototype.toDER = function toDER(enc) {
   return utils.encode(res, enc);
 };
 
-},{"../../elliptic":100,"bn.js":43}],110:[function(require,module,exports){
+},{"../../elliptic":80,"bn.js":23}],90:[function(require,module,exports){
 'use strict';
 
 var hash = require('hash.js');
@@ -17134,7 +14826,7 @@ EDDSA.prototype.isPoint = function isPoint(val) {
   return val instanceof this.pointClass;
 };
 
-},{"../../elliptic":100,"./key":111,"./signature":112,"hash.js":139}],111:[function(require,module,exports){
+},{"../../elliptic":80,"./key":91,"./signature":92,"hash.js":116}],91:[function(require,module,exports){
 'use strict';
 
 var elliptic = require('../../elliptic');
@@ -17232,7 +14924,7 @@ KeyPair.prototype.getPublic = function getPublic(enc) {
 
 module.exports = KeyPair;
 
-},{"../../elliptic":100}],112:[function(require,module,exports){
+},{"../../elliptic":80}],92:[function(require,module,exports){
 'use strict';
 
 var BN = require('bn.js');
@@ -17300,7 +14992,7 @@ Signature.prototype.toHex = function toHex() {
 
 module.exports = Signature;
 
-},{"../../elliptic":100,"bn.js":43}],113:[function(require,module,exports){
+},{"../../elliptic":80,"bn.js":23}],93:[function(require,module,exports){
 module.exports = {
   doubles: {
     step: 4,
@@ -18082,7 +15774,7 @@ module.exports = {
   }
 };
 
-},{}],114:[function(require,module,exports){
+},{}],94:[function(require,module,exports){
 'use strict';
 
 var utils = exports;
@@ -18204,7 +15896,7 @@ function intFromLE(bytes) {
 utils.intFromLE = intFromLE;
 
 
-},{"bn.js":43,"minimalistic-assert":161,"minimalistic-crypto-utils":162}],115:[function(require,module,exports){
+},{"bn.js":23,"minimalistic-assert":137,"minimalistic-crypto-utils":138}],95:[function(require,module,exports){
 module.exports={
   "_args": [
     [
@@ -18297,11 +15989,11 @@ module.exports={
   "version": "6.4.0"
 }
 
-},{}],116:[function(require,module,exports){
+},{}],96:[function(require,module,exports){
 
 module.exports = require('./lib/index');
 
-},{"./lib/index":117}],117:[function(require,module,exports){
+},{"./lib/index":97}],97:[function(require,module,exports){
 
 module.exports = require('./socket');
 
@@ -18313,7 +16005,7 @@ module.exports = require('./socket');
  */
 module.exports.parser = require('engine.io-parser');
 
-},{"./socket":118,"engine.io-parser":129}],118:[function(require,module,exports){
+},{"./socket":98,"engine.io-parser":109}],98:[function(require,module,exports){
 (function (global){
 /**
  * Module dependencies.
@@ -19055,7 +16747,7 @@ Socket.prototype.filterUpgrades = function (upgrades) {
 };
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./transport":119,"./transports/index":120,"component-emitter":81,"debug":126,"engine.io-parser":129,"indexof":153,"parsejson":168,"parseqs":169,"parseuri":170}],119:[function(require,module,exports){
+},{"./transport":99,"./transports/index":100,"component-emitter":61,"debug":106,"engine.io-parser":109,"indexof":130,"parsejson":144,"parseqs":145,"parseuri":146}],99:[function(require,module,exports){
 /**
  * Module dependencies.
  */
@@ -19214,7 +16906,7 @@ Transport.prototype.onClose = function () {
   this.emit('close');
 };
 
-},{"component-emitter":81,"engine.io-parser":129}],120:[function(require,module,exports){
+},{"component-emitter":61,"engine.io-parser":109}],100:[function(require,module,exports){
 (function (global){
 /**
  * Module dependencies
@@ -19271,7 +16963,7 @@ function polling (opts) {
 }
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./polling-jsonp":121,"./polling-xhr":122,"./websocket":124,"xmlhttprequest-ssl":125}],121:[function(require,module,exports){
+},{"./polling-jsonp":101,"./polling-xhr":102,"./websocket":104,"xmlhttprequest-ssl":105}],101:[function(require,module,exports){
 (function (global){
 
 /**
@@ -19506,7 +17198,7 @@ JSONPPolling.prototype.doWrite = function (data, fn) {
 };
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./polling":123,"component-inherit":82}],122:[function(require,module,exports){
+},{"./polling":103,"component-inherit":62}],102:[function(require,module,exports){
 (function (global){
 /**
  * Module requirements.
@@ -19934,7 +17626,7 @@ function unloadHandler () {
 }
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./polling":123,"component-emitter":81,"component-inherit":82,"debug":126,"xmlhttprequest-ssl":125}],123:[function(require,module,exports){
+},{"./polling":103,"component-emitter":61,"component-inherit":62,"debug":106,"xmlhttprequest-ssl":105}],103:[function(require,module,exports){
 /**
  * Module dependencies.
  */
@@ -20181,7 +17873,7 @@ Polling.prototype.uri = function () {
   return schema + '://' + (ipv6 ? '[' + this.hostname + ']' : this.hostname) + port + this.path + query;
 };
 
-},{"../transport":119,"component-inherit":82,"debug":126,"engine.io-parser":129,"parseqs":169,"xmlhttprequest-ssl":125,"yeast":231}],124:[function(require,module,exports){
+},{"../transport":99,"component-inherit":62,"debug":106,"engine.io-parser":109,"parseqs":145,"xmlhttprequest-ssl":105,"yeast":207}],104:[function(require,module,exports){
 (function (global){
 /**
  * Module dependencies.
@@ -20470,7 +18162,7 @@ WS.prototype.check = function () {
 };
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../transport":119,"component-inherit":82,"debug":126,"engine.io-parser":129,"parseqs":169,"ws":45,"yeast":231}],125:[function(require,module,exports){
+},{"../transport":99,"component-inherit":62,"debug":106,"engine.io-parser":109,"parseqs":145,"ws":25,"yeast":207}],105:[function(require,module,exports){
 (function (global){
 // browser shim for xmlhttprequest module
 
@@ -20511,7 +18203,7 @@ module.exports = function (opts) {
 };
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"has-cors":137}],126:[function(require,module,exports){
+},{"has-cors":114}],106:[function(require,module,exports){
 (function (process){
 
 /**
@@ -20692,7 +18384,7 @@ function localstorage(){
 }
 
 }).call(this,require('_process'))
-},{"./debug":127,"_process":176}],127:[function(require,module,exports){
+},{"./debug":107,"_process":152}],107:[function(require,module,exports){
 
 /**
  * This is the common logic for both the Node.js and web browser
@@ -20894,7 +18586,7 @@ function coerce(val) {
   return val;
 }
 
-},{"ms":128}],128:[function(require,module,exports){
+},{"ms":108}],108:[function(require,module,exports){
 /**
  * Helpers.
  */
@@ -21045,7 +18737,7 @@ function plural(ms, n, name) {
   return Math.ceil(ms / n) + ' ' + name + 's'
 }
 
-},{}],129:[function(require,module,exports){
+},{}],109:[function(require,module,exports){
 (function (global){
 /**
  * Module dependencies.
@@ -21658,7 +19350,7 @@ exports.decodePayloadAsBinary = function (data, binaryType, callback) {
 };
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./keys":130,"after":23,"arraybuffer.slice":24,"base64-arraybuffer":40,"blob":42,"has-binary":135,"wtf-8":230}],130:[function(require,module,exports){
+},{"./keys":110,"after":3,"arraybuffer.slice":4,"base64-arraybuffer":20,"blob":22,"has-binary":112,"wtf-8":206}],110:[function(require,module,exports){
 
 /**
  * Gets the keys for an object.
@@ -21679,7 +19371,7 @@ module.exports = Object.keys || function keys (obj){
   return arr;
 };
 
-},{}],131:[function(require,module,exports){
+},{}],111:[function(require,module,exports){
 var Buffer = require('safe-buffer').Buffer
 var MD5 = require('md5.js')
 
@@ -21726,305 +19418,7 @@ function EVP_BytesToKey (password, salt, keyBits, ivLen) {
 
 module.exports = EVP_BytesToKey
 
-},{"md5.js":159,"safe-buffer":189}],132:[function(require,module,exports){
-(function (process){
-/**
- * Copyright 2013-2015, Facebook, Inc.
- * All rights reserved.
- *
- * This source code is licensed under the BSD-style license found in the
- * LICENSE file in the root directory of this source tree. An additional grant
- * of patent rights can be found in the PATENTS file in the same directory.
- *
- * @providesModule invariant
- */
-
-"use strict";
-
-/**
- * Use invariant() to assert state which your program assumes to be true.
- *
- * Provide sprintf-style format (only %s is supported) and arguments
- * to provide information about what broke and what you were
- * expecting.
- *
- * The invariant message will be stripped in production, but the invariant
- * will remain to ensure logic does not differ in production.
- */
-
-var invariant = function (condition, format, a, b, c, d, e, f) {
-  if (process.env.NODE_ENV !== 'production') {
-    if (format === undefined) {
-      throw new Error('invariant requires an error message argument');
-    }
-  }
-
-  if (!condition) {
-    var error;
-    if (format === undefined) {
-      error = new Error('Minified exception occurred; use the non-minified dev environment ' + 'for the full error message and additional helpful warnings.');
-    } else {
-      var args = [a, b, c, d, e, f];
-      var argIndex = 0;
-      error = new Error('Invariant Violation: ' + format.replace(/%s/g, function () {
-        return args[argIndex++];
-      }));
-    }
-
-    error.framesToPop = 1; // we don't care about invariant's own frame
-    throw error;
-  }
-};
-
-module.exports = invariant;
-}).call(this,require('_process'))
-},{"_process":176}],133:[function(require,module,exports){
-/**
- * Copyright (c) 2014-2015, Facebook, Inc.
- * All rights reserved.
- *
- * This source code is licensed under the BSD-style license found in the
- * LICENSE file in the root directory of this source tree. An additional grant
- * of patent rights can be found in the PATENTS file in the same directory.
- */
-
-module.exports.Dispatcher = require('./lib/Dispatcher');
-
-},{"./lib/Dispatcher":134}],134:[function(require,module,exports){
-(function (process){
-/**
- * Copyright (c) 2014-2015, Facebook, Inc.
- * All rights reserved.
- *
- * This source code is licensed under the BSD-style license found in the
- * LICENSE file in the root directory of this source tree. An additional grant
- * of patent rights can be found in the PATENTS file in the same directory.
- *
- * @providesModule Dispatcher
- * 
- * @preventMunge
- */
-
-'use strict';
-
-exports.__esModule = true;
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError('Cannot call a class as a function'); } }
-
-var invariant = require('fbjs/lib/invariant');
-
-var _prefix = 'ID_';
-
-/**
- * Dispatcher is used to broadcast payloads to registered callbacks. This is
- * different from generic pub-sub systems in two ways:
- *
- *   1) Callbacks are not subscribed to particular events. Every payload is
- *      dispatched to every registered callback.
- *   2) Callbacks can be deferred in whole or part until other callbacks have
- *      been executed.
- *
- * For example, consider this hypothetical flight destination form, which
- * selects a default city when a country is selected:
- *
- *   var flightDispatcher = new Dispatcher();
- *
- *   // Keeps track of which country is selected
- *   var CountryStore = {country: null};
- *
- *   // Keeps track of which city is selected
- *   var CityStore = {city: null};
- *
- *   // Keeps track of the base flight price of the selected city
- *   var FlightPriceStore = {price: null}
- *
- * When a user changes the selected city, we dispatch the payload:
- *
- *   flightDispatcher.dispatch({
- *     actionType: 'city-update',
- *     selectedCity: 'paris'
- *   });
- *
- * This payload is digested by `CityStore`:
- *
- *   flightDispatcher.register(function(payload) {
- *     if (payload.actionType === 'city-update') {
- *       CityStore.city = payload.selectedCity;
- *     }
- *   });
- *
- * When the user selects a country, we dispatch the payload:
- *
- *   flightDispatcher.dispatch({
- *     actionType: 'country-update',
- *     selectedCountry: 'australia'
- *   });
- *
- * This payload is digested by both stores:
- *
- *   CountryStore.dispatchToken = flightDispatcher.register(function(payload) {
- *     if (payload.actionType === 'country-update') {
- *       CountryStore.country = payload.selectedCountry;
- *     }
- *   });
- *
- * When the callback to update `CountryStore` is registered, we save a reference
- * to the returned token. Using this token with `waitFor()`, we can guarantee
- * that `CountryStore` is updated before the callback that updates `CityStore`
- * needs to query its data.
- *
- *   CityStore.dispatchToken = flightDispatcher.register(function(payload) {
- *     if (payload.actionType === 'country-update') {
- *       // `CountryStore.country` may not be updated.
- *       flightDispatcher.waitFor([CountryStore.dispatchToken]);
- *       // `CountryStore.country` is now guaranteed to be updated.
- *
- *       // Select the default city for the new country
- *       CityStore.city = getDefaultCityForCountry(CountryStore.country);
- *     }
- *   });
- *
- * The usage of `waitFor()` can be chained, for example:
- *
- *   FlightPriceStore.dispatchToken =
- *     flightDispatcher.register(function(payload) {
- *       switch (payload.actionType) {
- *         case 'country-update':
- *         case 'city-update':
- *           flightDispatcher.waitFor([CityStore.dispatchToken]);
- *           FlightPriceStore.price =
- *             getFlightPriceStore(CountryStore.country, CityStore.city);
- *           break;
- *     }
- *   });
- *
- * The `country-update` payload will be guaranteed to invoke the stores'
- * registered callbacks in order: `CountryStore`, `CityStore`, then
- * `FlightPriceStore`.
- */
-
-var Dispatcher = (function () {
-  function Dispatcher() {
-    _classCallCheck(this, Dispatcher);
-
-    this._callbacks = {};
-    this._isDispatching = false;
-    this._isHandled = {};
-    this._isPending = {};
-    this._lastID = 1;
-  }
-
-  /**
-   * Registers a callback to be invoked with every dispatched payload. Returns
-   * a token that can be used with `waitFor()`.
-   */
-
-  Dispatcher.prototype.register = function register(callback) {
-    var id = _prefix + this._lastID++;
-    this._callbacks[id] = callback;
-    return id;
-  };
-
-  /**
-   * Removes a callback based on its token.
-   */
-
-  Dispatcher.prototype.unregister = function unregister(id) {
-    !this._callbacks[id] ? process.env.NODE_ENV !== 'production' ? invariant(false, 'Dispatcher.unregister(...): `%s` does not map to a registered callback.', id) : invariant(false) : undefined;
-    delete this._callbacks[id];
-  };
-
-  /**
-   * Waits for the callbacks specified to be invoked before continuing execution
-   * of the current callback. This method should only be used by a callback in
-   * response to a dispatched payload.
-   */
-
-  Dispatcher.prototype.waitFor = function waitFor(ids) {
-    !this._isDispatching ? process.env.NODE_ENV !== 'production' ? invariant(false, 'Dispatcher.waitFor(...): Must be invoked while dispatching.') : invariant(false) : undefined;
-    for (var ii = 0; ii < ids.length; ii++) {
-      var id = ids[ii];
-      if (this._isPending[id]) {
-        !this._isHandled[id] ? process.env.NODE_ENV !== 'production' ? invariant(false, 'Dispatcher.waitFor(...): Circular dependency detected while ' + 'waiting for `%s`.', id) : invariant(false) : undefined;
-        continue;
-      }
-      !this._callbacks[id] ? process.env.NODE_ENV !== 'production' ? invariant(false, 'Dispatcher.waitFor(...): `%s` does not map to a registered callback.', id) : invariant(false) : undefined;
-      this._invokeCallback(id);
-    }
-  };
-
-  /**
-   * Dispatches a payload to all registered callbacks.
-   */
-
-  Dispatcher.prototype.dispatch = function dispatch(payload) {
-    !!this._isDispatching ? process.env.NODE_ENV !== 'production' ? invariant(false, 'Dispatch.dispatch(...): Cannot dispatch in the middle of a dispatch.') : invariant(false) : undefined;
-    this._startDispatching(payload);
-    try {
-      for (var id in this._callbacks) {
-        if (this._isPending[id]) {
-          continue;
-        }
-        this._invokeCallback(id);
-      }
-    } finally {
-      this._stopDispatching();
-    }
-  };
-
-  /**
-   * Is this Dispatcher currently dispatching.
-   */
-
-  Dispatcher.prototype.isDispatching = function isDispatching() {
-    return this._isDispatching;
-  };
-
-  /**
-   * Call the callback stored with the given id. Also do some internal
-   * bookkeeping.
-   *
-   * @internal
-   */
-
-  Dispatcher.prototype._invokeCallback = function _invokeCallback(id) {
-    this._isPending[id] = true;
-    this._callbacks[id](this._pendingPayload);
-    this._isHandled[id] = true;
-  };
-
-  /**
-   * Set up bookkeeping needed when dispatching.
-   *
-   * @internal
-   */
-
-  Dispatcher.prototype._startDispatching = function _startDispatching(payload) {
-    for (var id in this._callbacks) {
-      this._isPending[id] = false;
-      this._isHandled[id] = false;
-    }
-    this._pendingPayload = payload;
-    this._isDispatching = true;
-  };
-
-  /**
-   * Clear bookkeeping used for dispatching.
-   *
-   * @internal
-   */
-
-  Dispatcher.prototype._stopDispatching = function _stopDispatching() {
-    delete this._pendingPayload;
-    this._isDispatching = false;
-  };
-
-  return Dispatcher;
-})();
-
-module.exports = Dispatcher;
-}).call(this,require('_process'))
-},{"_process":176,"fbjs/lib/invariant":132}],135:[function(require,module,exports){
+},{"md5.js":135,"safe-buffer":165}],112:[function(require,module,exports){
 (function (global){
 
 /*
@@ -22087,12 +19481,12 @@ function hasBinary(data) {
 }
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"isarray":136}],136:[function(require,module,exports){
+},{"isarray":113}],113:[function(require,module,exports){
 module.exports = Array.isArray || function (arr) {
   return Object.prototype.toString.call(arr) == '[object Array]';
 };
 
-},{}],137:[function(require,module,exports){
+},{}],114:[function(require,module,exports){
 
 /**
  * Module exports.
@@ -22111,7 +19505,7 @@ try {
   module.exports = false;
 }
 
-},{}],138:[function(require,module,exports){
+},{}],115:[function(require,module,exports){
 'use strict'
 var Buffer = require('safe-buffer').Buffer
 var Transform = require('stream').Transform
@@ -22208,7 +19602,7 @@ HashBase.prototype._digest = function () {
 
 module.exports = HashBase
 
-},{"inherits":154,"safe-buffer":189,"stream":214}],139:[function(require,module,exports){
+},{"inherits":131,"safe-buffer":165,"stream":190}],116:[function(require,module,exports){
 var hash = exports;
 
 hash.utils = require('./hash/utils');
@@ -22225,7 +19619,7 @@ hash.sha384 = hash.sha.sha384;
 hash.sha512 = hash.sha.sha512;
 hash.ripemd160 = hash.ripemd.ripemd160;
 
-},{"./hash/common":140,"./hash/hmac":141,"./hash/ripemd":142,"./hash/sha":143,"./hash/utils":150}],140:[function(require,module,exports){
+},{"./hash/common":117,"./hash/hmac":118,"./hash/ripemd":119,"./hash/sha":120,"./hash/utils":127}],117:[function(require,module,exports){
 'use strict';
 
 var utils = require('./utils');
@@ -22319,7 +19713,7 @@ BlockHash.prototype._pad = function pad() {
   return res;
 };
 
-},{"./utils":150,"minimalistic-assert":161}],141:[function(require,module,exports){
+},{"./utils":127,"minimalistic-assert":137}],118:[function(require,module,exports){
 'use strict';
 
 var utils = require('./utils');
@@ -22368,7 +19762,7 @@ Hmac.prototype.digest = function digest(enc) {
   return this.outer.digest(enc);
 };
 
-},{"./utils":150,"minimalistic-assert":161}],142:[function(require,module,exports){
+},{"./utils":127,"minimalistic-assert":137}],119:[function(require,module,exports){
 'use strict';
 
 var utils = require('./utils');
@@ -22516,7 +19910,7 @@ var sh = [
   8, 5, 12, 9, 12, 5, 14, 6, 8, 13, 6, 5, 15, 13, 11, 11
 ];
 
-},{"./common":140,"./utils":150}],143:[function(require,module,exports){
+},{"./common":117,"./utils":127}],120:[function(require,module,exports){
 'use strict';
 
 exports.sha1 = require('./sha/1');
@@ -22525,7 +19919,7 @@ exports.sha256 = require('./sha/256');
 exports.sha384 = require('./sha/384');
 exports.sha512 = require('./sha/512');
 
-},{"./sha/1":144,"./sha/224":145,"./sha/256":146,"./sha/384":147,"./sha/512":148}],144:[function(require,module,exports){
+},{"./sha/1":121,"./sha/224":122,"./sha/256":123,"./sha/384":124,"./sha/512":125}],121:[function(require,module,exports){
 'use strict';
 
 var utils = require('../utils');
@@ -22601,7 +19995,7 @@ SHA1.prototype._digest = function digest(enc) {
     return utils.split32(this.h, 'big');
 };
 
-},{"../common":140,"../utils":150,"./common":149}],145:[function(require,module,exports){
+},{"../common":117,"../utils":127,"./common":126}],122:[function(require,module,exports){
 'use strict';
 
 var utils = require('../utils');
@@ -22633,7 +20027,7 @@ SHA224.prototype._digest = function digest(enc) {
 };
 
 
-},{"../utils":150,"./256":146}],146:[function(require,module,exports){
+},{"../utils":127,"./256":123}],123:[function(require,module,exports){
 'use strict';
 
 var utils = require('../utils');
@@ -22740,7 +20134,7 @@ SHA256.prototype._digest = function digest(enc) {
     return utils.split32(this.h, 'big');
 };
 
-},{"../common":140,"../utils":150,"./common":149,"minimalistic-assert":161}],147:[function(require,module,exports){
+},{"../common":117,"../utils":127,"./common":126,"minimalistic-assert":137}],124:[function(require,module,exports){
 'use strict';
 
 var utils = require('../utils');
@@ -22777,7 +20171,7 @@ SHA384.prototype._digest = function digest(enc) {
     return utils.split32(this.h.slice(0, 12), 'big');
 };
 
-},{"../utils":150,"./512":148}],148:[function(require,module,exports){
+},{"../utils":127,"./512":125}],125:[function(require,module,exports){
 'use strict';
 
 var utils = require('../utils');
@@ -23109,7 +20503,7 @@ function g1_512_lo(xh, xl) {
   return r;
 }
 
-},{"../common":140,"../utils":150,"minimalistic-assert":161}],149:[function(require,module,exports){
+},{"../common":117,"../utils":127,"minimalistic-assert":137}],126:[function(require,module,exports){
 'use strict';
 
 var utils = require('../utils');
@@ -23160,7 +20554,7 @@ function g1_256(x) {
 }
 exports.g1_256 = g1_256;
 
-},{"../utils":150}],150:[function(require,module,exports){
+},{"../utils":127}],127:[function(require,module,exports){
 'use strict';
 
 var assert = require('minimalistic-assert');
@@ -23415,7 +20809,7 @@ function shr64_lo(ah, al, num) {
 }
 exports.shr64_lo = shr64_lo;
 
-},{"inherits":154,"minimalistic-assert":161}],151:[function(require,module,exports){
+},{"inherits":131,"minimalistic-assert":137}],128:[function(require,module,exports){
 'use strict';
 
 var hash = require('hash.js');
@@ -23530,7 +20924,7 @@ HmacDRBG.prototype.generate = function generate(len, enc, add, addEnc) {
   return utils.encode(res, enc);
 };
 
-},{"hash.js":139,"minimalistic-assert":161,"minimalistic-crypto-utils":162}],152:[function(require,module,exports){
+},{"hash.js":116,"minimalistic-assert":137,"minimalistic-crypto-utils":138}],129:[function(require,module,exports){
 exports.read = function (buffer, offset, isLE, mLen, nBytes) {
   var e, m
   var eLen = (nBytes * 8) - mLen - 1
@@ -23616,7 +21010,7 @@ exports.write = function (buffer, value, offset, isLE, mLen, nBytes) {
   buffer[offset + i - d] |= s * 128
 }
 
-},{}],153:[function(require,module,exports){
+},{}],130:[function(require,module,exports){
 
 var indexOf = [].indexOf;
 
@@ -23627,7 +21021,7 @@ module.exports = function(arr, obj){
   }
   return -1;
 };
-},{}],154:[function(require,module,exports){
+},{}],131:[function(require,module,exports){
 if (typeof Object.create === 'function') {
   // implementation from standard node.js 'util' module
   module.exports = function inherits(ctor, superCtor) {
@@ -23652,7 +21046,7 @@ if (typeof Object.create === 'function') {
   }
 }
 
-},{}],155:[function(require,module,exports){
+},{}],132:[function(require,module,exports){
 /*!
  * Determine if an object is a Buffer
  *
@@ -23675,14 +21069,14 @@ function isSlowBuffer (obj) {
   return typeof obj.readFloatLE === 'function' && typeof obj.slice === 'function' && isBuffer(obj.slice(0, 0))
 }
 
-},{}],156:[function(require,module,exports){
+},{}],133:[function(require,module,exports){
 var toString = {}.toString;
 
 module.exports = Array.isArray || function (arr) {
   return toString.call(arr) == '[object Array]';
 };
 
-},{}],157:[function(require,module,exports){
+},{}],134:[function(require,module,exports){
 (function (global){
 /*! JSON v3.3.2 | http://bestiejs.github.io/json3 | Copyright 2012-2014, Kit Cambridge | http://kit.mit-license.org */
 ;(function () {
@@ -24588,62 +21982,7 @@ module.exports = Array.isArray || function (arr) {
 }).call(this);
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],158:[function(require,module,exports){
-/**
- * Copyright 2013-2014 Facebook, Inc.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- * http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- *
- */
-
-"use strict";
-
-/**
- * Constructs an enumeration with keys equal to their value.
- *
- * For example:
- *
- *   var COLORS = keyMirror({blue: null, red: null});
- *   var myColor = COLORS.blue;
- *   var isColorValid = !!COLORS[myColor];
- *
- * The last line could not be performed if the values of the generated enum were
- * not equal to their keys.
- *
- *   Input:  {key1: val1, key2: val2}
- *   Output: {key1: key1, key2: key2}
- *
- * @param {object} obj
- * @return {object}
- */
-var keyMirror = function(obj) {
-  var ret = {};
-  var key;
-  if (!(obj instanceof Object && !Array.isArray(obj))) {
-    throw new Error('keyMirror(...): Argument must be an object.');
-  }
-  for (key in obj) {
-    if (!obj.hasOwnProperty(key)) {
-      continue;
-    }
-    ret[key] = key;
-  }
-  return ret;
-};
-
-module.exports = keyMirror;
-
-},{}],159:[function(require,module,exports){
+},{}],135:[function(require,module,exports){
 (function (Buffer){
 'use strict'
 var inherits = require('inherits')
@@ -24792,7 +22131,7 @@ function fnI (a, b, c, d, m, k, s) {
 module.exports = MD5
 
 }).call(this,require("buffer").Buffer)
-},{"buffer":78,"hash-base":138,"inherits":154}],160:[function(require,module,exports){
+},{"buffer":58,"hash-base":115,"inherits":131}],136:[function(require,module,exports){
 var bn = require('bn.js');
 var brorand = require('brorand');
 
@@ -24909,7 +22248,7 @@ MillerRabin.prototype.getDivisor = function getDivisor(n, k) {
   return false;
 };
 
-},{"bn.js":43,"brorand":44}],161:[function(require,module,exports){
+},{"bn.js":23,"brorand":24}],137:[function(require,module,exports){
 module.exports = assert;
 
 function assert(val, msg) {
@@ -24922,7 +22261,7 @@ assert.equal = function assertEqual(l, r, msg) {
     throw new Error(msg || ('Assertion failed: ' + l + ' != ' + r));
 };
 
-},{}],162:[function(require,module,exports){
+},{}],138:[function(require,module,exports){
 'use strict';
 
 var utils = exports;
@@ -24982,7 +22321,7 @@ utils.encode = function encode(arr, enc) {
     return arr;
 };
 
-},{}],163:[function(require,module,exports){
+},{}],139:[function(require,module,exports){
 module.exports={"2.16.840.1.101.3.4.1.1": "aes-128-ecb",
 "2.16.840.1.101.3.4.1.2": "aes-128-cbc",
 "2.16.840.1.101.3.4.1.3": "aes-128-ofb",
@@ -24996,7 +22335,7 @@ module.exports={"2.16.840.1.101.3.4.1.1": "aes-128-ecb",
 "2.16.840.1.101.3.4.1.43": "aes-256-ofb",
 "2.16.840.1.101.3.4.1.44": "aes-256-cfb"
 }
-},{}],164:[function(require,module,exports){
+},{}],140:[function(require,module,exports){
 // from https://github.com/indutny/self-signed/blob/gh-pages/lib/asn1.js
 // Fedor, you are amazing.
 'use strict'
@@ -25120,7 +22459,7 @@ exports.signature = asn1.define('signature', function () {
   )
 })
 
-},{"./certificate":165,"asn1.js":25}],165:[function(require,module,exports){
+},{"./certificate":141,"asn1.js":5}],141:[function(require,module,exports){
 // from https://github.com/Rantanen/node-dtls/blob/25a7dc861bda38cfeac93a723500eea4f0ac2e86/Certificate.js
 // thanks to @Rantanen
 
@@ -25210,7 +22549,7 @@ var X509Certificate = asn.define('X509Certificate', function () {
 
 module.exports = X509Certificate
 
-},{"asn1.js":25}],166:[function(require,module,exports){
+},{"asn1.js":5}],142:[function(require,module,exports){
 (function (Buffer){
 // adapted from https://github.com/apatil/pemstrip
 var findProc = /Proc-Type: 4,ENCRYPTED[\n\r]+DEK-Info: AES-((?:128)|(?:192)|(?:256))-CBC,([0-9A-H]+)[\n\r]+([0-9A-z\n\r\+\/\=]+)[\n\r]+/m
@@ -25244,7 +22583,7 @@ module.exports = function (okey, password) {
 }
 
 }).call(this,require("buffer").Buffer)
-},{"browserify-aes":48,"buffer":78,"evp_bytestokey":131}],167:[function(require,module,exports){
+},{"browserify-aes":28,"buffer":58,"evp_bytestokey":111}],143:[function(require,module,exports){
 (function (Buffer){
 var asn1 = require('./asn1')
 var aesid = require('./aesid.json')
@@ -25354,7 +22693,7 @@ function decrypt (data, password) {
 }
 
 }).call(this,require("buffer").Buffer)
-},{"./aesid.json":163,"./asn1":164,"./fixProc":166,"browserify-aes":48,"buffer":78,"pbkdf2":171}],168:[function(require,module,exports){
+},{"./aesid.json":139,"./asn1":140,"./fixProc":142,"browserify-aes":28,"buffer":58,"pbkdf2":147}],144:[function(require,module,exports){
 (function (global){
 /**
  * JSON parse.
@@ -25389,7 +22728,7 @@ module.exports = function parsejson(data) {
   }
 };
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],169:[function(require,module,exports){
+},{}],145:[function(require,module,exports){
 /**
  * Compiles a querystring
  * Returns string representation of the object
@@ -25428,7 +22767,7 @@ exports.decode = function(qs){
   return qry;
 };
 
-},{}],170:[function(require,module,exports){
+},{}],146:[function(require,module,exports){
 /**
  * Parses an URI
  *
@@ -25469,11 +22808,11 @@ module.exports = function parseuri(str) {
     return uri;
 };
 
-},{}],171:[function(require,module,exports){
+},{}],147:[function(require,module,exports){
 exports.pbkdf2 = require('./lib/async')
 exports.pbkdf2Sync = require('./lib/sync')
 
-},{"./lib/async":172,"./lib/sync":175}],172:[function(require,module,exports){
+},{"./lib/async":148,"./lib/sync":151}],148:[function(require,module,exports){
 (function (process,global){
 var checkParameters = require('./precondition')
 var defaultEncoding = require('./default-encoding')
@@ -25577,7 +22916,7 @@ module.exports = function (password, salt, iterations, keylen, digest, callback)
 }
 
 }).call(this,require('_process'),typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./default-encoding":173,"./precondition":174,"./sync":175,"_process":176,"safe-buffer":189}],173:[function(require,module,exports){
+},{"./default-encoding":149,"./precondition":150,"./sync":151,"_process":152,"safe-buffer":165}],149:[function(require,module,exports){
 (function (process){
 var defaultEncoding
 /* istanbul ignore next */
@@ -25591,7 +22930,7 @@ if (process.browser) {
 module.exports = defaultEncoding
 
 }).call(this,require('_process'))
-},{"_process":176}],174:[function(require,module,exports){
+},{"_process":152}],150:[function(require,module,exports){
 (function (Buffer){
 var MAX_ALLOC = Math.pow(2, 30) - 1 // default in iojs
 
@@ -25623,7 +22962,7 @@ module.exports = function (password, salt, iterations, keylen) {
 }
 
 }).call(this,{"isBuffer":require("../../is-buffer/index.js")})
-},{"../../is-buffer/index.js":155}],175:[function(require,module,exports){
+},{"../../is-buffer/index.js":132}],151:[function(require,module,exports){
 var md5 = require('create-hash/md5')
 var rmd160 = require('ripemd160')
 var sha = require('sha.js')
@@ -25726,7 +23065,7 @@ function pbkdf2 (password, salt, iterations, keylen, digest) {
 
 module.exports = pbkdf2
 
-},{"./default-encoding":173,"./precondition":174,"create-hash/md5":86,"ripemd160":188,"safe-buffer":189,"sha.js":191}],176:[function(require,module,exports){
+},{"./default-encoding":149,"./precondition":150,"create-hash/md5":66,"ripemd160":164,"safe-buffer":165,"sha.js":167}],152:[function(require,module,exports){
 // shim for using process in browser
 
 var process = module.exports = {};
@@ -25786,7 +23125,7 @@ process.chdir = function (dir) {
 };
 process.umask = function() { return 0; };
 
-},{}],177:[function(require,module,exports){
+},{}],153:[function(require,module,exports){
 exports.publicEncrypt = require('./publicEncrypt');
 exports.privateDecrypt = require('./privateDecrypt');
 
@@ -25797,7 +23136,7 @@ exports.privateEncrypt = function privateEncrypt(key, buf) {
 exports.publicDecrypt = function publicDecrypt(key, buf) {
   return exports.privateDecrypt(key, buf, true);
 };
-},{"./privateDecrypt":179,"./publicEncrypt":180}],178:[function(require,module,exports){
+},{"./privateDecrypt":155,"./publicEncrypt":156}],154:[function(require,module,exports){
 (function (Buffer){
 var createHash = require('create-hash');
 module.exports = function (seed, len) {
@@ -25816,7 +23155,7 @@ function i2ops(c) {
   return out;
 }
 }).call(this,require("buffer").Buffer)
-},{"buffer":78,"create-hash":85}],179:[function(require,module,exports){
+},{"buffer":58,"create-hash":65}],155:[function(require,module,exports){
 (function (Buffer){
 var parseKeys = require('parse-asn1');
 var mgf = require('./mgf');
@@ -25927,7 +23266,7 @@ function compare(a, b){
   return dif;
 }
 }).call(this,require("buffer").Buffer)
-},{"./mgf":178,"./withPublic":181,"./xor":182,"bn.js":43,"browserify-rsa":67,"buffer":78,"create-hash":85,"parse-asn1":167}],180:[function(require,module,exports){
+},{"./mgf":154,"./withPublic":157,"./xor":158,"bn.js":23,"browserify-rsa":47,"buffer":58,"create-hash":65,"parse-asn1":143}],156:[function(require,module,exports){
 (function (Buffer){
 var parseKeys = require('parse-asn1');
 var randomBytes = require('randombytes');
@@ -26025,7 +23364,7 @@ function nonZero(len, crypto) {
   return out;
 }
 }).call(this,require("buffer").Buffer)
-},{"./mgf":178,"./withPublic":181,"./xor":182,"bn.js":43,"browserify-rsa":67,"buffer":78,"create-hash":85,"parse-asn1":167,"randombytes":186}],181:[function(require,module,exports){
+},{"./mgf":154,"./withPublic":157,"./xor":158,"bn.js":23,"browserify-rsa":47,"buffer":58,"create-hash":65,"parse-asn1":143,"randombytes":162}],157:[function(require,module,exports){
 (function (Buffer){
 var bn = require('bn.js');
 function withPublic(paddedMsg, key) {
@@ -26038,7 +23377,7 @@ function withPublic(paddedMsg, key) {
 
 module.exports = withPublic;
 }).call(this,require("buffer").Buffer)
-},{"bn.js":43,"buffer":78}],182:[function(require,module,exports){
+},{"bn.js":23,"buffer":58}],158:[function(require,module,exports){
 module.exports = function xor(a, b) {
   var len = a.length;
   var i = -1;
@@ -26047,7 +23386,7 @@ module.exports = function xor(a, b) {
   }
   return a
 };
-},{}],183:[function(require,module,exports){
+},{}],159:[function(require,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -26133,7 +23472,7 @@ var isArray = Array.isArray || function (xs) {
   return Object.prototype.toString.call(xs) === '[object Array]';
 };
 
-},{}],184:[function(require,module,exports){
+},{}],160:[function(require,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -26220,13 +23559,13 @@ var objectKeys = Object.keys || function (obj) {
   return res;
 };
 
-},{}],185:[function(require,module,exports){
+},{}],161:[function(require,module,exports){
 'use strict';
 
 exports.decode = exports.parse = require('./decode');
 exports.encode = exports.stringify = require('./encode');
 
-},{"./decode":183,"./encode":184}],186:[function(require,module,exports){
+},{"./decode":159,"./encode":160}],162:[function(require,module,exports){
 (function (process,global){
 'use strict'
 
@@ -26268,7 +23607,7 @@ function randomBytes (size, cb) {
 }
 
 }).call(this,require('_process'),typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"_process":176,"safe-buffer":189}],187:[function(require,module,exports){
+},{"_process":152,"safe-buffer":165}],163:[function(require,module,exports){
 (function (process,global){
 'use strict'
 
@@ -26380,7 +23719,7 @@ function randomFillSync (buf, offset, size) {
 }
 
 }).call(this,require('_process'),typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"_process":176,"randombytes":186,"safe-buffer":189}],188:[function(require,module,exports){
+},{"_process":152,"randombytes":162,"safe-buffer":165}],164:[function(require,module,exports){
 'use strict'
 var Buffer = require('buffer').Buffer
 var inherits = require('inherits')
@@ -26545,9 +23884,9 @@ function fn5 (a, b, c, d, e, m, k, s) {
 
 module.exports = RIPEMD160
 
-},{"buffer":78,"hash-base":138,"inherits":154}],189:[function(require,module,exports){
-arguments[4][66][0].apply(exports,arguments)
-},{"buffer":78,"dup":66}],190:[function(require,module,exports){
+},{"buffer":58,"hash-base":115,"inherits":131}],165:[function(require,module,exports){
+arguments[4][46][0].apply(exports,arguments)
+},{"buffer":58,"dup":46}],166:[function(require,module,exports){
 var Buffer = require('safe-buffer').Buffer
 
 // prototype class for hash functions
@@ -26630,7 +23969,7 @@ Hash.prototype._update = function () {
 
 module.exports = Hash
 
-},{"safe-buffer":189}],191:[function(require,module,exports){
+},{"safe-buffer":165}],167:[function(require,module,exports){
 var exports = module.exports = function SHA (algorithm) {
   algorithm = algorithm.toLowerCase()
 
@@ -26647,7 +23986,7 @@ exports.sha256 = require('./sha256')
 exports.sha384 = require('./sha384')
 exports.sha512 = require('./sha512')
 
-},{"./sha":192,"./sha1":193,"./sha224":194,"./sha256":195,"./sha384":196,"./sha512":197}],192:[function(require,module,exports){
+},{"./sha":168,"./sha1":169,"./sha224":170,"./sha256":171,"./sha384":172,"./sha512":173}],168:[function(require,module,exports){
 /*
  * A JavaScript implementation of the Secure Hash Algorithm, SHA-0, as defined
  * in FIPS PUB 180-1
@@ -26743,7 +24082,7 @@ Sha.prototype._hash = function () {
 
 module.exports = Sha
 
-},{"./hash":190,"inherits":154,"safe-buffer":189}],193:[function(require,module,exports){
+},{"./hash":166,"inherits":131,"safe-buffer":165}],169:[function(require,module,exports){
 /*
  * A JavaScript implementation of the Secure Hash Algorithm, SHA-1, as defined
  * in FIPS PUB 180-1
@@ -26844,7 +24183,7 @@ Sha1.prototype._hash = function () {
 
 module.exports = Sha1
 
-},{"./hash":190,"inherits":154,"safe-buffer":189}],194:[function(require,module,exports){
+},{"./hash":166,"inherits":131,"safe-buffer":165}],170:[function(require,module,exports){
 /**
  * A JavaScript implementation of the Secure Hash Algorithm, SHA-256, as defined
  * in FIPS 180-2
@@ -26899,7 +24238,7 @@ Sha224.prototype._hash = function () {
 
 module.exports = Sha224
 
-},{"./hash":190,"./sha256":195,"inherits":154,"safe-buffer":189}],195:[function(require,module,exports){
+},{"./hash":166,"./sha256":171,"inherits":131,"safe-buffer":165}],171:[function(require,module,exports){
 /**
  * A JavaScript implementation of the Secure Hash Algorithm, SHA-256, as defined
  * in FIPS 180-2
@@ -27036,7 +24375,7 @@ Sha256.prototype._hash = function () {
 
 module.exports = Sha256
 
-},{"./hash":190,"inherits":154,"safe-buffer":189}],196:[function(require,module,exports){
+},{"./hash":166,"inherits":131,"safe-buffer":165}],172:[function(require,module,exports){
 var inherits = require('inherits')
 var SHA512 = require('./sha512')
 var Hash = require('./hash')
@@ -27095,7 +24434,7 @@ Sha384.prototype._hash = function () {
 
 module.exports = Sha384
 
-},{"./hash":190,"./sha512":197,"inherits":154,"safe-buffer":189}],197:[function(require,module,exports){
+},{"./hash":166,"./sha512":173,"inherits":131,"safe-buffer":165}],173:[function(require,module,exports){
 var inherits = require('inherits')
 var Hash = require('./hash')
 var Buffer = require('safe-buffer').Buffer
@@ -27357,7 +24696,7 @@ Sha512.prototype._hash = function () {
 
 module.exports = Sha512
 
-},{"./hash":190,"inherits":154,"safe-buffer":189}],198:[function(require,module,exports){
+},{"./hash":166,"inherits":131,"safe-buffer":165}],174:[function(require,module,exports){
 
 /**
  * Module dependencies.
@@ -27468,7 +24807,7 @@ exports.connect = lookup;
 exports.Manager = require('./manager');
 exports.Socket = require('./socket');
 
-},{"./manager":199,"./socket":201,"./url":202,"debug":203,"socket.io-parser":207}],199:[function(require,module,exports){
+},{"./manager":175,"./socket":177,"./url":178,"debug":179,"socket.io-parser":183}],175:[function(require,module,exports){
 
 /**
  * Module dependencies.
@@ -28030,7 +25369,7 @@ Manager.prototype.onreconnect = function () {
   this.emitAll('reconnect', attempt);
 };
 
-},{"./on":200,"./socket":201,"backo2":39,"component-bind":80,"component-emitter":81,"debug":203,"engine.io-client":116,"indexof":153,"socket.io-parser":207}],200:[function(require,module,exports){
+},{"./on":176,"./socket":177,"backo2":19,"component-bind":60,"component-emitter":61,"debug":179,"engine.io-client":96,"indexof":130,"socket.io-parser":183}],176:[function(require,module,exports){
 
 /**
  * Module exports.
@@ -28056,7 +25395,7 @@ function on (obj, ev, fn) {
   };
 }
 
-},{}],201:[function(require,module,exports){
+},{}],177:[function(require,module,exports){
 
 /**
  * Module dependencies.
@@ -28477,7 +25816,7 @@ Socket.prototype.compress = function (compress) {
   return this;
 };
 
-},{"./on":200,"component-bind":80,"component-emitter":81,"debug":203,"has-binary":135,"socket.io-parser":207,"to-array":227}],202:[function(require,module,exports){
+},{"./on":176,"component-bind":60,"component-emitter":61,"debug":179,"has-binary":112,"socket.io-parser":183,"to-array":203}],178:[function(require,module,exports){
 (function (global){
 
 /**
@@ -28556,13 +25895,13 @@ function url (uri, loc) {
 }
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"debug":203,"parseuri":170}],203:[function(require,module,exports){
-arguments[4][126][0].apply(exports,arguments)
-},{"./debug":204,"_process":176,"dup":126}],204:[function(require,module,exports){
-arguments[4][127][0].apply(exports,arguments)
-},{"dup":127,"ms":205}],205:[function(require,module,exports){
-arguments[4][128][0].apply(exports,arguments)
-},{"dup":128}],206:[function(require,module,exports){
+},{"debug":179,"parseuri":146}],179:[function(require,module,exports){
+arguments[4][106][0].apply(exports,arguments)
+},{"./debug":180,"_process":152,"dup":106}],180:[function(require,module,exports){
+arguments[4][107][0].apply(exports,arguments)
+},{"dup":107,"ms":181}],181:[function(require,module,exports){
+arguments[4][108][0].apply(exports,arguments)
+},{"dup":108}],182:[function(require,module,exports){
 (function (global){
 /*global Blob,File*/
 
@@ -28707,7 +26046,7 @@ exports.removeBlobs = function(data, callback) {
 };
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./is-buffer":208,"isarray":212}],207:[function(require,module,exports){
+},{"./is-buffer":184,"isarray":188}],183:[function(require,module,exports){
 
 /**
  * Module dependencies.
@@ -29113,7 +26452,7 @@ function error(data){
   };
 }
 
-},{"./binary":206,"./is-buffer":208,"component-emitter":209,"debug":210,"json3":157}],208:[function(require,module,exports){
+},{"./binary":182,"./is-buffer":184,"component-emitter":185,"debug":186,"json3":134}],184:[function(require,module,exports){
 (function (global){
 
 module.exports = isBuf;
@@ -29130,7 +26469,7 @@ function isBuf(obj) {
 }
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],209:[function(require,module,exports){
+},{}],185:[function(require,module,exports){
 
 /**
  * Expose `Emitter`.
@@ -29296,7 +26635,7 @@ Emitter.prototype.hasListeners = function(event){
   return !! this.listeners(event).length;
 };
 
-},{}],210:[function(require,module,exports){
+},{}],186:[function(require,module,exports){
 
 /**
  * This is the web browser implementation of `debug()`.
@@ -29466,7 +26805,7 @@ function localstorage(){
   } catch (e) {}
 }
 
-},{"./debug":211}],211:[function(require,module,exports){
+},{"./debug":187}],187:[function(require,module,exports){
 
 /**
  * This is the common logic for both the Node.js and web browser
@@ -29665,9 +27004,9 @@ function coerce(val) {
   return val;
 }
 
-},{"ms":213}],212:[function(require,module,exports){
-arguments[4][136][0].apply(exports,arguments)
-},{"dup":136}],213:[function(require,module,exports){
+},{"ms":189}],188:[function(require,module,exports){
+arguments[4][113][0].apply(exports,arguments)
+},{"dup":113}],189:[function(require,module,exports){
 /**
  * Helpers.
  */
@@ -29794,7 +27133,7 @@ function plural(ms, n, name) {
   return Math.ceil(ms / n) + ' ' + name + 's';
 }
 
-},{}],214:[function(require,module,exports){
+},{}],190:[function(require,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -29923,12 +27262,12 @@ Stream.prototype.pipe = function(dest, options) {
   return dest;
 };
 
-},{"events":74,"inherits":154,"readable-stream/duplex.js":216,"readable-stream/passthrough.js":222,"readable-stream/readable.js":223,"readable-stream/transform.js":224,"readable-stream/writable.js":225}],215:[function(require,module,exports){
-arguments[4][136][0].apply(exports,arguments)
-},{"dup":136}],216:[function(require,module,exports){
+},{"events":54,"inherits":131,"readable-stream/duplex.js":192,"readable-stream/passthrough.js":198,"readable-stream/readable.js":199,"readable-stream/transform.js":200,"readable-stream/writable.js":201}],191:[function(require,module,exports){
+arguments[4][113][0].apply(exports,arguments)
+},{"dup":113}],192:[function(require,module,exports){
 module.exports = require("./lib/_stream_duplex.js")
 
-},{"./lib/_stream_duplex.js":217}],217:[function(require,module,exports){
+},{"./lib/_stream_duplex.js":193}],193:[function(require,module,exports){
 (function (process){
 // Copyright Joyent, Inc. and other Node contributors.
 //
@@ -30021,7 +27360,7 @@ function forEach (xs, f) {
 }
 
 }).call(this,require('_process'))
-},{"./_stream_readable":219,"./_stream_writable":221,"_process":176,"core-util-is":83,"inherits":154}],218:[function(require,module,exports){
+},{"./_stream_readable":195,"./_stream_writable":197,"_process":152,"core-util-is":63,"inherits":131}],194:[function(require,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -30069,7 +27408,7 @@ PassThrough.prototype._transform = function(chunk, encoding, cb) {
   cb(null, chunk);
 };
 
-},{"./_stream_transform":220,"core-util-is":83,"inherits":154}],219:[function(require,module,exports){
+},{"./_stream_transform":196,"core-util-is":63,"inherits":131}],195:[function(require,module,exports){
 (function (process){
 // Copyright Joyent, Inc. and other Node contributors.
 //
@@ -31024,7 +28363,7 @@ function indexOf (xs, x) {
 }
 
 }).call(this,require('_process'))
-},{"./_stream_duplex":217,"_process":176,"buffer":78,"core-util-is":83,"events":74,"inherits":154,"isarray":215,"stream":214,"string_decoder/":226,"util":45}],220:[function(require,module,exports){
+},{"./_stream_duplex":193,"_process":152,"buffer":58,"core-util-is":63,"events":54,"inherits":131,"isarray":191,"stream":190,"string_decoder/":202,"util":25}],196:[function(require,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -31235,7 +28574,7 @@ function done(stream, er) {
   return stream.push(null);
 }
 
-},{"./_stream_duplex":217,"core-util-is":83,"inherits":154}],221:[function(require,module,exports){
+},{"./_stream_duplex":193,"core-util-is":63,"inherits":131}],197:[function(require,module,exports){
 (function (process){
 // Copyright Joyent, Inc. and other Node contributors.
 //
@@ -31716,10 +29055,10 @@ function endWritable(stream, state, cb) {
 }
 
 }).call(this,require('_process'))
-},{"./_stream_duplex":217,"_process":176,"buffer":78,"core-util-is":83,"inherits":154,"stream":214}],222:[function(require,module,exports){
+},{"./_stream_duplex":193,"_process":152,"buffer":58,"core-util-is":63,"inherits":131,"stream":190}],198:[function(require,module,exports){
 module.exports = require("./lib/_stream_passthrough.js")
 
-},{"./lib/_stream_passthrough.js":218}],223:[function(require,module,exports){
+},{"./lib/_stream_passthrough.js":194}],199:[function(require,module,exports){
 (function (process){
 exports = module.exports = require('./lib/_stream_readable.js');
 exports.Stream = require('stream');
@@ -31733,15 +29072,15 @@ if (!process.browser && process.env.READABLE_STREAM === 'disable') {
 }
 
 }).call(this,require('_process'))
-},{"./lib/_stream_duplex.js":217,"./lib/_stream_passthrough.js":218,"./lib/_stream_readable.js":219,"./lib/_stream_transform.js":220,"./lib/_stream_writable.js":221,"_process":176,"stream":214}],224:[function(require,module,exports){
+},{"./lib/_stream_duplex.js":193,"./lib/_stream_passthrough.js":194,"./lib/_stream_readable.js":195,"./lib/_stream_transform.js":196,"./lib/_stream_writable.js":197,"_process":152,"stream":190}],200:[function(require,module,exports){
 module.exports = require("./lib/_stream_transform.js")
 
-},{"./lib/_stream_transform.js":220}],225:[function(require,module,exports){
+},{"./lib/_stream_transform.js":196}],201:[function(require,module,exports){
 module.exports = require("./lib/_stream_writable.js")
 
-},{"./lib/_stream_writable.js":221}],226:[function(require,module,exports){
-arguments[4][76][0].apply(exports,arguments)
-},{"buffer":78,"dup":76}],227:[function(require,module,exports){
+},{"./lib/_stream_writable.js":197}],202:[function(require,module,exports){
+arguments[4][56][0].apply(exports,arguments)
+},{"buffer":58,"dup":56}],203:[function(require,module,exports){
 module.exports = toArray
 
 function toArray(list, index) {
@@ -31756,7 +29095,7 @@ function toArray(list, index) {
     return array
 }
 
-},{}],228:[function(require,module,exports){
+},{}],204:[function(require,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -32465,7 +29804,7 @@ function isNullOrUndefined(arg) {
   return  arg == null;
 }
 
-},{"punycode":75,"querystring":185}],229:[function(require,module,exports){
+},{"punycode":55,"querystring":161}],205:[function(require,module,exports){
 var indexOf = require('indexof');
 
 var Object_keys = function (obj) {
@@ -32605,7 +29944,7 @@ exports.createContext = Script.createContext = function (context) {
     return copy;
 };
 
-},{"indexof":153}],230:[function(require,module,exports){
+},{"indexof":130}],206:[function(require,module,exports){
 (function (global){
 /*! https://mths.be/wtf8 v1.0.0 by @mathias */
 ;(function(root) {
@@ -32843,7 +30182,7 @@ exports.createContext = Script.createContext = function (context) {
 }(this));
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],231:[function(require,module,exports){
+},{}],207:[function(require,module,exports){
 'use strict';
 
 var alphabet = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz-_'.split('')

@@ -13,6 +13,9 @@
 		"test": {
 			"state": true,
 			"active_test_default": 0
+		},
+		"quest": {
+			"state": true
 		}
 	}
 }

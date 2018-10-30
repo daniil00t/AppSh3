@@ -61,6 +61,30 @@ gulp.task 'scripts', ->
     clientBundlerLearnerChat.on 'update', rebundleChat
   rebundleChat()
 
+  # WebQuest
+  clientBundlerLearnerwebQuest = browserify
+    cache: {}, packageCache: {}
+    entries: './client/webQuest/scripts/main.coffee'
+    extensions: ['.cjsx', '.coffee']
+
+  _.forEach dependencies, (path, dep) ->
+    clientBundlerLearnerwebQuest.external dep
+
+  rebundlewebQuest = ->
+    bundleLogger.start 'client.js'
+
+    clientBundlerLearnerwebQuest.bundle()
+      .on 'error', handleErrors
+      .pipe source('client.js')
+      .pipe gulp.dest('./Public/media/scripts/learner/webQuest')
+      .on 'end', ->
+        bundleLogger.end 'client.js'
+
+  if global.isWatching
+    clientBundlerLearnerwebQuest = watchify clientBundlerLearnerwebQuest
+    clientBundlerLearnerwebQuest.on 'update', rebundleChat
+  rebundlewebQuest()
+
   ###Admin###
 
 
