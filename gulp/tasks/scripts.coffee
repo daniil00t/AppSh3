@@ -82,7 +82,7 @@ gulp.task 'scripts', ->
 
   if global.isWatching
     clientBundlerLearnerwebQuest = watchify clientBundlerLearnerwebQuest
-    clientBundlerLearnerwebQuest.on 'update', rebundleChat
+    clientBundlerLearnerwebQuest.on 'update', rebundlewebQuest
   rebundlewebQuest()
 
   ###Admin###

@@ -134,12 +134,13 @@ routeLearner.get("/quest", (req, res) => {
 	// db.listTests().then((data) => {
 	// 	res.send(data);
 	// });
-	if(appData.quest.state){
-		res.render("learner/webQuest.html", {});
-	}
-	else {
-		res.render("main/closed.html", {title: "WebQuest - Closed", massage: "Доступ закрыт)"});
-	}
+	res.sendfile("Public/pages/learner/webQuest.html")
+	// if(appData.quest.state){
+	// 	res.render("learner/webQuest.html", {});
+	// }
+	// else {
+	// 	res.render("main/closed.html", {title: "WebQuest - Closed", massage: "Доступ закрыт)"});
+	// }
 });
 
 routeLearner.get("/test/result", (req, res) => {

@@ -1020,4 +1020,73 @@ section.features
 	background-color: red
 	z-index: 10
 
+
+//////////////////////
+// @webquest
+/* Web Quest */
+//////////////////////
+.main_area
+	height: 100%
+	width: 100%
+	position: relative
+	.wrp_main_area
+		position: absolute
+		height: 100%
+		width: 100%
+		top: 0
+		bottom: 0
+		left: 0
+		right: 0
+		display: -webkit-flex
+		display: -moz-flex
+		display: -ms-flex
+		display: -o-flex
+		display: flex
+		align-items: center
+		text-align: center
+		justify-content: center
+		h1.welcome
+			color: #fff
+			font-family: MontserratBold
+			animation: fadeInDown 2s ease-in-out, fadeOut 3s 2s ease-in-out
+			opacity: 0
+		.usr_form
+			width: 350px
+			height: 300px
+			background-color: #fff
+			box-shadow: 0 0 15px rgba(0,0,0,.3)
+			padding: 30px 15px
+			border-radius: 5px
+			h2
+				font-family: MontserratBlack
+				font-size: 28px
+				text-align: center
+				padding: 15px 0 0 0 
+			p.caption
+				color: rgba(#000, .7)
+				font-family: MontserratRegular
+			input
+				width: 80%
+				height: 30px
+				border: 1px solid rgba(0,0,0,.4)
+				border-radius: 3px
+				box-shadow: 0 0 4px rgba(0,0,0,.2)
+				font-size: 25px
+				font-family: MontserratBold
+				margin-top: 20px
+			button
+				border: none
+				padding: 5px 50px
+				background-color: $matan
+				color: #fff
+				font-size: 20px
+				font-family: MontserratBold
+				margin-top: 40px
+				border-radius: 4px
+				&:active
+					background-color: darken($matan, 5%)
+			.mini-footer
+				font-family: MontserratRegular
+				color: rgba(#000, .6)
+				margin-top: 20px
 @import "media.sass"

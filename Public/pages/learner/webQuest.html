@@ -10,9 +10,62 @@
   <link rel="stylesheet" href="/cssFiles/style_sass.css">
 </head>
 <body>
-	
+    <style>
+       html,body{ 
+      width:100%;
+      height:100%;
+      background:#111;
+    }
+
+    html{
+      -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
+    }
+
+    body{
+      font:normal 75% Arial, Helvetica, sans-serif;
+    }
+
+    canvas{
+      display:block;
+      vertical-align:bottom;
+    }
+    /* ---- particles.js container ---- */
+
+    #particles-js{
+      width: 100%;
+      height: 100%;
+      background-color: #b61924;
+      background-image: url('');
+      background-size: cover;
+      background-position: 50% 50%;
+      background-repeat: no-repeat;
+      position: fixed;
+      top: 0;
+      bottom: 0;
+      right: 0;
+      left: 0;
+      z-index: 1;
+    } 
+    #app{
+      position: absolute;
+      background: rgba(0,0,0,0);
+      width: 100%;
+      height: 100%;
+      top: 0;
+      left: 0;
+      z-index: 2;
+    }
+  </style>
+  
   <div id="app"></div>
 
+
+<!-- particles.js container -->
+  <div id="particles-js"></div>
+  <!-- scripts -->
+  <script src="/libsFiles/particles/particles.min.js"></script>
+
+  <script src="/libsFiles/particles/app.js"></script>
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
   <script src="/jsFiles/vendor.js"></script>
   <script src="/jsFiles/learner/webQuest/client.js"></script>
