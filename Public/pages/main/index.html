@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>School Project</title>
+  <link rel="stylesheet" href="/cssFiles/style.css">
+	<link rel="stylesheet" href="/cssFiles/preloader.css">
+</head>
+<body>
+
+	{{date}} <br>
+  <a href="/learner">learner</a><br>
+  <a href="/admin">admin</a>
+
+  
+	{% set cls = cycler("odd", "even") %}
+	{% for row in apps %}
+	  <div class="{{ cls.next() }}">{{ row }}</div>
+	{% endfor %}
+</body>
+</html>

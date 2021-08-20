@@ -6,3 +6,6 @@
 ```bash
 npm run server
 ```
+
+P.S.
+"socket.io": "^1.7.4"

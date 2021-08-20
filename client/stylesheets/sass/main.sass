@@ -1,0 +1,1092 @@
+@import "bourbon"
+@import "fonts.sass"
+@import "ui.sass"
+@import "vars.sass"
+
+//Load Libs SASS
+// @import "app/libs/animate/animate.sass"
+
+*::-webkit-input-placeholder
+	color: #666
+	opacity: 1
+
+*:-moz-placeholder
+	color: #666
+	opacity: 1
+
+*::-moz-placeholder
+	color: #666
+	opacity: 1
+
+*:-ms-input-placeholder
+	color: #666
+	opacity: 1
+
+body input:focus:required:invalid,
+body textarea:focus:required:invalid
+	color: #666
+body input:required:valid,
+body textarea:required:valid
+	color: #666
+
+html
+	height: 100%
+	width: 100%
+body
+	height: 100%
+	background-color: #e4ebf0
+	padding: 0
+	margin: 0
+	//Custom Styles Here
+	#app
+		height: 100%
+
+.CHAT_APP
+	height: 100%
+	header
+		// border-bottom: 2px solid rgba(0,0,0,.2)
+		box-shadow: 0 0 15px rgba(0,0,0,.3)
+		height: 120px
+		background-color: #fff
+		.container-fluid
+			height: 100%
+			// padding: 0
+			overflow: hidden
+			& .row 
+				height: 100%
+				& > *
+					height: 100%
+					display: -webkit-flex
+					display: -moz-flex
+					display: -ms-flex
+					display: -o-flex
+					display: flex
+					align-items: center
+					justify-content: center
+					padding: 0
+				.changeNameUser
+					margin-right: 20px
+					input
+						width: 200px
+						height: 40px
+						padding: 0 5px
+						margin-bottom: 15px
+					button.save_name
+						width: 200px
+						height: 40px
+						background-color: #46B29D
+						color: #fff
+						border-radius: none
+						border: none
+				.changeAva
+					display: -webkit-flex
+					display: -moz-flex
+					display: -ms-flex
+					display: -o-flex
+					display: flex
+					align-items: center
+					justify-content: center
+					label
+						display: inline-block
+					.out
+						.ava_wrp_img
+							margin: 0 auto 5px auto
+							margin: none
+							padding: none
+							width: 60px
+							height: 60px
+							border-radius: 50%
+							overflow: hidden
+							display: block
+							img
+								width: 100%
+								height: 100%
+						input
+							display: block
+							width: 100%
+					.noactive
+						display: none
+					.active
+						display: block
+				.logout_button
+					background-color: #324D5C
+					color: #fff
+					border-radius: none
+					padding: 7px 20px
+	.main_cnt
+		// background-color: #e4ebf0
+		height: calc(100% - 130px)
+		margin-top: 20px
+		.container
+			height: 100%
+			.massages
+				background-color: #fff
+				width: 100%
+				height: calc(100% - 140px)
+				box-shadow: 0 0 15px rgba(0,0,0,.2)
+				position: relative
+				padding-top: 50px
+				border-radius: 5px
+				
+				overflow: hidden
+				.fixed_top_panel
+					position: absolute
+					top: 0px
+					left: 0
+					width: 100%
+					height: 50px
+					background-color: #F0CA4D
+					p
+						text-align: center
+						line-height: 50px
+						color: #444
+				.wrp_massages	
+					overflow-y: scroll
+					height: 100%
+					.my_massage
+						width: 100%
+						
+						// margin: 15px 20px
+						padding: 15px 20px
+						position: relative
+						// display: block
+						display: inline-block
+						.wrap
+							max-width: 40%
+							min-width: auto
+							float: right
+							border-radius: 5px
+							background-color: #2776FD
+							padding: 10px
+							p
+								width: 100%
+								padding: 0
+								margin: 0
+								color: #fff
+								// display: inline-block
+								
+						i.fas
+							color: #2776FD
+							font-size: 30px
+							position: absolute
+							right: 13px
+							bottom: 25px
+					.other_massage
+						width: 100%
+						// margin: 15px 20px
+						padding: 15px 20px
+						position: relative
+						display: inline-block
+						
+						.wrp
+							width: 40%
+							background-color: #E5E2E9
+							padding: 10px
+							border-radius: 5px
+							.info
+								height: 50px
+								width: 200px
+								// background-color: #eaeaea
+								display: -webkit-flex
+								display: -moz-flex
+								display: -ms-flex
+								display: -o-flex
+								display: flex
+								align-items: center
+								border-radius: 30px
+								padding: 0 20px
+								.wrp_img
+									width: 50px
+									height: 50px
+									display: block
+									overflow: hidden
+									margin-right: 15px
+									border-radius: 50%
+									img
+										width: 100%
+										height: 100%
+								.name_usr
+									// display: inline-block
+									color: #46B29D
+									font-size: 18px
+							.cnt_massage
+								padding: 10px
+								p
+									margin: 0
+									color: #222
+						i.fas
+							color: #E5E2E9
+							font-size: 30px
+							position: absolute
+							display: block
+							left: 12px
+							bottom: 25px
+			.bottom_panel
+				margin-top: 20px
+				position: relative
+				textarea
+					height: 100px
+					width: 100%
+					box-shadow: 0 0 15px rgba(0,0,0,.2)
+					outline: none
+					border-radius: 5px
+					padding: 5px 5px 50px 5px
+					resize: none
+				.panel_icon
+					.smile_icon
+						bottom: 60px
+					.clip_icon
+						bottom: 20px
+						padding: 3px 7px
+					.icon
+						background-color: #46B29D
+						color: #fff
+						transition: all .2s ease-in-out
+						position: absolute
+						right: 15px
+						font-size: 18px
+						padding: 3px 5px
+						cursor: pointer
+						&:hover
+							background-color: lighten(#46B29D, 5%)
+//ALWAYS END
+// @import "media"
+
+/* Main Admin Panel */
+.wrp-login
+	height: 320px
+.onlineusers
+	li
+		background-color: #fff
+.mainArea
+	.wrp
+		.chatPanel, .dbPanel, .testPanel
+			// background-color: red
+			padding: 0 0 40px 0
+			.welcome_chat_panel, .welcome_db_panel
+				font-size: 32px
+				color: #555
+				width: 100%
+				border-bottom: 1px solid #46B29D
+			.block_chat, .block_db, .block_test
+				width: 100%
+				background-color: #fff
+				box-shadow: 0 0 10px rgba(0,0,0,.3)
+				border-radius: 6px
+				margin: 30px 0
+				overflow: hidden
+				.wrp_cnt
+					padding: 20px
+					.fixed_top_panel
+						width: 100%
+						height: 50px
+						border-radius: 5px 5px 0 0
+						background-color: #F0CA4D
+						p
+							color: #333
+							line-height: 50px
+							padding: 0
+							margin: 0
+							cursor: pointer
+							width: 100%
+							&::after
+								content: '\f044'
+								font-family: 'Font Awesome\ 5 Free'
+								color: #fff
+								margin-left: 10px
+								opacity: 0
+								transition: all ease-in-out .2s
+							&:hover::after
+								opacity: 1
+							input
+								width: 40%
+								height: 30px
+
+				.title_block
+					background-color: #46B29D
+					padding: 0 15px
+					h3.title_block_text
+						font-size: 24px
+						color: #fff
+						padding: 10px 0
+						margin: 0
+						&::before
+							content: '#'
+							color: #ccc
+							margin-right: 5px
+						i
+							float: right
+							color: #d3d3d3
+							font-size: 18px
+							cursor: pointer
+							line-height: 30px
+							padding-right: 10px
+.test_admin_panel
+	width: 100%
+	.items
+		display: -webkit-flex
+		display: -moz-flex
+		display: -ms-flex
+		display: -o-flex
+		display: flex
+		flex-wrap: wrap
+		justify-content: space-between
+		margin-bottom: 30px
+		.item
+			width: 30%
+			height: 300px
+			background-color: #fff
+			border-radius: 5px
+			overflow: hidden
+			box-shadow: 0 0 15px rgba(0,0,0,.2)
+			position: relative
+			&::before
+				content: attr(data-title)
+				position: absolute
+				display: inline-block
+				color: #000
+				top: 10px
+				bottom: 0
+				right: 0
+				left: 0
+				z-index: 10
+				font-size: 16px
+				font-family: MontserratMedium
+				padding: 0 10px
+		.mid_points
+			display: -webkit-flex
+			display: -moz-flex
+			display: -ms-flex
+			display: -o-flex
+			display: flex
+			align-items: center
+			p.mid_points_value
+				font-family: MontserratBold
+				font-size: 54px
+				text-align: center
+				width: 100%
+				color: #192
+.testPanel
+	.wrp_cnt
+		.all_tests
+			justify-content: space-between
+			display: -webkit-flex
+			display: -moz-flex
+			display: -ms-flex
+			display: -o-flex
+			display: flex
+			flex-flow: row wrap
+			.active > div
+				.testItem_header
+					&::before
+						content: 'active'
+						display: inline-block
+						position: absolute
+						bottom: 5px
+						left: 0
+						right: 0
+						margin: 0 50%
+						background-color: #4dc81b
+						color: #fff
+						font-family: MontserratBold
+						padding: 2px 7px
+						width: 55px
+						border-radius: 2px
+			.testItem
+				display: contents
+				& > div
+					background-color: #fff
+					width: 250px
+					height: 200px
+					border-radius: 4px
+					box-shadow: 0 0 10px rgba(0,0,0,.3)
+					overflow: hidden
+					transition: all ease-in-out .2s
+					margin: 0 10px 20px 0
+					&:last-child
+						margin-right: 0
+
+				&:nth-child(3n)
+					page-break-after: always
+
+				&_header.informat
+					background-color: $informat
+				&_header.matan
+					background-color: $matan
+				&_header.history
+					background-color: $history
+				&_header
+					width: 100%
+					height: 35px
+					padding: 0 10px
+					position: relative
+					span.subject
+						color: #fff
+						line-height: 35px
+						font-family: MontserratRegular
+					.controls
+						float: right
+						i
+							line-height: 35px
+							color: #e7e7e7
+							cursor: pointer
+							padding: 0 5px
+							transition: all ease-in-out .2s
+							&:hover
+								color: #fff
+				&_main_cnt
+					height: 165px
+					display: -webkit-flex
+					display: -moz-flex
+					display: -ms-flex
+					display: -o-flex
+					display: flex
+					align-items: center
+					position: relative
+					&_name
+						width: 100%
+						text-align: center
+						margin: 0
+						font-family: MontserratBold
+						font-size: 22px
+						color: #333
+						cursor: pointer
+					._id
+						color: rgba(0,0,0,.3)
+						position: absolute
+						bottom: 5px
+						right: 10px
+					.time
+						color: rgba(0,0,0,.5)
+						position: absolute
+						top: 10px
+						left: 10px
+						i
+							margin-right: 5px
+					.count_variants
+						position: absolute
+						right: 10px
+						top: 10px
+						color: rgba(0,0,0,.3)
+						i
+							margin-right: 5px
+				&:hover
+					background-color: #e9e9e94d
+					box-shadow: 0px 5px 17px 3px rgba(136, 136, 136, 0.4)
+			.addTest > div
+				border: 2px dashed #bebebe
+				display: -webkit-flex
+				display: -moz-flex
+				display: -ms-flex
+				display: -o-flex
+				display: flex
+				align-items: center
+				justify-content: center
+				span.plus
+					font-size: 48px
+					color: #bebebe
+					border: 5px solid #791ad0
+					border-radius: 50%
+					padding: 0 20px
+					transition: all ease-in-out .2s
+					&:hover
+						background-color: #791ad0
+						color: #fff
+						cursor: pointer
+	.addTestBlock
+		display: -webkit-flex
+		display: -moz-flex
+		display: -ms-flex
+		display: -o-flex
+		display: flex
+		align-items: center
+		flex-direction: column
+		position: relative
+		._id_forEdit
+			position: absolute
+			color: rgba(0,0,0,.3)
+			right: 10px
+			top: 10px
+		.initDataTest
+			width: 300px
+			input.data_add_test
+				border: none
+				border-bottom: 2px solid #8676e1
+				outline: none
+				width: 300px
+				height: 30px
+				font-family: MontserratRegular
+				margin-bottom: 10px
+				transition: all ease-in-out .3s
+				color: #333
+				&:focus, &:visited
+					border-bottom: 2px solid #791ad0
+				&:placeholder
+					color: rgba(0,0,0,.3)
+					font-family: MontserratRegular
+			select.subject
+				background-color: #fff
+				box-shadow: 0 0 15px rgba(0,0,0,.4)
+				border-radius: 5px
+				color: #333
+				font-family: MontserratRegular
+				margin: 20px 0
+				border: none
+				padding: 6px 7px
+				width: 150px
+				margin-left: 75px
+				outline: none
+		.addVariantBlock
+			// background-color: red
+			width: 100%
+			& > *
+				padding: 20px 25px
+			.addVariantNext
+				width: 25%
+				float: left
+				height: 100%
+
+				.wrp_df
+					display: -webkit-flex
+					display: -moz-flex
+					display: -ms-flex
+					display: -o-flex
+					display: flex
+					flex-direction: column
+					align-items: center
+					justify-content: center
+					height: 100%
+					padding-top: 30px
+					section.choiceVariant
+						margin-bottom: 20px
+					.addVariantButton
+						margin-top: 20px
+			.addProblemNext
+				width: 75%
+				float: right
+				border-left: 2px solid #bebebe
+				.formForNewProblem
+					display: -webkit-flex
+					display: -moz-flex
+					display: -ms-flex
+					display: -o-flex
+					display: flex
+					flex-direction: column
+					align-items: center
+					justify-content: center
+					& > *
+						margin-bottom: 15px
+				input.inputRadioItemToProblem
+					margin-left: 9px
+				input.inputTextItemToProblem
+					margin: 0 15px 
+					height: 25px
+				button.addItemToProblem
+					margin: 0
+					width: 25px
+					height: 25px
+					&::after
+						left: 20px
+						top: 4px
+						width: 100px
+	.saveTest
+		margin-top: 50px
+		width: 200px
+
+
+
+
+/* Test */
+header.main_header_test
+	// border-bottom: 2px solid rgba(0,0,0,.2)
+	box-shadow: 0 0 15px rgba(0,0,0,.3)
+	height: 120px
+	background-color: #fff
+	.container-fluid
+		height: 100%
+		// padding: 0
+		overflow: hidden
+		& .row 
+			height: 100%
+			& > *
+				height: 100%
+				display: -webkit-flex
+				display: -moz-flex
+				display: -ms-flex
+				display: -o-flex
+				display: flex
+				align-items: center
+				justify-content: center
+				padding: 0
+			.main_part_header
+				// background-color: red
+				div.change_dataUsr
+					width: 50%
+					.labels
+						width: 33%
+						text-align: right
+						display: inline-block
+						padding-right: 5px
+						font-family: MontserratMedium
+						label:first-child
+							padding-bottom: 7px
+					.inputs
+						width: 65%
+						display: inline-block
+						input
+							width: 100%
+							&:first-child
+								margin-bottom: 7px
+				select#selectVariant
+					width: 110px
+					margin-left: 20px
+					font-family: MontserratRegular
+			.timer
+				background-color: #3670f7
+				color: #fff
+				border-radius: none
+				padding: 7px 20px
+				height: 60%
+				width: 170px
+				display: block
+				box-shadow: insert 0 0 15px rgba(0,0,0,.5)
+				border-radius: 2px
+				// text-align: center
+				span.time
+					font-family: MontserratBold
+					font-size: 28px
+					line-height: 56px
+					float: left
+				.controlls
+					// display: inline-block
+					margin-top: 17px
+					float: right
+					margin-right: 10px
+					i
+						font-size: 20px
+						cursor: pointer
+					// line-height: 52px
+
+.testing
+	.main_cnt
+		background-color: #fff
+		margin-top: 30px
+		padding: 45px 30px
+		border-radius: 5px 5px 2px 2px
+		box-shadow: 0 0 25px rgba(0,0,0,.2)
+		position: relative
+		overflow: hidden
+		&_top_panel
+			width: 100%
+			height: 40px
+			position: absolute
+			top: 0
+			background-color: red
+			left: 0px
+			color: #fff
+			text-align: center
+			line-height: 40px
+			font-family: MontserratRegular
+		// @improve
+		&_top_panel.informat
+			background-color: $informat
+		&_top_panel.matan
+			background-color: $matan
+		&_top_panel.history
+			background-color: $history
+
+footer.main_footer
+	margin-top: 20px
+	height: 40px
+	p
+		line-height: 40px
+		color: rgb(150, 150, 150)
+
+
+
+
+
+/* 
+	Main page - learner
+	main color - blue
+ */
+section.main
+	width: 100%
+	height: 100%
+	background: linear-gradient(#013ca9,#001b48)
+	position: relative
+	overflow: hidden
+	.objects
+		.object
+			position: absolute
+			
+			background-color: rgba(255, 255, 255, .25)
+
+			&.small
+				width: 50px
+				height: 50px
+			&.big
+				width: 150px
+				height: 150px
+			&.b
+				background: transparent
+				border: 3px solid rgba(255, 255, 255, .25)
+	.tringgle
+		border-radius: 0 50px 50px 0
+		// border-radius-left: 25px
+	.round
+		border-radius: 50px
+
+	.line
+		height: 4px
+		position: absolute
+		display: block
+		background-color: rgba(255, 255, 255, .4)
+		
+	.small
+		width: 150px
+		bottom: 10%
+	.big
+		width: 300px
+		bottom: 12%
+	.welcome
+		color: #fff
+		font-family: MontserratBlack
+		font-size: 2.1em
+		text-transform: uppercase
+		padding-left: 170px
+		padding-top: 50px
+		position: relative
+		&::after
+			content: '_'
+			font-family: MontserratBlack
+			font-size: 1.1em
+			bottom: 3px
+			padding-left: 5px
+			position: absolute
+			animation: verticalSlashTick 1.5s linear infinite
+	.wrp-main-indexup
+		position: absolute
+		width: 100%
+		.apps
+			padding: 40px 170px
+			display: -webkit-flex
+			display: -moz-flex
+			display: -ms-flex
+			display: -o-flex
+			display: flex
+			justify-content: space-between
+			.app
+				// display: block
+				padding: 15px 25px
+				background-color: #fff
+				height: 350px
+				width: 27%
+				border-radius: 2px
+				background-color: #fff
+				transition: all .2s ease-in-out
+				box-shadow: 0 0 25px rgba(255, 255, 255,.3)
+				// margin-right: 5%
+				&:last-child
+					margin-right: none
+				position: relative
+				// &:hover
+					// background-color: #593df5
+				&::after
+					position: absolute
+					top: -25px
+					right: -25px
+					display: block
+					background-color: #fff
+					font-family: MontserratBold
+					color: #333
+					width: 50px
+					height: 50px
+					border-radius: 50%
+					font-size: 18px
+					line-height: 50px
+					text-align: center
+					box-shadow: 0 0 20px rgba(0,0,0,.7)
+				.wrp
+					// padding: 25px
+					width: 100%
+					
+					.name_app
+						display: block
+						margin: 0 auto
+						h2
+							// text-align: center
+							color: #333
+							font-family: MontserratBold
+							padding-bottom: 0
+							margin-bottom: 0
+							font-size: 1.8em
+							// display: inline-block
+						h4
+							color: rgb(150, 150, 150)
+							font-family: MontserratMedium
+							font-size: 16px
+							text-align: right
+							// display: inline-block
+							// padding-right: 20%
+					.description
+						padding-top: 15px
+						p
+							color: #444
+							font-size: 14px
+							font-family: MontserratRegular
+							letter-spacing: .4px
+					.more
+						background-color: #2700ff
+						color: #fff
+						width: 85%
+						line-height: 40px
+						text-align: center
+						display: inline-block
+						font-family: MontserratBold
+						font-size: 14px
+						text-decoration: none
+						position: absolute
+						border-radius: 1px
+						bottom: 40px
+						right: 0
+						left: 0
+						margin: 0 auto
+						&:hover
+							animation: animaBGCbutton 1.5s ease-in-out
+
+						text-transform: uppercase
+			.chat
+				&::after
+					content: '#1'
+				.name_app
+					width: 130px
+			.testing
+				&::after
+					content: '#2'
+				.name_app
+					width: 170px
+			.web_quest
+				&::after
+					content: '#3'
+				.name_app
+					width: 165px
+@keyframes animaBGCbutton
+	0%
+		background-color: #2700ff
+	33%
+		background-color: #002eec
+	66%
+		background-color: #6600ec
+	100%
+		background-color: #2700ff
+
+@keyframes verticalSlashTick
+	// =/
+	0%
+		content: '_'
+	50%
+		content: ''
+	100%
+		content: '_'
+	// =)
+
+footer.agfa
+	height: 130px
+	position: absolute
+	background-color: transparent
+	bottom: 0
+	width: 100%
+	p
+		text-align: center
+		img
+			display: inline-block
+			width: 200px
+	.copy
+		// width: 50%
+		text-align: center
+		font-family: RalewayMedium
+		color: rgb(190, 190, 190)
+
+section.features
+	background-color: #fff
+
+
+
+// Notification
+.Notification
+	width: 350px
+	height: 150px
+	background-color: #fff
+	position: fixed
+	z-index: 999
+	top: 0
+	left: 0
+	right: 0
+	margin: 0 auto
+	transition: all .3s
+	border-radius: 0 0 3px 3px
+	box-shadow: 0 0 20px 5px rgba(0,0,0,.3)
+	.nf_wrp
+		position: relative
+		padding: 10px
+		width: 100%
+		height: 100%
+		i.close
+			position: absolute
+			right: 10px
+			top: 10px
+			width: 22px
+			height: 22px
+		& > *
+			width: 100%
+			height: 100%
+			button.button_success
+				position: absolute
+				bottom: 10px
+				right: 10px
+				background-color: #791ad0
+				color: #fff
+				border: none
+				padding: 6px 15px
+				transition: all .3s
+				font-family: MontserratBold
+				&:hover
+					background-color: #6c17b9
+			.tag
+				color: #fff
+				font-size: 14px
+				border-radius: 5px
+				background-color: #791ad0
+				font-family: MontserratRegular
+				width: 100px
+				padding: 2px 4px
+				margin-bottom: 5px
+				display: block
+				text-align: center
+		.massage
+			width: 100%
+			.massage_title
+				font-family: MontserratRegular
+				font-size: 18px
+				width: 100%
+				text-align: center
+
+
+@keyframes forEvent
+	from 
+		opacity: 0
+		-webkit-transform: translate3d(0, 100%, 0)
+		transform: translate3d(0, 100%, 0)
+	7%, 90%
+		opacity: 1
+		-webkit-transform: translate3d(0, 0, 0)
+		transform: translate3d(0, 0, 0)
+	to 
+		opacity: 0
+		-webkit-transform: translate3d(0, 100%, 0)
+		transform: translate3d(0, 100%, 0)
+
+
+.events
+	position: absolute
+	bottom: 50px
+	right: 30px
+	width: 250px
+	height: 50px
+	border-radius: 3px
+	box-shadow: 0 0 20px 5px rgba(0,0,0,.3)
+	color: #fff
+	z-index: 10
+	overflow: hidden
+	opacity: 0
+	-webkit-transform: translate3d(0, 100%, 0)
+	transform: translate3d(0, 100%, 0)
+	& > *
+		width: 100%
+		height: 100%
+		line-height: 50px
+		text-align: center
+		i
+			margin-right: 5px
+	.success
+		background-color: #2f820d
+
+.CMenu
+	width: 200px
+	height: 60px
+	display: block
+	position: absolute
+	background-color: red
+	z-index: 10
+
+
+//////////////////////
+// @webquest
+/* Web Quest */
+//////////////////////
+.main_area
+	height: 100%
+	width: 100%
+	position: relative
+	.wrp_main_area
+		position: absolute
+		height: 100%
+		width: 100%
+		top: 0
+		bottom: 0
+		left: 0
+		right: 0
+		display: -webkit-flex
+		display: -moz-flex
+		display: -ms-flex
+		display: -o-flex
+		display: flex
+		align-items: center
+		text-align: center
+		justify-content: center
+		h1.welcome
+			color: #fff
+			font-family: MontserratBold
+			animation: fadeInDown 2s ease-in-out, fadeOut 3s 2s ease-in-out
+			opacity: 0
+		.usr_form
+			width: 350px
+			height: 300px
+			background-color: #fff
+			box-shadow: 0 0 15px rgba(0,0,0,.3)
+			padding: 30px 15px
+			border-radius: 5px
+			h2
+				font-family: MontserratBlack
+				font-size: 28px
+				text-align: center
+				padding: 15px 0 0 0 
+			p.caption
+				color: rgba(#000, .7)
+				font-family: MontserratRegular
+			input
+				width: 80%
+				height: 30px
+				border: 1px solid rgba(0,0,0,.4)
+				border-radius: 3px
+				box-shadow: 0 0 4px rgba(0,0,0,.2)
+				font-size: 25px
+				font-family: MontserratBold
+				margin-top: 20px
+			button
+				border: none
+				padding: 5px 50px
+				background-color: $matan
+				color: #fff
+				font-size: 20px
+				font-family: MontserratBold
+				margin-top: 40px
+				border-radius: 4px
+				&:active
+					background-color: darken($matan, 5%)
+			.mini-footer
+				font-family: MontserratRegular
+				color: rgba(#000, .6)
+				margin-top: 20px
+@import "media.sass"

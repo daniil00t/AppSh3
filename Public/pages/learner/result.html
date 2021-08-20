@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Your result</title>
+</head>
+<body>
+	Name: {{data.fname}} <br>
+	LastName: {{data.lname}}
+	<br>
+	{% if data.points < 50 %}
+		<h1>Your result: <span style="color: grey">{{data.points}}</span> - {{data.points / 20 + 1}}</h1>
+	{% elif data.points >= 50 and data.points < 80 %}
+	  <h1>Your result: <span style="color: blue">{{data.points}}</span> - {{data.points / 20 + 1}}</h1>
+	{% else %}
+	  <h1>Your result: <span style="color: green">{{data.points}}</span> - {{data.points / 20}}</h1>
+	{% endif %}
+</body>
+</html>

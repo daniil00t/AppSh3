@@ -13,33 +13,107 @@ dependencies =
 
 gulp.task 'scripts', ->
   #==========  Client bundler  ==========#
-
-  clientBundler = browserify
+  ###Learner###
+  clientBundlerLearnerTest = browserify
     cache: {}, packageCache: {}
-    entries: './app/scripts/main.coffee'
+    entries: './client/_learner/scripts/main.coffee'
     extensions: ['.cjsx', '.coffee']
 
   _.forEach dependencies, (path, dep) ->
-    clientBundler.external dep
+    clientBundlerLearnerTest.external dep
 
-  rebundle = ->
+  rebundleTest = ->
     bundleLogger.start 'client.js'
 
-    clientBundler.bundle()
+    clientBundlerLearnerTest.bundle()
       .on 'error', handleErrors
       .pipe source('client.js')
-      .pipe gulp.dest('./Public/scripts/admin')
+      .pipe gulp.dest('./Public/media/scripts/learner/test')
       .on 'end', ->
         bundleLogger.end 'client.js'
 
   if global.isWatching
-    clientBundler = watchify clientBundler
-    clientBundler.on 'update', rebundle
-  rebundle()
+    clientBundlerLearnerTest = watchify clientBundlerLearnerTest
+    clientBundlerLearnerTest.on 'update', rebundleTest
+  rebundleTest()
+
+  # Chat
+  clientBundlerLearnerChat = browserify
+    cache: {}, packageCache: {}
+    entries: './client/_learner_chat/scripts/main.coffee'
+    extensions: ['.cjsx', '.coffee']
+
+  _.forEach dependencies, (path, dep) ->
+    clientBundlerLearnerChat.external dep
+
+  rebundleChat = ->
+    bundleLogger.start 'client.js'
+
+    clientBundlerLearnerChat.bundle()
+      .on 'error', handleErrors
+      .pipe source('client.js')
+      .pipe gulp.dest('./Public/media/scripts/learner/chat')
+      .on 'end', ->
+        bundleLogger.end 'client.js'
+
+  if global.isWatching
+    clientBundlerLearnerChat = watchify clientBundlerLearnerChat
+    clientBundlerLearnerChat.on 'update', rebundleChat
+  rebundleChat()
+
+  # WebQuest
+  clientBundlerLearnerwebQuest = browserify
+    cache: {}, packageCache: {}
+    entries: './client/webQuest/scripts/main.coffee'
+    extensions: ['.cjsx', '.coffee']
+
+  _.forEach dependencies, (path, dep) ->
+    clientBundlerLearnerwebQuest.external dep
+
+  rebundlewebQuest = ->
+    bundleLogger.start 'client.js'
+
+    clientBundlerLearnerwebQuest.bundle()
+      .on 'error', handleErrors
+      .pipe source('client.js')
+      .pipe gulp.dest('./Public/media/scripts/learner/webQuest')
+      .on 'end', ->
+        bundleLogger.end 'client.js'
+
+  if global.isWatching
+    clientBundlerLearnerwebQuest = watchify clientBundlerLearnerwebQuest
+    clientBundlerLearnerwebQuest.on 'update', rebundlewebQuest
+  rebundlewebQuest()
+
+  ###Admin###
+
+
+  clientBundlerAdmin = browserify
+    cache: {}, packageCache: {}
+    entries: './client/_admin/scripts/main.coffee'
+    extensions: ['.cjsx', '.coffee']
+
+  _.forEach dependencies, (path, dep) ->
+    clientBundlerAdmin.external dep
+
+  rebundle1 = ->
+    bundleLogger.start 'client.js'
+
+    clientBundlerAdmin.bundle()
+      .on 'error', handleErrors
+      .pipe source('client.js')
+      .pipe gulp.dest('./Public/media/scripts/admin')
+      .on 'end', ->
+        bundleLogger.end 'client.js'
+
+  if global.isWatching
+    clientBundlerAdmin = watchify clientBundlerAdmin
+    clientBundlerAdmin.on 'update', rebundle1
+  rebundle1()
 
   #==========  Vendor bundler  ==========#
 
-  vendorBundler = browserify
+###  vendorBundler = browserify
     cache: {}, packageCache: {}
     extensions: ['.coffee']
 
@@ -53,4 +127,4 @@ gulp.task 'scripts', ->
     .pipe source('vendor.js')
     .pipe gulp.dest('./build/scripts')
     .on 'end', ->
-      bundleLogger.end 'vendor.js'
+      bundleLogger.end 'vendor.js'###
