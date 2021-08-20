@@ -1,18 +1,10 @@
-# AppSh3
----
-## Init application
-```bash
-npm i
-```
----
-## Start App (server)
-```bash
-npm run start
-```
+# Приложение школы №3 г. Мурома
 
-## Start App (client)
+
+Запуск приложения (npm)
+---------------------
 ```bash
-gulp
+npm run server
 ```
 
 P.S.
